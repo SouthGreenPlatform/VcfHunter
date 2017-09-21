@@ -52,7 +52,6 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	
 	REF = CONFIG.get('Reference', 'genome')
 	SAMTOOLS = LOCA_PROGRAMS.get('Programs','samtools')
-	# BAMTOOLS = LOCA_PROGRAMS.get('Programs','bamtools')
 	BWA = LOCA_PROGRAMS.get('Programs','bwa')
 	JAVA = LOCA_PROGRAMS.get('Programs','java')
 	PICARD = LOCA_PROGRAMS.get('Programs','picard')
@@ -61,8 +60,8 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	PYTHON = LOCA_PROGRAMS.get('Programs','python')
 	PREFIX = OPTIONS.prefix
 	if CONFIG.has_section('Variant'):
-		if CONFIG.has_option('General', 'UseUnifiedGenotyperForBaseRecal'):
-			UseUnifiedGenotyperForBaseRecal =  CONFIG.get('General', 'UseUnifiedGenotyperForBaseRecal')
+		if CONFIG.has_option('Variant', 'UseUnifiedGenotyperForBaseRecal'):
+			UseUnifiedGenotyperForBaseRecal =  CONFIG.get('Variant', 'UseUnifiedGenotyperForBaseRecal')
 	
 	if 'a' in OPTIONS.steps:
 		#1 Mapping
@@ -83,7 +82,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	
 	if 'e' in OPTIONS.steps:
 		#6 GVCF generation
-		to_return = utils.run_step_E(ACC_ID, PYTHON, GATK, REF, PLOIDY, CONFIG, DICO_CHR, PREFIX, QUEUE, PATHNAME)
+		to_return = utils.run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME)
 	if to_return == 0:
 		return 0
 	else:
@@ -128,7 +127,6 @@ def __main__():
 	'The conf file should contain 2 sections ([Libraries] and [Reference]) and 2 additional ones ([Mapping], [Variant]).\t\t\t\t\t[Libraries] '
 	'section should look like as follows :\t[Libraries]\t\t\t\t\t\tlib1 = genome_name path_to_mate1 path_to_mate2 ploidy\t\tlib2 = genome_name '
 	'path_to_single ploidy\t\t\t...\t\t\t\t\t\t[Reference] section should look like as follows :\t[Reference]\t\t\t\t\t\tgenome = path_to_the_reference_sequence\t\t'
-	'[Mapping] section may contain mapper options and should look like :\t\t\t\t[Mapping]\t\t\t\t\t\tmapopt = additional_options_to_pass (to do)\t\t\t'
 	'[Variant] section may contain 4 options and should look like :\t\t\t\t\t\t[Variant]\t\t\t\t\t\tindel = path to vcf_of_known_indels\t\t\t\t\tsnp = '
 	'path to vcf_of_known_SNPs\t\t\t\tHCopt = additional options to pass to HaplotypeCaller\t\tUseUnifiedGenotyperForBaseRecal = yes or no (if not filled default = no)')
 	parser.add_option( '-t', '--thread', dest='thread', default='1', help='Max number of accessions treated at the same time (integer), [default: %default]')
@@ -136,12 +134,12 @@ def __main__():
 	parser.add_option( '-p', '--prefix', dest='prefix', default='All_lib', help='Prefix for output bam and vcf containing all libraries. [default: %default]')
 	parser.add_option( '-s', '--steps', dest='steps', default=None, help='A string containing steps to perform:\t\t\t\t'
 	'a: Aligning libraries\t\t\t\t\t'
-	'b: MarkDuplicates\t\t\t\t\t\t\t'
+	'b: Removing duplicates\t\t\t\t\t\t\t'
 	'c: Indel realignment\t\t\t\t\t\t'
 	'd: Bases recalibration\t\t\t\t\t\t'
-	'e: GVCF calculation\t\t\t\t\t\t'
-	'f: GVCF accession merging\t\t\t\t\t'
-	'g: Per chromosome VCF merging\t\t\t\t\t'
+	'e: Allele counting\t\t\t\t\t\t'
+	'f: Genotype calling\t\t\t\t\t'
+	'g: Merging genotype calling\t\t\t\t\t'
 	'h: Mapping statistics calculation\t\t\t\t\t')
 	(options, args) = parser.parse_args()
 	
@@ -224,7 +222,7 @@ def __main__():
 		sys.stdout.write('.dict found for the reference sequence.\n')
 	sys.stdout.flush()
 	
-	
+	# Obtaining chromosome informations
 	dico_chr = {}
 	if 'e' in options.steps or 'f' in options.steps or 'g' in options.steps:
 		# calculating sequence length

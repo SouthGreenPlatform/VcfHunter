@@ -1,6 +1,6 @@
 
 #
-#  Copyright 2014 CIRAD
+#  Copyright 2017 CIRAD
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-
 
 def stop_err( msg ):
 	sys.stderr.write( "%s\n" % msg )
@@ -121,6 +120,539 @@ def run_qsub(QUEUE, COMMANDE_LIST, PROC, JID, LMEM, PREFIX):
 				list_job.append(job_ID2list(qs))
 	sys.stdout.flush()
 	hold_job(list_job)
+
+def Record_CDS_and_UTR(GFF3, dico_gene_gff3):
+	
+	"""
+		Record in a dictionnary CDS and UTR positions.
+		
+		:param GFF3: A gff3 file.
+		:type GFF3: gff3
+		:return: Dictionary containing for each gene CDS, UTR and INTRON position.
+		:rtype: void
+	"""
+	
+	# initializing dictionaries
+	dico_parent = {}
+	# recording for each gene CDS and exon position
+	file = open(GFF3)
+	for line in file:
+		data = line.replace('\n','').split('\t')
+		if data:
+			if data[0][0] != "#":
+				# recording gene in dictionary
+				if data[2] == 'gene':
+					dico = gffline2dic(data[8])
+					dico_gene_gff3[dico['ID']] = {}
+					dico_gene_gff3[dico['ID']]['exon'] = set()
+					dico_gene_gff3[dico['ID']]['chr'] = data[0]
+				elif data[2] == 'mRNA':
+					dico = gffline2dic(data[8])
+					dico_parent[dico['ID']] = dico['Parent']
+				elif data[2] == 'exon':
+					dico = gffline2dic(data[8])
+					nom_gene = dico_parent[dico['Parent']]
+					debut = int(data[3])
+					while debut <= int(data[4]):
+						dico_gene_gff3[nom_gene]['exon'].add(debut)
+						debut += 1
+				elif data[2] == 'CDS':
+					dico = gffline2dic(data[8])
+					nom_gene = dico_parent[dico['Parent']]
+					debut = int(data[3])
+					while debut <= int(data[4]):
+						dico_gene_gff3[nom_gene]['exon'].add(debut)
+						debut += 1
+	file.close()
+	
+	for n in dico_gene_gff3:
+		if len(dico_gene_gff3[n]['exon']) == 0:
+			sys.exit('This is embarrassing... The program exited without finishing because a gene without CDS and exon was found: '+n)
+
+def gffline2dic(LINE):
+	
+	"""
+		Return a dictionnary of the information contained in 9th column of a gff3 file
+		
+		:param LINE: The 9th column of a gff3 file.
+		:type LINE: str
+		:return: Dictionary containing each element contained in the line.
+		:rtype: dictionary
+	"""
+	# initializing dictionary
+	dico_line = {}
+	# recording information in dictionary
+	to_split = LINE.split(';')
+	for n in to_split:
+		data = n.split('=')
+		dico_line[data[0]] = data[1]
+	return dico_line
+
+def calcul_cov(LOCA_PROGRAMS, SAM, TYPE, OUT):
+	"""
+		Calculate the coverage of a sam or bam file, site by site
+		
+		:param LOCA_PROGRAMS: From the Configparser module. Contains the path of each programs
+		:param SAM: The input sam or bam file.
+		:type SAM: str
+		:param TYPE: The format of the input file
+		:type TYPE: str ("sam" | "bam")
+		:param OUT: The name of the output file
+		:type OUT: str
+		:return: void
+	"""
+	
+	if TYPE == 'sam':
+		#Convert the sam file to the bam format
+		sam2bam = '%s view -bSh %s -o %s' % (LOCA_PROGRAMS.get('Programs','samtools'), SAM, SAM+'_BAM.bam')
+		run_job(getframeinfo(currentframe()), sam2bam, 'Error in sam2bam (calcul_cov):\n')
+		SAM = SAM+'_BAM.bam'
+	elif TYPE != 'bam':
+		mot = TYPE+' argument passed in --type is not recognized'
+		sys.exit(mot)
+	
+	cal_cov = ('%s depth %s > %s') % (LOCA_PROGRAMS.get('Programs','samtools'), SAM, OUT)
+	run_job(getframeinfo(currentframe()), cal_cov, 'Error in calculating coverage:\n')
+	
+	#remove the intermediate bam file.
+	if TYPE == 'sam':
+		os.remove(SAM)
+
+def calculate_annotation_coverage(OUT, dico_GFF3, BAM, REF, LOCA_PROGRAMS):
+	# calculating coverage
+	calcul_cov(LOCA_PROGRAMS, BAM, 'bam', BAM+'.cov')
+	
+	# recording in dictionnary covered sites
+	dico_cov = {}
+	file = open(BAM+'.cov')
+	for line in file:
+		data = line.split()
+		if data:
+			if not(data[0] in dico_cov):
+				dico_cov[data[0]] = set()
+			dico_cov[data[0]].add(int(data[1])) 
+	file.close()
+	
+	# calculating exon coverage proportion gene by gene
+	outfile = open(OUT,'w')
+	for n in dico_GFF3:
+		total_len = len(dico_GFF3[n]['exon'])
+		cov_len = 0
+		if dico_GFF3[n]['chr'] in dico_cov:
+			for k in dico_GFF3[n]['exon']:
+				if k in dico_cov[dico_GFF3[n]['chr']]:
+					cov_len += 1
+		outfile.write('\t'.join([n, str(float(cov_len)/total_len*100)])+'\n')
+	outfile.close()
+
+
+	
+##############################################
+#          Process RNASeq Only
+##############################################
+
+
+def run_step_A_RNAseq(STAR, PROC, OUT_REF1, REF, SJDBO, JID, QUEUE):
+	index = '%s --runThreadN %s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s' %	(STAR, PROC, OUT_REF1, REF)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), index, 'Error in step A:\n')
+	else:
+		run_qsub(QUEUE, [index], PROC, JID+'-INDEX1', "12G", JID)
+	sys.stdout.write("Step a: reference indexation done\n")
+	sys.stdout.flush()
+
+def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUEUE):
+	# Concatenation of reads for junction identification
+	os.mkdir(TMP)
+	list_pair1 = []
+	list_pair2 = []
+	dico_single = set()
+	for n in DICO_LIB:
+		for j in DICO_LIB[n]:
+			if len(DICO_LIB[n][j]) == 1:
+				dico_single.add(DICO_LIB[n][j][0])
+			elif len(DICO_LIB[n][j]) == 2:
+				list_pair1.append(DICO_LIB[n][j][0])
+				list_pair2.append(DICO_LIB[n][j][1])
+			else:
+				sys.exit('Problem in the configuration file in libraries section')
+	
+	# Mapping reads first time for junction identification
+	if len(list_pair1) > 0:
+	
+		fichier_final = open(TMP+'/mate1.fq', "w")
+		for i in list_pair1:
+			shutil.copyfileobj(open(i, 'r'), fichier_final)
+		fichier_final.close()
+		
+		fichier_final = open(TMP+'/mate2.fq', "w")
+		for i in list_pair2:
+			shutil.copyfileobj(open(i, 'r'), fichier_final)
+		fichier_final.close()
+		
+		mappP = '%s --runThreadN %s --genomeDir %s --readFilesIn %s %s --outFileNamePrefix %s %s' % (STAR, PROC, OUT_REF1, TMP+'/mate1.fq', TMP+'/mate2.fq', PREFIX+'_JUNC_ESTIMATION_pair', STAR_OPT)
+		if QUEUE == None:
+			run_job(getframeinfo(currentframe()), mappP, 'Error in step B:\n')
+		else:
+			run_qsub(QUEUE, [mappP], PROC, PREFIX+'-MapP1', "12G", PREFIX)
+		# checking step
+		if not(os.path.isfile(PREFIX+'_JUNC_ESTIMATION_pairAligned.out.sam')):
+			sys.exit('An error was encountered in step b. The program exited without finishing during mapping step')
+		
+	if len(dico_single) > 0:
+		fichier_final = open(TMP+'/single.fq', "w")
+		for i in dico_single:
+			shutil.copyfileobj(open(i, 'r'), fichier_final)
+		fichier_final.close()
+		mappS = '%s --runThreadN %s --genomeDir %s --readFilesIn %s --outFileNamePrefix %s %s' % (STAR, PROC, OUT_REF1, TMP+'/single.fq', PREFIX+'_JUNC_ESTIMATION_single', STAR_OPT)
+		if QUEUE == None:
+			run_job(getframeinfo(currentframe()), mappS, 'Error in step B:\n')
+		else:
+			run_qsub(QUEUE, [mappS], PROC, PREFIX+'-MapS1', "12G", PREFIX)
+		# checking step
+		if not(os.path.isfile(PREFIX+'_JUNC_ESTIMATION_singleAligned.out.sam')):
+			sys.exit('An error was encountered in step b. The program exited without finishing')
+
+	# removing folders
+	shutil.rmtree(TMP)
+	shutil.rmtree(OUT_REF1)
+	
+	# Merging JUNCTION files if needed
+	if len(list_pair1) > 0 and len(dico_single) > 0:
+		dico_sites = {}
+		dico_list_sites = {}
+		file = open(PREFIX+'_JUNC_ESTIMATION_pairSJ.out.tab')
+		for line in file:
+			data = line.split()
+			if data:
+				line_id = ' '.join(data[0:3])
+				intermediate_list = map(int, data[1:3])
+				if not(data[0]) in dico_list_sites:
+					dico_list_sites[data[0]] = []
+				if intermediate_list in dico_list_sites[data[0]]:
+					if int(data[3]) == dico_sites[line_id][0] and int(data[4]) == dico_sites[line_id][1] and int(data[5]) == dico_sites[line_id][2]:
+						dico_sites[line_id][3] += int(data[6])
+						dico_sites[line_id][4] += int(data[7])
+						dico_sites[line_id][5] = max(int(data[7]), dico_sites[line_id][5])
+					else:
+						print data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2]
+						sys.exit('An error was encountered in step b. The program exited without finishing during mapping step')
+				else:
+					dico_list_sites[data[0]].append(intermediate_list)
+					dico_sites[line_id] = map(int, data[3:])
+		file.close()
+		
+		file = open(PREFIX+'_JUNC_ESTIMATION_singleSJ.out.tab')
+		for line in file:
+			data = line.split()
+			if data:
+				line_id = ' '.join(data[0:3])
+				intermediate_list = map(int, data[1:3])
+				if not(data[0]) in dico_list_sites:
+					dico_list_sites[data[0]] = []
+				if intermediate_list in dico_list_sites[data[0]]:
+					if int(data[3]) == dico_sites[line_id][0] and int(data[4]) == dico_sites[line_id][1] and int(data[5]) == dico_sites[line_id][2]:
+						dico_sites[line_id][3] += int(data[6])
+						dico_sites[line_id][4] += int(data[7])
+						dico_sites[line_id][5] = max(int(data[7]), dico_sites[line_id][5])
+					else:
+						print data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2]
+						sys.exit('An error was encountered in step b. The program exited without finishing during mapping step')
+				else:
+					dico_list_sites[data[0]].append(intermediate_list)
+					dico_sites[line_id] = map(int, data[3:])
+		file.close()
+		
+		outfile = open(PREFIX+'_JUNC_ESTIMATION_SJ.out.tab','w')
+		for n in dico_list_sites:
+			dico_list_sites[n].sort(cmp=lambda x,y: cmp(x[0],y[0]))
+			for j in dico_list_sites[n]:
+				line_id = ' '.join([n]+map(str, j))
+				outfile.write('\t'.join(map(str,[n]+ j+dico_sites[line_id])))
+				outfile.write('\n')
+		outfile.close()
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleSJ.out.tab')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleAligned.out.sam')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.final.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.progress.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairSJ.out.tab')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairAligned.out.sam')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.final.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.progress.out')
+	elif len(list_pair1) > 0:
+		os.renames(PREFIX+'_JUNC_ESTIMATION_pairSJ.out.tab', PREFIX+'_JUNC_ESTIMATION_SJ.out.tab')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairAligned.out.sam')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.final.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_pairLog.progress.out')
+	elif len(dico_single) > 0:
+		os.renames(PREFIX+'_JUNC_ESTIMATION_singleSJ.out.tab', PREFIX+'_JUNC_ESTIMATION_SJ.out.tab')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleAligned.out.sam')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.final.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.out')
+		os.remove(PREFIX+'_JUNC_ESTIMATION_singleLog.progress.out')
+	else:
+		sys.exit('An error was encountered in step b. The program exited without finishing. The problem is on fastq files...')
+	sys.stdout.write("Step b: Spliced sites estimation done\n")
+	sys.stdout.flush()
+
+def run_step_C_RNAseq(STAR, PROC, OUT_REF2, REF, SJDBO, JID, SJDBFCSE, QUEUE):
+	index = '%s --runThreadN %s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s --sjdbOverhang %s --sjdbFileChrStartEnd %s' % (STAR, PROC, OUT_REF2, REF, SJDBO, SJDBFCSE)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), index, 'Error in step C:\n')
+	else:
+		run_qsub(QUEUE, [index], PROC, JID+'-INDEX2', "12G", JID)
+	sys.stdout.write("Step c: reference indexation done\n")
+	sys.stdout.flush()
+
+def run_step_D_RNAseq (LIBS, ACC, STAR, OUT_REF2, PROC, STAR_OPT, PREFIX, QUEUE):
+	if not (os.path.isdir(ACC)):
+		os.mkdir(ACC)
+	for lib in LIBS:
+		rg_tag = 'ID:'+ACC+'"\t"SM:'+ACC+'"\t"LB:'+ACC+'"\t"PU:whatever"\t"PL:ILLUMINA'
+		if len(LIBS[lib]) == 1:
+			mapp2 = '%s --runThreadN %s --genomeDir %s --readFilesIn %s --outFileNamePrefix %s --outSAMattrRGline %s %s' % (STAR, PROC, OUT_REF2, LIBS[lib][0], ACC+'/'+lib, rg_tag, STAR_OPT)
+		elif len(LIBS[lib]) == 2:
+			mapp2 = '%s --runThreadN %s --genomeDir %s --readFilesIn %s %s --outFileNamePrefix %s --outSAMattrRGline %s %s' % (STAR, PROC, OUT_REF2, LIBS[lib][0], LIBS[lib][1], ACC+'/'+lib, rg_tag, STAR_OPT)
+		else:
+			return 'Problem in the configuration file in libraries section for accession '+ACC+'\n'
+		if QUEUE == None:
+			run_job(getframeinfo(currentframe()), mapp2, 'Error in step D:\n')
+		else:
+			run_qsub(QUEUE, [mapp2], PROC, ACC+'-Map2', "12G", PREFIX)
+		# checking step
+		if not(os.path.isfile(ACC+'/'+lib+'Aligned.out.sam')):
+			return 'An error was encountered in step d. The program exited without finishing for accession '+ACC+'\n'
+		os.remove(ACC+'/'+lib+'Log.progress.out')
+		os.remove(ACC+'/'+lib+'Log.out')
+	sys.stdout.write("Step d: Mapping done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_stat_step_D_RNAseq(PREFIX, CONFIG):
+	outfile = open(PREFIX+'/'+PREFIX+'_mapping.tab','w')
+	outfile.write('Accession\tPairedReads\tSingleReads\tUniquelyMappedPairs\tMultipleMappedPairs\tUniquelyMappedSingle\tMultipleMappedSingle\n')
+	dico_lib_stat = {}
+	for n in CONFIG.options('Libraries'):
+		data =  CONFIG.get('Libraries', n).split()
+		if not(data[0] in dico_lib_stat):
+			dico_lib_stat[data[0]] = []
+		if len(data[1:-1]) == 2:
+			dico_lib_stat[data[0]].append([n,'pair'])
+		elif len(data[1:-1]) == 1:
+			dico_lib_stat[data[0]].append([n,'single'])
+		else:
+			sys.exit('An error was encountered in step d because an problem was encountered in the configuration file in libraries section. The program exited without finishing')
+	for acc in dico_lib_stat:
+		nb_single = 0
+		nb_mapped_single = 0
+		nb_multi_single = 0
+		nb_pair = 0
+		nb_mapped_pair = 0
+		nb_multi_pair = 0
+		for k in dico_lib_stat[acc]:
+			file = open(acc+'/'+k[0]+'Log.final.out')
+			for line in file:
+				data = line.split('|')
+				if data:
+					if data[0] == '                          Number of input reads ':
+						number = int(data[1].split()[0])
+						if k[1] == 'pair':
+							nb_pair += number
+						else:
+							nb_single += number
+					elif data[0] == '                   Uniquely mapped reads number ':
+						number = int(data[1].split()[0])
+						if k[1] == 'pair':
+							nb_mapped_pair += number
+						else:
+							nb_mapped_single += number
+					elif data[0] == '        Number of reads mapped to multiple loci ':
+						number = int(data[1].split()[0])
+						if k[1] == 'pair':
+							nb_multi_pair += number
+						else:
+							nb_multi_single += number
+					elif data[0] == '        Number of reads mapped to too many loci ':
+						number = int(data[1].split()[0])
+						if k[1] == 'pair':
+							nb_multi_pair += number
+						else:
+							nb_multi_single += number
+		outfile.write('\t'.join([acc,str(nb_pair),str(nb_single),str(nb_mapped_pair),str(nb_multi_pair),str(nb_mapped_single),str(nb_multi_single)])+'\n')
+	outfile.close()
+
+def run_step_E_RNAseq(LIB, ACC, PREFIX, JAVA, PICARD, QUEUE):
+	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
+	to_merge = ''
+	for n in LIB:
+		to_merge = to_merge + 'INPUT='+ACC+'/'+n+'Aligned.out.sam '
+	merge = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s MergeSamFiles %s OUTPUT=%s MERGE_SEQUENCE_DICTIONARIES=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate TMP_DIR=%s' % (JAVA, PICARD, to_merge, ACC+'/'+ACC+'_merged.bam', ACC+'/'+TMP)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), merge, 'Error in step E:\n')
+	else:
+		run_qsub(QUEUE, [merge], 1, ACC+'-Merge', "12G", PREFIX)
+	# checking step
+	if not(os.path.isfile(ACC+'/'+ACC+'_merged.bam')):
+		return 'An error was encountered in step e. The program exited without finishing for accession '+ACC+'\n'
+	shutil.rmtree(ACC+'/'+TMP)
+	for n in LIB:
+		os.remove(ACC+'/'+n+'Aligned.out.sam')
+	sys.stdout.write("Step e: Merging done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_step_F_RNAseq(ACC, JAVA, PICARD, PREFIX, QUEUE):
+	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
+	rmdup = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s MarkDuplicates INPUT=%s OUTPUT=%s METRICS_FILE=%s REMOVE_DUPLICATES=true QUIET=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 VERBOSITY=WARNING TMP_DIR=%s' % (JAVA, PICARD, ACC+'/'+ACC+'_merged.bam', ACC+'/'+ACC+'_rmdup.bam', ACC+'/'+ACC+'_duplicate', ACC+'/'+TMP)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), rmdup, 'Error in step F:\n')
+	else:
+		run_qsub(QUEUE, [rmdup], 1, ACC+'-RmDup', "12G", PREFIX)
+	# checking step
+	if not(os.path.isfile(ACC+'/'+ACC+'_rmdup.bam')):
+		return 'An error was encountered in step f. The program exited without finishing for accession '+ACC+'\n'
+	shutil.rmtree(ACC+'/'+TMP)
+	os.remove(ACC+'/'+ACC+'_merged.bam')
+	os.remove(ACC+'/'+ACC+'_merged.bai')
+	sys.stdout.write("Step f: duplicate removal done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_stat_step_F_RNAseq(PREFIX, DICO_LIB):
+	outfile = open(PREFIX+'/'+PREFIX+'_rmdup_stat.tab','w')
+	outfile.write('LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_READ_DUPLICATES\tREAD_PAIR_DUPLICATES\tREAD_PAIR_OPTICAL_DUPLICATES\tPERCENT_DUPLICATION\tESTIMATED_LIBRARY_SIZE\n')
+	for acc in DICO_LIB:
+		file = open(acc+'/'+acc+'_duplicate')
+		i = 0
+		while i < 8:
+			i += 1
+			line = file.readline()
+		outfile.write(line)
+	outfile.close()
+	
+def run_step_G_RNAseq(JAVA, PICARD, ACC, REF, PREFIX, QUEUE):
+	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
+	reorder = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s ReorderSam INPUT=%s OUTPUT=%s REFERENCE=%s CREATE_INDEX=true TMP_DIR=%s' % (JAVA, PICARD, ACC+'/'+ACC+'_rmdup.bam',  ACC+'/'+ACC+'_reorder.bam', REF, ACC+'/'+TMP)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), reorder, 'Error in step G:\n')
+	else:
+		run_qsub(QUEUE, [reorder], 1, ACC+'-Reord', "12G", PREFIX)
+	# checking step
+	if not(os.path.isfile(ACC+'/'+ACC+'_reorder.bam')):
+		return 'An error was encountered in step g. The program exited without finishing for accession '+ACC+'\n'
+	shutil.rmtree(ACC+'/'+TMP)
+	os.remove(ACC+'/'+ACC+'_rmdup.bam')
+	sys.stdout.write("Step g: Bam reodering done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_step_H_RNAseq(JAVA, GATK, ACC, REF, PREFIX, QUEUE):
+	trim = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T SplitNCigarReads -I %s -o %s -rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -R %s -U ALLOW_N_CIGAR_READS' % (JAVA, GATK, ACC+'/'+ACC+'_reorder.bam', ACC+'/'+ACC+'_trim.bam', REF)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), trim, 'Error in step H:\n')
+	else:
+		run_qsub(QUEUE, [trim], 1, ACC+'-Trim', "12G", PREFIX)
+	# checking step
+	if not(os.path.isfile(ACC+'/'+ACC+'_trim.bam')):
+		return 'An error was encountered in step h. The program exited without finishing for accession '+ACC+'\n'
+	os.remove(ACC+'/'+ACC+'_reorder.bam')
+	os.remove(ACC+'/'+ACC+'_reorder.bai')
+	sys.stdout.write("Step h: Read splitting done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_step_I_RNAseq(ACC, JAVA, GATK, REF, PLOIDY, PREFIX, UseUnifiedGenotyperForBaseRecal, QUEUE):
+	
+	realTC = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T RealignerTargetCreator -o %s -I %s -R %s' % (JAVA, GATK, ACC+'/'+ACC+'_RTC.intervals', ACC+'/'+ACC+'_trim.bam', REF)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), realTC, 'Error in step I:\n')
+	else:
+		run_qsub(QUEUE, [realTC], 1, ACC+'-realTC', "12G", PREFIX)
+	if not(os.path.isfile(ACC+'/'+ACC+'_RTC.intervals')):
+		return 'An error was encountered in step i. The program exited without finishing for accession '+ACC+'\n'
+
+	Ireal = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T IndelRealigner -o %s -I %s -targetIntervals %s -R %s' % (JAVA, GATK, ACC+'/'+ACC+'_realigned.bam', ACC+'/'+ACC+'_trim.bam', ACC+'/'+ACC+'_RTC.intervals', REF)
+	if QUEUE == None:
+		run_job(getframeinfo(currentframe()), Ireal, 'Error in step I:\n')
+	else:
+		run_qsub(QUEUE, [Ireal], 1, ACC+'-Ireal', "12G", PREFIX)
+	if not(os.path.isfile(ACC+'/'+ACC+'_realigned.bam')):
+		return 'An error was encountered in step i. The program exited without finishing for accession '+ACC+'\n'
+	os.remove(ACC+'/'+ACC+'_RTC.intervals')
+	
+	if not(os.path.isfile(ACC+'/'+ACC+'_realigned.bam')):
+		return 'An error was encountered in step i. The program exited without finishing for accession '+ACC+'\n'
+	sys.stdout.write("Step i: Base recalibration done for accession "+ACC+"\n")
+	sys.stdout.flush()
+	
+	return 0
+
+def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
+	# recording gff3 informations
+	sys.stdout.write('recording gff3 informations\n')
+	dico_gene_gff3 = {}
+	Record_CDS_and_UTR(GFF3, dico_gene_gff3)
+	
+	# calculating exon coverage by accession
+	sys.stdout.write('calculating exon coverage by accession\n')
+	list_lib = []
+	list_bam_cov = []
+	for ACC_ID in DICO_LIB:
+		sys.stdout.write(ACC_ID+'\n')
+		sys.stdout.flush()
+		if os.path.isfile(ACC_ID+'/'+ACC_ID+'_real_recal.bam'):
+			bam = ACC_ID+'/'+ACC_ID+'_real_recal.bam'
+			list_bam_cov.append(bam+'.cov')
+		elif os.path.isfile(ACC_ID+'/'+ACC_ID+'_realigned.bam'):
+			bam = ACC_ID+'/'+ACC_ID+'_realigned.bam'
+			list_bam_cov.append(bam+'.cov')
+			sys.stdout.write('Warning no recalibrated bam file found for '+ACC_ID+'... Continue using realigned bam instead.\n')
+			sys.stdout.flush()
+		else:
+			return 'ERROR : Neither '+ACC_ID+'/'+ACC_ID+'_real_recal.bam or '+ACC_ID+'/'+ACC_ID+'_realigned.bam were found.\n'
+		list_lib.append(ACC_ID)
+		calculate_annotation_coverage(ACC_ID+'/'+ACC_ID+'_exon_coverage.cov', dico_gene_gff3, bam, REF, LOCA_PROGRAMS)
+
+	
+	# Loading final dictionary
+	final_dico = {}
+	for acc in list_lib:
+		file = open(acc+'/'+acc+'_exon_coverage.cov')
+		for line in file:
+			data = line.split()
+			if data:
+				if not(data[0] in final_dico):
+					final_dico[data[0]] = {}
+				final_dico[data[0]][acc] = data[1]
+		file.close()
+	
+	# merging all informations in a single file
+	outfile = open(PREFIX+'/'+PREFIX+'_exon_coverage.cov','w')
+	outfile.write('gene_id\t'+'\t'.join(list_lib)+'\n')
+	for acc in final_dico:
+		outfile.write(acc)
+		for k in list_lib:
+			outfile.write('\t'+final_dico[acc][k])
+		outfile.write('\n')
+	outfile.close()
+	
+	for acc in list_bam_cov:
+		os.remove(acc)
+
+
+
+##############################################
+#          Process ReSeq Only
+##############################################
+
 
 def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE):
 
@@ -478,7 +1010,13 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	
 	return 0
 
-def run_step_E(ACC_ID, PYTHON, GATK, REF, PLOIDY, CONFIG, DICO_CHR, PREFIX, QUEUE, PATHNAME):
+
+##############################################
+#          Common to Process
+##############################################
+
+
+def run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME):
 
 	sys.stdout.write('Working on '+ACC_ID+' accession\n')
 	
