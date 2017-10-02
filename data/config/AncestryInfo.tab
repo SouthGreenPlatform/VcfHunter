@@ -1,0 +1,46 @@
+[group]
+sample1	X1
+sample2	X1
+sample3	X1
+sample4	X1
+sample5	X1
+sample6	X1
+sample7	X1
+sample8	X1
+sample9	X1
+sample10	X1
+sample20	Y1
+sample21	Y1
+sample22	Y1
+sample23	Y1
+sample24	Y1
+sample25	Y1
+sample26	Y1
+sample27	Y1
+sample28	Y1
+sample29	Y1
+sample40	Z1
+sample41	Z1
+sample42	Z1
+sample43	Z1
+sample44	Z1
+sample45	Z1
+sample46	Z1
+sample47	Z1
+sample48	Z1
+sample49	Z1
+sample61	UN
+sample62	UN
+sample63	UN
+sample64	UN
+sample65	UN
+sample66	UN
+sample67	UN
+sample68	UN
+sample69	UN
+sample70	UN
+
+[color]
+X1      red=0:green=1:blue=0:alpha=0.7
+Y1      red=0:green=0:blue=1:alpha=0.7
+Z1      red=1:green=0:blue=0:alpha=0.7

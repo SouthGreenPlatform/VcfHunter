@@ -128,8 +128,9 @@ def createKar(PREFIX, liste_chr, dico_centro, dico_haplotype):
 		outfile.write('\n')
 	
 	for chr in dico_centro:
-		outfile.write('\t'.join(['band', chr, 'p36.33', 'p36.33', str(dico_centro[chr][0]), str(dico_centro[chr][1]), 'black']))
-		outfile.write('\n')
+		if chr in liste_chr:
+			outfile.write('\t'.join(['band', chr, 'p36.33', 'p36.33', str(dico_centro[chr][0]), str(dico_centro[chr][1]), 'black']))
+			outfile.write('\n')
 	outfile.close()
 
 def create_housekeeping(fileName):
@@ -330,7 +331,7 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PREFIX):
 	################################################
 	outfile.write('<ideogram>\n')
 	outfile.write('<spacing>\n')
-	outfile.write('default = 0.1u\n')
+	outfile.write('default = 0.05r\n')
 	outfile.write('</spacing>\n')
 	outfile.write('thickness        = 50p\n')
 	outfile.write('stroke_thickness = 2\n')
@@ -395,8 +396,6 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PREFIX):
 	outfile.write('</tick>\n')
 	outfile.write('</ticks>\n')
 	outfile.close()
-	
-	sys.exit()
 
 def __main__():
 	#Parse Command Line
@@ -424,5 +423,10 @@ def __main__():
 	if options.centro == None:
 		sys.exit('Please provide a centro file to --centro argument')
 	draw_chromosome(options.acc, options.chr, options.gcol, options.dg, options.centro, options.prefix)
-		
+	
+	qs=os.popen('circos -conf '+options.prefix+'.conf -noparanoid')
+	
+	for n in qs:
+		sys.stdout.write(n.replace("\n","\r\n"))
+	
 if __name__ == "__main__": __main__()

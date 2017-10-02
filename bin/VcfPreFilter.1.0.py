@@ -315,7 +315,7 @@ def __main__():
 	parser.add_option( '-v', '--vcf',		dest='vcf',			default=None,		help='The VCF file')
 	parser.add_option( '-m', '--MinCov',	dest='MinCov',		default='10',		help='Minimal read coverage for site. [Default: %default]')
 	parser.add_option( '-M', '--MaxCov',	dest='MaxCov',		default='1000',		help='Maximal read coverage for site. [Default: %default]')
-	parser.add_option( '-f', '--minFreq',	dest='minFreq',		default='0.05',		help='Minimal allele frequency in an accession to keep the allele for calling in the row')
+	parser.add_option( '-f', '--minFreq',	dest='minFreq',		default='0.05',		help='Minimal allele frequency in an accession to keep the allele for calling in the row. [Default: %default]')
 	parser.add_option( '-c', '--MinAlCov',	dest='MinAlCov',	default='3',		help='Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: %default]')
 	parser.add_option( '-o', '--out',		dest='out',			default='Pop',		help='Prefix for output files. [Default: %default]')
 	(options, args) = parser.parse_args()

@@ -1537,7 +1537,7 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 	max_len_group_col = 0 # For color plotting at the end of matrix creation
 	
 	#111111111111111111111111111111111111111111111111122222222222222222222222222222222222222
-	dico_group_number = {}
+	# dico_group_number = {}
 	#111111111111111111111111111111111111111111111111122222222222222222222222222222222222222
 	
 	if not(GROUP == None):
@@ -1557,9 +1557,9 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 					dico_group[data[0]] = data[1]
 					
 					#111111111111111111111111111111111111111111111111122222222222222222222222222222222222222
-					if not(data[1] in dico_group_number):
-						dico_group_number[data[1]] = 0
-					dico_group_number[data[1]] += 1
+					# if not(data[1] in dico_group_number):
+						# dico_group_number[data[1]] = 0
+					# dico_group_number[data[1]] += 1
 					#111111111111111111111111111111111111111111111111122222222222222222222222222222222222222
 					
 				elif sur_color:
@@ -1644,9 +1644,9 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 							dico_grouped = set()
 							
 							#1111111111111111111111111111111111111122222222222222222222222222222222222222
-							dico_count = {}
-							for n in dico_group_number:
-								dico_count[n] = 0
+							# dico_count = {}
+							# for n in dico_group_number:
+								# dico_count[n] = 0
 							#1111111111111111111111111111111111111122222222222222222222222222222222222222
 							
 							for n in LIST_NAME:
@@ -1655,7 +1655,7 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 										dico_grouped.add(dico_group[n])
 										
 										#1111111111111111111111111111111111111122222222222222222222222222222222222222
-										dico_count[dico_group[n]] +=1
+										# dico_count[dico_group[n]] +=1
 										#1111111111111111111111111111111111111122222222222222222222222222222222222222
 							
 							#11111111111111111111111111111111111111
@@ -1667,10 +1667,10 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 							
 							
 							#22222222222222222222222222222222222222
-							dico_grouped2 = set()
-							for n in dico_count:
-								if dico_count[n] == dico_group_number[n]:
-									dico_grouped2.add(n)
+							# dico_grouped2 = set()
+							# for n in dico_count:
+								# if dico_count[n] == dico_group_number[n]:
+									# dico_grouped2.add(n)
 							#22222222222222222222222222222222222222
 							
 							# printing line
@@ -1680,10 +1680,10 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 								outfile.write(var_chr+':'+var_pos+':'+allele+':P\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['present'])))+'\n')
 								
 							#22222222222222222222222222222222222222
-							elif len(dico_grouped2) > max_len_group_col:
-								outfile.write(var_chr+':'+var_pos+':'+allele+':P\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['present'])))+'\n')
-							elif len(dico_grouped2) == 0:
-								outfile.write(var_chr+':'+var_pos+':'+allele+':P\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['present'])))+'\n')
+							# elif len(dico_grouped2) > max_len_group_col:
+								# outfile.write(var_chr+':'+var_pos+':'+allele+':P\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['present'])))+'\n')
+							# elif len(dico_grouped2) == 0:
+								# outfile.write(var_chr+':'+var_pos+':'+allele+':P\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['present'])))+'\n')
 							#22222222222222222222222222222222222222
 							
 							else:
@@ -1694,9 +1694,9 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 							dico_grouped = set()
 							
 							#1111111111111111111111111111111111111122222222222222222222222222222222222222
-							dico_count = {}
-							for n in dico_group_number:
-								dico_count[n] = 0
+							# dico_count = {}
+							# for n in dico_group_number:
+								# dico_count[n] = 0
 							#1111111111111111111111111111111111111122222222222222222222222222222222222222
 							
 							for n in LIST_NAME:
@@ -1705,7 +1705,7 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 										dico_grouped.add(dico_group[n])
 										
 										#1111111111111111111111111111111111111122222222222222222222222222222222222222
-										dico_count[dico_group[n]] +=1
+										# dico_count[dico_group[n]] +=1
 										#1111111111111111111111111111111111111122222222222222222222222222222222222222
 							
 							#11111111111111111111111111111111111111
@@ -1717,10 +1717,10 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 							
 							
 							#22222222222222222222222222222222222222
-							dico_grouped2 = set()
-							for n in dico_count:
-								if dico_count[n] == dico_group_number[n]:
-									dico_grouped2.add(n)
+							# dico_grouped2 = set()
+							# for n in dico_count:
+								# if dico_count[n] == dico_group_number[n]:
+									# dico_grouped2.add(n)
 							#22222222222222222222222222222222222222
 							
 							# printing line
@@ -1730,10 +1730,10 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 								outfile.write(var_chr+':'+var_pos+':'+allele+':A\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['absent'])))+'\n')
 							
 							#22222222222222222222222222222222222222
-							elif len(dico_grouped2) > max_len_group_col:
-								outfile.write(var_chr+':'+var_pos+':'+allele+':A\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['absent'])))+'\n')
-							elif len(dico_grouped2) == 0:
-								outfile.write(var_chr+':'+var_pos+':'+allele+':A\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['absent'])))+'\n')
+							# elif len(dico_grouped2) > max_len_group_col:
+								# outfile.write(var_chr+':'+var_pos+':'+allele+':A\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['absent'])))+'\n')
+							# elif len(dico_grouped2) == 0:
+								# outfile.write(var_chr+':'+var_pos+':'+allele+':A\t'+'UN\t'+'\t'.join(list(map(str, dico_coded[allele]['absent'])))+'\n')
 							#22222222222222222222222222222222222222
 							
 							else:

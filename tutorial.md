@@ -1,0 +1,913 @@
+# Tutorial for VcfExplorer
+
+This tutorial go through all steps from variant calling from DNAseq and/or RNAseq to caracterization of genome mosaic structure
+ using ***vcfExplorer tools***
+
+Go to the vcfExplorer folder (Scripts can be run from any folder but the command lines in this tutorial assume you are in this
+ folder and that you have python 2.7 and 3 versions).
+
+### Available data:
+
+*data/reference/* is a folder containing a fasta file with the reference sequence and a gff file containing the reference
+ sequence annotation
+*data/reads/* is a folder containing DNAseq paired reads simulated from 3 gene pools of diploid ancestral accessions (10
+ accessions from each gene pool) and 10 DNAseq and 10 RNAseq paired reads simulated from hybrids diploids accessions resulting
+ from several crosses of accessions from the ancestral pool.
+*data/config/* is a folder containing two configuration files needed for the RNAseq and DNAseq variant calling
+
+A specific folder as been created to test the tools (*TestTools*). Go to this folder to run all command lines of this toolbox.
+ But these tools can also be launched from everywhere you have permission to write, you will only have to change path to the
+ configuration files.
+
+For the following example, we will assume that you have a computer with 8 processors. If it is not the case or is you want
+ to use less processors than available you should/can change the number of processors you allow the program to use.
+
+In this tutorial we assume that you have performed the preliminary steps of checking your reads and filtered if necessary.
+ After that, it is time to begin the variant calling.
+
+## A - Variant calling
+
+Because different mapping tools are needed to perfom the mapping depending on the type of data (RNA or DNA), two different
+ pipeline shoold be use for read mapping and post mapping processing.
+
+### DNA seq variant calling
+
+a - Mapping of the DNA reads: In this step, reads are aligned against the reference sequence using BWA mem algorithm
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a
+~~~
+
+40 folders have been created containing each:
+
+* *.sam.stat files with mapping statistics
+* *_merged.bam file containing aligned read merged in one bam file
+* *_merged.bai file (index of the bam file)
+* STAT folder containing a .html file summarising statistics on libraries.
+
+
+b - Removing duplicates reads: In this step, read duplicates are removed
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b
+~~~
+
+3 new files have been added in each folders:
+
+* *_rmdup.bam file containing non redundant reads resulting from PCR and optical duplicates
+* *_rmdup.bai file (index of the bam file)
+* *_duplicate file summarising read duplication statistics
+
+
+c - Removing duplicates reads: In this step, read are realigned around indels
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c
+~~~
+
+2 new files have been added in each folders:
+
+* *_realigned.bam file reads realigned around indels
+* *_realigned.bai file (index of the bam file)
+
+
+d - Base recalibration: In this step, reads base sequencing quality are recalculated. **This step is recommended by GATK
+ best practice but we do not recommend to use it if you use our pipeline.**
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s d
+~~~
+
+5 new files have been added in each folders:
+
+* *\_real\_recal.bam file reads bases recalibrated
+* *\_real\_recal.bai file (index of the bam file)
+* *\_recalibration_plot.pdf file
+* *_selected.vcf file containing variant sites used for base recalibration (if no vcf have been provided)
+* *_selected.vcf.idx file (index of the vcf file)
+
+
+e - Allele counting: In this step, reads are used to count for each covered sites the number of reads supporting each
+ bases (A,T,G,C,N,\*=deletion).
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s e
+~~~
+
+Several new files have been added in each folders:
+
+* *.gz files recording, for each chromosomes/sequences in the fasta provided as reference, the count of the number of
+ reads supporting each bases (A,T,G,C,N,\*=deletion) at each covered site.
+
+
+f - Vcf generation: generate the vcf for all accessions in the configuration file
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f
+~~~
+
+Several new files in the current directory:
+
+* prefix\_\*\_all_allele_count.vcf file for each chromosomes/sequences in the fasta provided as reference.
+
+
+g - Vcf merging: generate a single vcf from all chromosome/sequences in the fasta provided as reference. This step is not
+ needed here has only one sequence is passed but you can try the command line anyway ;-)
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s g
+~~~
+
+1 new file is created in the current directory:
+
+* prefix_all_allele_count.vcf file
+
+
+h - Statistics: Compute mapping statistics
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h
+~~~
+
+Several new files in the current directory:
+
+* *_lib.stats file containing mapping statistics per libraries
+* *_acc.stats file containing mapping statistics per accessions
+
+
+***All the steps can be lauched in one command line. First remove the generated files:***
+
+~~~
+rm -rf *
+~~~
+
+Run the pipeline again (without step d)
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh
+~~~
+
+
+
+### RNA seq variant calling
+
+
+a - Reference indexation: Create an index for STAR RNAseq mapping
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s a
+~~~
+
+1 folder is created in the current directory (name = prefix+_ref_star_1). This folder contains index constructed and used
+ by STAR to align RNAseq reads
+
+
+b - Identification of splicing sites. During this step, all reads from all libraries are merged and aligned against the
+ reference sequence which allowed STAR to identify splicing sites which will be used to build a new index (step c) taking
+ in account the splicing site.
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s b
+~~~
+
+A file (prefix+"_JUNC_ESTIMATION_SJ.out.tab") containing the splicing sites is generated
+
+
+c - Reference indexation: with the splicing site information
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s c
+~~~
+
+1 folder is created in the current directory (name = prefix+_ref_star_2). This folder contains index constructed and used
+ by STAR to align RNAseq reads
+
+
+d - Read mapping: Reads are aligned against the reference sequence using STAR software 
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s d
+~~~
+
+10 folders have been created containing each:
+
+* *Aligned.out.sam files containing aligned reads (1 per libraries)
+* *Log.final.out file containing mapping statistics of STAR (1 per libraries)
+* *.SJ.out.tab file containing splicing sites (1 per libraries)
+
+1 additional folder was created and named as passed to -p option containing a file named prefix + "_mapping.tab" which
+ summarise mapping statistics for all accessions.
+
+
+e - Read merging and ordering: Reads from different libraries but the same accessions are merged and sorted on coordinate.
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e
+~~~
+
+Several new files have been added in each folders:
+
+* *_merged.bam files containing all aligned reads from all libraries of one accession.
+* *_merged.bai files (index of the bam file)
+
+
+f - Removing duplicates reads: In this step, read duplicates are removed
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e
+~~~
+
+2 new files have been added in each folders:
+
+* *_rmdup.bam file containing non redundant reads resulting from PCR and optical duplicates
+* *_duplicate file summarising read duplication statistics
+
+An additional file was created in the folder named as passed to -p option. This file named prefix + "_rmdup_stat.tab"
+ contained duplicates statistics for all accessions.
+
+
+g - Bam reordering: In this step, is necessary for subsequent steps
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s g
+~~~
+
+2 new files have been added in each folders:
+
+* *_reorder.bam file containing reordered reads based on the order sequences are provided in the multifasta
+* *_reorder.bai file (index of the bam file)
+
+
+h - Reads splitting: In this step, reads are splitted on splicing sites
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s h
+~~~
+
+2 new files have been added in each folders:
+
+* *_trim.bam file containing splitted reads
+* *_trim.bai file (index of the bam file)
+
+
+i - Indel realigment: In this step, reads realigned around indels. Countrary to **process_reseq** a vcf on known indel
+ could not be provided. It will be implemented in futur...
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s i
+~~~
+
+2 new files have been added in each folders:
+
+* *_realigned.bam file containing realigned reads
+* *_realigned.bai file (index of the bam file)
+
+
+j - Allele counting: In this step, reads are used to count for each covered sites the number of reads supporting each
+ bases (A,T,G,C,N,\*=deletion).
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s j
+~~~
+
+Several new files have been added in each folders:
+
+* *.gz files recording, for each chromosomes/sequences in the fasta provided as reference, the count of the number of
+ reads supporting each bases (A,T,G,C,N,\*=deletion) at each covered site.
+
+
+k - Vcf generation: generate the vcf for all accessions in the configuration file
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s k
+~~~
+
+Several new files in the current directory:
+
+* prefix\_\*\_all_allele_count.vcf file for each chromosomes/sequences in the fasta provided as reference.
+
+
+l - Vcf merging: generate a single vcf from all chromosome/sequences in the fasta provided as reference. This step is
+ not needed here has only one sequence is passed but you can try the command line anyway ;-)
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s l
+~~~
+
+1 new file is created in the current directory:
+
+* prefix_all_allele_count.vcf file
+
+
+m - Exon coverage: Calculate for each gene filled in the gff file passed in the configuration file and for each accessions,
+ the proportion of the exon covered by the library.
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s m
+~~~
+
+1 new file is created in the current directory:
+
+* prefix_all_allele_count.vcf file
+
+
+***All the steps can be lauched in one command line. First remove the generated files:***
+
+~~~
+rm -rf sample71 sample72 sample73 sample74 sample75 sample76 sample77 sample78 sample79 sample80
+~~~
+
+Run the pipeline again
+
+~~~
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcdefghijklm
+~~~
+
+
+***RNAseq and DNAseq bam can be used to generate a single vcf:*** At this stage we assume that RNAseq and DNAseq have been
+ processed until step j and e for **process_RNAseq** and **process_reseq respectively**. To generate a single vcf a new
+ configuration file should be created containing informations for RNAseq and DNAseq accession. This file is available in
+ *data/config/DNA_RNAseq.conf*. To obtain the vcf run the following command line:
+
+~~~
+python2 ../bin/process_reseq_1.0.py -c ../data/config/DNA_RNAseq.conf -t 8 -p DNA_RNAseq -s fg
+~~~
+
+
+## B - VCF prefiltering
+
+Once the variant calling is performed, it is now time to filter the calling. This is a necessary step with this pipeline
+ because all variant sites are reported (one read, on one accession supporting a variant). The phylosophie of
+ ***process_RNAseq*** and ***process_reseq*** is to report all variant sites and then decide to filter the vcf (what is
+ error and what is not) based on understandable and simple parametres using ***VcfPreFilter*** tool.
+For the following step we will work on the vcf file generated on both DNA and RNA seq data. VcfPreFilter can be launched
+ as followed:
+
+~~~
+python2 ../bin/VcfPreFilter.1.0.py -v DNA_RNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNA_RNAseq
+~~~
+
+The outpout is a vcf file (named as filled in -o option) in which the variant line are filtered as followed:
+
+* 1 - an accession of a variant line is considered only if its site coverage is comprised in [-m : -M] (in this example
+ [10:10000]),
+* 2 - for each considered accession, an allele is considered only if its frequency at in the accession if equal or greater
+ than -f (in this example: 0.05) and its coverage is equal or greater than -c (in this example: 3),
+* 3 - the line is kept only if their is at least one allele different from the reference kept in at least one accession
+ at the end of the process,
+
+The variant calling is recalculated **for each accessions** based on selected alleles (even accessions which are not
+ enough covered according our parameters will have a genotype). An additional tag (GC) is added in the FORMAT column
+ of the VCF. This tag is calculated as followed : -log10(best genotype probability) + log10(second best genotype
+ probability) and give an idea of the quality of the calling at the datapoint.
+
+## C - VCF statistics
+Now that we have a vcf file in which we have only kept variant lines in which we are relatively confident, it is time to
+ perform some statistics on the vcf.
+To do so, we first need to create a file in which we list accessions to perform statistics on. This can be done with the
+ following command line:
+
+~~~
+head -n 1000 DNA_RNAseq_prefiltered.vcf | grep "#CHROM" | sed 's/\t/\n/g' | tail -n 50 > all_names.tab
+~~~
+
+Statistics calculation can be done with the following command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --type STAT --prefix DNA_RNAseq_prefiltered
+~~~
+
+2 files are generated:
+
+* prefix+"_general.stat" which regroup global statistics
+* prefix+"_accession.stat" which regroup statistics per accessions such as missing data, accession specific alleles,
+ homozygous sites and heterozygous sites. 
+
+When looking at the prefix+"_general.stat" file we observe that there is around 60000 sites in which we detected only
+ one allele. This suggests that either this is reference specific alleles or sequencing errors or that it is monomorphous
+ sites that have been identified polymorphous based on the criteria passed in during vcf prefilter (but binomial
+ probabilities identified monorphous).
+
+2 solution are available:
+
+* running again ***VcfPreFilter*** with more stringent parameters
+* filtering the vcf removing monoallelic variant. This is the solution we will choose in this tutorial.
+
+
+In this same filtering step, we will also identify variant sites in which we dont have enough confidence (--MinCov
+ and MinAl options) and we will remove also tri-allelic sites. To perform the filter, run the following command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 50 --RmAlAlt 1:3 --prefix DNA_RNAseq_prefiltered
+~~~
+
+The output is a filtered vcf file (prefix+"_filt.vcf") in which all mono- or tri- allelic lines are removed. In
+ addition, all datapoints which have a coverage lower than 10 reads or a minor allele frequency lower than 3 reads
+ are converted to missing data.
+
+
+We will perform a final filter on the vcf file because the analysis that perform the chromosome painting does not
+ support the missing data. Because the vcf is a mix of DNA and RNAseq, the accession genotyped with the RNAseq will
+ have more missing data. In this context we will filter the DNAseq accession for no missing data. This is not clear
+ why we do that only on the DNAseq but it will become clearer and clearer along the process why we do that.
+
+So to filter the vcf on DNAseq data only we should generate 2 files. A file which regroup accession names to use for
+ filtering (DNAseq accession) and accessions we do not want to use for filtering but which we want to keep in the vcf
+ anyway (RNAseq accessions). This can be done with the following command line:
+
+~~~
+grep Lib ../data/config/DNAseq.conf | cut -f 3 > DNAseq_names.tab
+grep Lib ../data/config/RNAseq.conf | cut -f 3 > RNAseq_names.tab
+~~~
+
+And to perform the filter, run the following command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered_filt.vcf --names DNAseq_names.tab --outgroup RNAseq_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 0 --RmAlAlt 1:3 --prefix DNA_RNAseq_final
+~~~
+
+The output is a filtered vcf file (prefix+"_filt.vcf") in which there is no missing datas for the DNAseq accession but it
+ remains missing data for RNAseq data. You can calculate statistics if you want:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names all_names.tab --type STAT --prefix DNA_RNAseq_final_filt
+~~~
+
+## D - PCA analysis
+
+Now that we have a "good" vcf in which we are confident in the variant line, it is time to analyse the dataset. 
+In another way to say: to perform the chromosome painting! The fisrt step of the chromosome painting is to perform 
+a COA analysis on the dataset to cluster the alleles and the accession. Create a folder in which the analysis will 
+be performed and run the following command line:
+
+~~~
+mkdir AllClust
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseq_names.tab --type FACTORIAL --prefix AllClust/ClustAnalysis --nAxes 6 --mulType coa
+~~~
+
+The last command line run the factorial analysis (--type FACTORIAL option). During this analysis the vcf file
+ is recoded as followed: For each allele at each variants site two markers were generated; One marker for the
+ presence of the allele (0/1 coded) and one for the absence of the allele (0/1 coded). 
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig3.png"  width="700">
+
+Only alleles present or absent in **part** (not all) of selected accessions were included in the final matrix file 
+named ***AllClust/ClustAnalysis_matrix_4_PCA.tab*** in this example. An additional column named "GROUP" can be 
+identified. This column is filled with "UN" value if no --group argument is passed. We will explain later this arguement.
+
+The factorial analysis (here a COA, --mulType option) was performed on the transposed matrix using R (The R script is 
+generated by the sript and can be found here: ***AllClust/ClustAnalysis_multivariate.R***). R warning messages and
+ command lines are recorded in the file named ***ClustAnalysis_multivariate.Rout***. Graphical outputs of the analysis
+ were draw and for example accessions and alleles can be projected along axis in the following picture.
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig4.png"  width="700">
+
+In this example the left graphe represent accessions projected along axis 1 and 2 and the right represent the allele 
+projected along synthetic axis.
+A graphical representation is performed for each axis combinations and each file is named according to the following
+ nomenclature ***prefix + \_axis\_X\_vs\_Y.pdf***. Several pdf for accessions along axis only is also generated and are
+ named according to the following nomenclature ***prefix + \_axis\_X\_vs\_Y\_accessions.pdf***.
+
+The cumulated inertia is plotted in the graphe named ***AllClust/ClustAnalysis_inertia.pdf***
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig5.png"  width="400">
+
+Individual and variables coordinates for the selected 6 fisrt axis (--nAxes option) are recorded in files named
+ ***AllClust/ClustAnalysis_individuals_coordinates.tab*** and ***AllClust/ClustAnalysis_variables_coordinates.tab***
+ respectively.</br></br></br>
+
+
+### The --group option
+
+We assume that in some case you have additionnal informations on your dataset such as which accessions are adimxed
+ and which accessions are likely to be the ancestral one. And maybe you want to verify/project this information in
+ your analysis. This can be done passing a configuration file with two section to the --group option. This file can
+ be found in the data/config/ folder and is named ***AncestryInfo.tab***. You can have a look at the file if you want
+ but basically the two sections are named [group] and [color] and contained respectively the accession suspected 
+ grouping and a color (in RGB proportion) you want to attribute to each group. Accessions with no group should filled
+ with "UN" value. **Warning: group name should be written in upper case (du to R sorting)**.
+
+**This additional information will not change the results of the analysis.** It will only add color to the figures and
+ fill the GROUP column: in the GROUP column alleles groups were attributed based on the following rule: the allele is
+ attributed to a group if it is only present in this group but not in other defined groups.
+
+you can try this option running the following command line:
+
+~~~
+mkdir AllClust_group
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseq_names.tab --type FACTORIAL --prefix AllClust_group/ClustAnalysis --nAxes 6 --mulType coa --group ../data/config/AncestryInfo.tab
+~~~
+
+Outpout are strictely the same with two exceptions: pdf files are colorated according to the groups passed in --group
+ option. And the "GROUP" column has been filled if the grouping rules are fulfilled.
+ 
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig6.png"  width="700">
+
+You can observe that if you compare this example with the preceding one that only the orientation of the axis changed
+ but the accessions and allele coordiantes remained the same.
+
+
+## D - K-mean clustering
+
+### K-mean clustering
+
+Now that allele have been projected along synthetic axes, it is time to clusterize these alleles. The idea is that the
+ structure reflected by the synthetic axis represent the ancestral structure. In this context, the alleles at the
+ extremities of the cloud of points will be the ancestral ones. These alleles can be clusterized using a k-mean approche
+ with the following command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --nGroup 4 --iter 1000 --thread 8 --prefix AllClust/ClustAnalysis
+~~~
+
+The k-mean clustering is performed with only the 2 first axes of the COA (--dAxes 1:2) because the analysis showed that
+ most of the inertia is on these axes. We choose to look for 4 groups (--nGroup 4) because, based on the data we identified
+ 3 ancestral groups (the number of groups can be serached with other means, *i.e.*, admixture, SNMF, ... softwares) and we
+ also allow a group of ungrouped alleles corresponding to the center of the loud of points.
+
+The k-mean is performed as followed: 1000 (--iter 1000) independant k-means are performed with 4 (--nGroup 4) random
+ startpoints each. Each of the 1000 k-mean runned until centroids do not move. After that, all the 4*1000 centroids are 
+ clusterized using a single k-mean which allowed to run a last k-mean on the allele cloud of points with centroids of the
+ centroids as startpoints.
+
+During the process, several informations are returned to stdout, but at the end of the process two main informations the
+ number of allele grouped within each group is returned and should look like as followed:
+
+~~~
+Group g0 contained 1594 dots
+Group g1 contained 1970 dots
+Group g2 contained 7103 dots
+Group g3 contained 4489 dots
+~~~
+
+These results suggested a large desequilibrium in the grouping and we will discuss latter the reason of such desequilibrium
+ and will focus at the moment on the output and on the way we can interpret the analysis. Five file are generated and can be
+ found in the **AllClust** folder:
+
+* **ClustAnalysis\_kMean\_allele.tab** file which correspond to the ***ClustAnalysis\_matrix\_4\_PCA.tab*** in which the K-mean
+allele grouping has been recorded.
+* **ClustAnalysis\_centroid\_coordinates.tab** file which regroup the 4*1000 centroids of the 1000 k-mean centroid clustering.
+* **ClustAnalysis\_centroid\_iteration\_grouping.tab** file which records for each of the 1000 repetition the centroid grouping.
+* **ClustAnalysis\_group\_color.tab** file that attribute a color to the groups.
+* **ClustAnalysis\_kMean\_gp\_prop.tab** file that summarise, the proportions of time each allele is regrouped in a group in the
+ 1000 k-mean steps
+
+### K-mean visualization
+
+The K-mean visualization can be performed using 2 tools of vcf2struct, a 2d visualization can be performed with --type VISUALIZE_VAR_2D,
+ and a 3d interactive visualization can be performed using --type VISUALIZE_VAR_3D. The 2d visualization can be launched with the
+ following command line either on centroids.
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_centroid_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_centroid_iteration_grouping.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/CentroidGrouping
+~~~
+
+Output is as much files as axis combinations named according to the following nomenclature ***prefix + \_axisX\_vs\_axisY\.png***.
+The output should look like this:
+
+<img src="http://banana-genome-http.cirad.fr/image/CentroidGrouping_axis1_vs_axis2.png"  width="700">
+
+This Figure represent the 4000 centroids grouping obtained from the 1000 independant k-mean. Colors may not be the same when you
+ run the analysis because the color attribution is random. Anyway, we can observe that g2 group, is at the center of the cloud of
+ points and coresponded to the groups of unasigned alleles (non discriminant allles). One can also observe that the blue centroids
+ are more dispersed than the red and black one. This may be due to the fact that hybrids accessions seems to have a strong
+ contribution of the ancestral group corresponding to the blue groups which perturbate the analysis! This also explained why the
+ blue group (g3) as more specific alleles grouped! 
+
+
+Visualization of the allele grouping can be done as followed 
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
+~~~
+
+The outpout named ***prefix + \_axis1\_vs\_axis2\.png*** look like this (color may be different):
+
+<img src="http://banana-genome-http.cirad.fr/image/AlleleGrouping_axis1_vs_axis2.png"  width="700">
+
+In this picture you have the representation of the allele clustering performed by the k-mean approach. We can clearly observe that
+ the green group (g2) corresponded to allele not structuring the dataset.</br></br></br>
+
+As in this example we choose to work only with 2 axis, it is not necessary to have a 3d visualization but we can try the command
+ anyway:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_3D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2:3 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab
+~~~
+
+A window which should look like this should open:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig7.png"  width="700">
+
+This 3d visualisation can be rotated with the mouse.
+ 
+
+### Important remark
+
+In this example we observed that the allele of the blue group are over represented. This may be due to the strong contribution of
+ this group to the hybrid accessions (cf accessions projection along synthetic axis) and/or a structuration in hybrid accessions 
+ that generate noise in wild accessions structure. This may be a problem because in this case, during chromosome painting, blue
+ regions may be over represented and/or the chromosome painting may represent a structure that is not related to the ancestral 
+ contribution but rather a mix between ancestral contribution and hybrid structure!!! In this context, it may be clever to re-
+run the COA analysis and k-mean clustering but only on accessions that are not supposed hybrids to have a better allele grouping
+ and ultimately a better chromosome painting.
+
+At this point, you may ask why not suggesting to do this directely as I knew this will happen in our dataset. To this I respond that
+ it is not so long to run and this example provide a limit of the method explained here that you should take in account!
+
+
+## E - Runnig again Multivariate analysis and clustering
+
+
+First we need to create a new name file in which their will only be "ancestral" accessions. Some accession may have introgression but
+ they should not be to much (this can be verified with several methods such as the first COA, adixture or SNMF analysis). In this
+ example, we the COA analysis, we observed that acccession from sample61 to sample70 seemed not "pure". I also know this from the
+ simulations we have made to generate the dataset ;-). These accessions should be removed from the name file. To do this, run :
+
+~~~
+head -n 31 DNAseq_names.tab > DNAseqFinalName.tab
+~~~
+
+Once this is done do again the Multivariate analysis:
+
+~~~
+mkdir Final
+python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseqFinalName.tab --type FACTORIAL --prefix Final/ClustAnalysis --nAxes 6 --mulType coa --group ../data/config/AncestryInfo.tab
+~~~
+
+When you look at the ***Final/ClustAnalysis_axis_1_vs_2_accessions.pdf***, you can observe that accessions are separated on the 2
+ axis with no intermediate accessions that could perturbate the analysis.
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig8.png"  width="350"> 
+
+
+And the k-mean clustering:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST --VarCoord Final/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_matrix_4_PCA.tab --nGroup 4 --iter 1000 --thread 8 --prefix Final/ClustAnalysis
+~~~
+
+At this point you can observe that clusterised allele are more homogenous with only one over-represented group normally corresponding
+ to unassigned alleles. You can observe allele clusering with the previously described command lines:
+
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord Final/ClustAnalysis_centroid_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_centroid_iteration_grouping.tab --group Final/ClustAnalysis_group_color.tab --prefix Final/CentroidGrouping
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord Final/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_kMean_allele.tab --group Final/ClustAnalysis_group_color.tab --prefix Final/AlleleGrouping
+~~~
+
+The resulting centroid grouping:
+
+<img src="http://banana-genome-http.cirad.fr/image/FinaleCentroidGrouping_axis1_vs_axis2.png"  width="600">
+
+The final allele grouping:
+
+<img src="http://banana-genome-http.cirad.fr/image/FinaleAlleleGrouping_axis1_vs_axis2.png"  width="600">
+
+
+## F - Performing the chromosome painting
+
+Now that allele are clusterized, it is time to perform the chromosome painting. The idea is to count, on a sliding window along
+ chromosomes, the number of grouped alleles of each groups for each hybrid accession and then to attribute a chromosome region origin 
+ based on the maximal grouped alleles. However it is not so simple, determining the expected grouped allele number is not
+ necessary an easy task: Sometime the representant of the ancestral groups are very few, or the diversity of these groups is
+ not well represented or the degree of ancestral allele fixation is not the same between accession depending if the accessions
+ are allogamous or autogamous. This program has been designed to solve these problems (at least try) as explained in the following
+ Figure:
+ 
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig9.png"  width="600">
+
+This figure explained the impact of an unbalance in the allele fixation levels of ancestral population on the expectation of grouped
+ allele number at a position. We can observe that depending on the allele fixation level in the population, for the same number of allele
+ grouped, the expected allele number of Gp2 is lower than Gp1 because all alleles of Gp2 are not fixed! In the case you have a large sample
+ of your ancestral populations, estimating the expected grouped allele number on the window is relatively easy, but this is not always the
+ case. In this context the program try to recreate the ancestral population from the few representatives provided by simulating 100 "accessions"
+ by sampling alleles from the ancestral population representatives. This is also done for hybrids population, to estimate the number of grouped
+ alleles in case of several ancestral origin at a site (example: one haploype of Gp1 and one haplotype of Gp2).
+
+An additional complexity level is that depending on the sampling of the ancestral representative of the ancestral groups, the variance of the
+ expected number of alleles of a group can be greatly underestimated as well as the mean value. (cf Figure below)
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig10.png"  width="600">
+
+This figure showed the impact of the ancestral accession sampling on the simulating of ancestral population. To partially solve this problem,
+ we chose to attribute the maximal variance found in a group and on a window, to all groups in the same window.
+
+Create a file to match allele groups names with accessions acestral groups:
+
+~~~
+grep sample ../data/config/AncestryInfo.tab | sed 's/X1/g1/' | sed 's/Y1/g0/' | sed 's/Z1/g3/' | grep -v 'UN' > ancestor.gp
+~~~
+
+**Be carreful, as the group attribution is random, you will have to check to which group (X1, Y1 and Z1) correspond the allele
+ group (g0, g1, g2 and g3) to adjust the command line**
+
+~~~
+mkdir Painting
+python3 ../bin/vcf2linear.1.1.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseq_names.tab --namesH ancestor.gp --win 100 --mat Final/ClustAnalysis_kMean_allele.tab --prefix Painting --gcol Final/ClustAnalysis_group_color.tab --chr RefSeq --ploidy 2
+~~~
+
+This is a long step that could be optimized but unfortunatelly at the time I am writting this tutorial, I don't have time to
+ do it...
+
+Several output are generated in the ***Painting*** folder. For each accessions name in the ***DNAseq_names.tab*** file, a file named according
+ to the following nomenclature ***prefix\_accessionName\_chr.tab*** is generated. This file record, for each allele at the center
+ of the window of 201 (--win 100 means a window of 100 alleles before and after the considered allele), the number of counted grouped alleles
+ in the accession for each groups (g1, g2, g3), the expected
+ grouped alleles in case of only one haplotype (**H1**) of the considered group is expected (Loc-mu-H1-g3, Loc-mu-H1-g1, Loc-mu-H1-g0), the
+ corresponding standard deviation value (Loc-sd-H1-g3, Loc-sd-H1-g1, Loc-sd-H1-g0) and the maximal standard deviation retained (Loc-max-sd-H1).
+ Depending on the ploidy level of the studied accessions (--ploidy) these values are calculated for 2 haplotypes of a same group (**H2**), 3
+ haplotypes (**H3**), 4 haplotypes (**H4**), ...
+ These values are followed by a column named *hetero*, which calculated the heterozygosity level in the window (proportion of heterozygous sites).
+ Then, probalility to have at least 1, 2, 3, ... (depending on the --ploidy option) haplotypes for each group is rapported (Prob-H1-g3, Prob-H1-g1, Prob-H1-g0)
+ for at least one haplotype and (Prob-H2-g3, Prob-H2-g1, Prob-H2-g0) for at least 2 haplotypes. The expected counted alleles of a group resulting from noise
+ is calculated in all simulated accessions that have no contributors of these groups. The mean values are reported in columns named : *Loc-mu-noise-g3*,
+ *Loc-mu-noise-g1*, *Loc-mu-noise-g0* and the coresponding standard deviation can be found in columns named : *Loc-sd-noise-g3*, *Loc-sd-noise-g1*, *Loc-sd-noise-g0*.
+ The maximal variance is also reported in column *Loc-max-sd-noise*. These values allowed to calculate the probability that the counted alleles of a group
+ is from noise and these values are reported in column named: *Prob-noise-g3*, *Prob-noise-g1*, *Prob-noise-g0*.
+ 
+
+Haplotype probabilities are calculated as followed:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig11.png"  width="400">
+
+If the observed grouped allele number is higher than the **expected value - the maximal standard deviation**
+ a probability of 1 is attributed. This probability is the probability to have at least X haplotypes in the analysed region. If the observed value is lower the
+ probability is calculated based on a density probability of a normal distribution of mean value = **expected value - the maximal standard deviation** and sd =
+ **the maximal standard deviation**. This density probability is normalized to reach a probability of 1 when the observed value is equal to **expected value -
+ the maximal standard deviation**.</br>
+The noise probability is calculated following the same phylosophie but this time a probability of 1 is attributed if the observed grouped allele number is lower
+ than the **expected value + the maximal standard deviation**. Else, the probability to be in the noise is calculated based on a density probability of a normal
+ distribution of mean value = **expected value + the maximal standard deviation** and sd = **the maximal standard deviation**. This density probability is
+ normalized to reach a probability of 1 when the observed value is equal to **expected value + the maximal standard deviation**.</br>
+Based on these probabilities, an ancestral origin is attributed to each haplotypes of the studied accession. The attribution is performed as followed, for each
+ ancestral group if the probability to be in the noise is higher than the probability to be in the group, the probability to be in the group is converted to 0.
+ Then, the haplotype probability is calculated based on the sorting of the maximal probability. If no consensus can be found (*ex.* incompatible three best
+ probabilities for a diploid) unknown haplotypes are filled. Haplotypes are ordered trying to minimize recombination events. Each haplotypes for or each
+ accessions are outputed in files found in the folder passed in --prefix option and are named as followed: ***accessionName\_chr\_haploX.tab***. There are as
+ much file as there are haplotypes. In each files there are 5 columns:
+
+* 1 - acessions name
+* 2 - chromosome name
+* 3 - start position of the bloc
+* 4 - end position of the bloc
+* 5 - ancestral origin of the bloc
+
+These files will be used to draw figures in the following steps.
+
+
+All these statistics are also plotted in files named according to the following nomenclature ***accessionName\_chr\_density.pdf*** and can be found in the
+ folder passed in --prefix option. The following Figure is obtained from the accession *sample67*
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig12.png"  width="600">
+
+This Figure regroup several informations such as the heterozygosity level along the chromosome, for each ancestry the expected number of grouped allele in
+ case of 1 haplotype of this origin (green band), 2 haplotypes of this origin (red band) or the noise (grey band) and the observed number of grouped allele
+ in the accession (black curve). The last graph represent the calculated probabilities and based on these probabilities a chromosome painting is performed.
+ *As the color attribution is random, the colors of the chromosome painting may not be the same when your run the program but the blocs should be the same.*
+
+
+## G - Chromosome painting visualization
+
+The chromsome painting can be vizualized from distinct ways. For example you can have several chromosomes from one accession and you may want to plot all
+ your chromosomes on a single file. This can be done with the following command line:
+
+~~~
+cd Painting
+python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+~~~
+
+This command line outpout a pdf named ***sample67.pdf*** which should look like this:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig13.png"  width="600">
+
+This is not very different from the previous Figure but the idea was just to try the command line. You can also observe that pericentromeric regions
+ (located by the ../../data/reference/centro_pos.tab file) are located in the figure with the grey lines while chromosome arms are identified with black
+ lines.</br>
+
+Just to have an idea of what it looks like when you have several chromosomes you can do the following. Create new files from other accessions that will
+ simulate new chromosomes:
+
+~~~
+sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo1.tab > sample67_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo2.tab > sample67_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo1.tab > sample67_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo2.tab > sample67_RefSeq2_haplo2.tab
+~~~
+
+At this point we have generated 2 additionnals chromosomes (RefSeq1 and RefSeq2) for sample67 which are in fact the chromosome painting of sample7 and
+ sample66. To do the chromosoime painting of this "false" accession run the following command line:
+
+~~~
+python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+~~~
+
+This command line overwrite the original Figure and the outpout should look like this:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig14.png"  width="600">
+
+You can observe our three chromosomes (RefSeq, RefSeq1 and RefSeq2) of the same accession in one Figure.</br></br></br>
+
+You may also want compare the chromosome painting of several accessions. *i.e.* to plot the chromosome painting of several accessions but for one
+ chromosome in one figure. For example you want to see the chromosome painting of all admixed accessions.</br>
+
+Fisrt create the liste of admixed accession with in column 2 the ploidy level:
+
+~~~
+tail -n 10 ../DNAseq_names.tab | sed 's/$/\t2/' > ../DNAseq_names_admix.tab
+~~~
+
+Then create the Figure:
+
+~~~
+python3 ../../bin/haplo2karByChr.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix All_Admix 
+~~~
+
+This command creates a file named ***All_Admix_RefSeq_1.pdf*** which contained haplotypes for accessions passed in --acc option. The outpout should
+ look like this (at the bottom of the page):
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig15.png"  width="600">
+
+This program is designed to print at most 53 (default parameters) chromosome per pages, if you have more chromosomes to draw, if this parameters is
+ not changed the first 53 haplotypes will be drawn in a fisrt pdf called ***All_Admix_RefSeq_1.pdf*** and the remaining will be drawn in a pdf called
+ ***All_Admix_RefSeq_2.pdf***. You can also change the --maxChr parameters to draw more chromosomes per pdf.</br></br></br>
+
+And finally, you may also want to generate a circos representation of your data with several accessions and chromosomes in the same Figure. This can
+ be done with the haplo2Circos.1.0.py. This can be done with the following command line:
+
+~~~
+python3 ../../bin/haplo2Circos.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_All_Admix
+~~~
+
+This programs outpouts 4 files:
+
+* **Circos\_All\_Admix.conf**: the configuration file used by circos. I choose to keep this file so that it can be edited to change aspect of the
+ Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : *circos -conf Circos_All_Admix.conf -noparanoid*
+* **Circos\_All\_Admix\_housekeeping.conf**: a second file used by circos,
+* **Circos\_All\_Admix.kar**: a third file also used by circos,
+* **Circos\_All\_Admix.png**: the circos Figure
+
+The Figure obtained should look like this:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig16.png"  width="600">
+ 
+In the circos picture, accessions are ordered from the outside to the inside in following the order passed in --acc option.
+ 
+Again in this example, because we do not have more than one chromosome, we will do the same thing than previously for sample67: we will generate 2
+ additionnal chromosomes for 4 other accessions to have an idea of what the circos looks like whit several chromosomes.
+
+~~~
+sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo1.tab > sample68_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo2.tab > sample68_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo1.tab > sample68_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo2.tab > sample68_RefSeq2_haplo2.tab
+sed 's/RefSeq/RefSeq1/' sample40_RefSeq_haplo1.tab > sample69_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample40_RefSeq_haplo2.tab > sample69_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample64_RefSeq_haplo1.tab > sample69_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample64_RefSeq_haplo2.tab > sample69_RefSeq2_haplo2.tab
+sed 's/RefSeq/RefSeq1/' sample5_RefSeq_haplo1.tab > sample61_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample5_RefSeq_haplo2.tab > sample61_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample63_RefSeq_haplo1.tab > sample61_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample63_RefSeq_haplo2.tab > sample61_RefSeq2_haplo2.tab
+sed 's/RefSeq/RefSeq1/' sample45_RefSeq_haplo1.tab > sample70_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample45_RefSeq_haplo2.tab > sample70_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample62_RefSeq_haplo1.tab > sample70_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample62_RefSeq_haplo2.tab > sample70_RefSeq2_haplo2.tab
+~~~
+
+We also need to generate the configuration file to pass to the --acc option:
+
+~~~
+echo "sample67 2" > for_circos.tab
+echo "sample68 2" >> for_circos.tab
+echo "sample69 2" >> for_circos.tab
+echo "sample61 2" >> for_circos.tab
+echo "sample70 2" >> for_circos.tab
+~~~
+
+And then, it is time to draw the Circos:
+
+~~~
+python3 ../../bin/haplo2Circos.1.0.py --acc for_circos.tab --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_Acc
+~~~
+
+The output should look like this:
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig17.png"  width="600">
+
+
+
+
+## H - Miscellaneous
+
+In this tutorial I have described main tools starting from fastq and finishing with chromosome painting. However, the the Vcf2struct.1.0.py allowed
+ to perform several other tasks which are described in the ***README*** file. You can try them if you want.
+
+In addition, once allele grouping as been performed, the analysis can be also perfomed on the RNAseq data, even if they have not been used in the analysis!
+ Go to the TestTools folder and run the following command line:
+
+~~~
+python3 ../bin/vcf2linear.1.1.py --vcf DNA_RNAseq_final_filt.vcf --names RNAseq_names.tab --namesH ancestor.gp --win 100 --mat Final/ClustAnalysis_kMean_allele.tab --prefix Painting --gcol Final/ClustAnalysis_group_color.tab --chr RefSeq --ploidy 2
+~~~
+
+The ouput are the same as for the DNAseq data. The only difference is that the analysis will only be performed on site of grouped alleles also present
+ in the RNAseq dataset.
