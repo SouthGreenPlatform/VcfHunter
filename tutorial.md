@@ -320,7 +320,7 @@ rm -rf sample71 sample72 sample73 sample74 sample75 sample76 sample77 sample78 s
 Run the pipeline again
 
 ~~~
-python2 ../bin/process_RNAseq.1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcdefghijklm
+python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p DNAseq -s abcdefghijklm
 ~~~
 
 
@@ -344,7 +344,7 @@ For the following step we will work on the vcf file generated on both DNA and RN
  as followed:
 
 ~~~
-python2 ../bin/VcfPreFilter.1.0.py -v DNA_RNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNA_RNAseq
+python2 ../bin/VcfPreFilter.1.0.py -v DNA_RNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNA_RNAseq_prefiltered.vcf
 ~~~
 
 The outpout is a vcf file (named as filled in -o option) in which the variant line are filtered as followed:
@@ -507,56 +507,57 @@ You can observe that if you compare this example with the preceding one that onl
  but the accessions and allele coordiantes remained the same.
 
 
-## D - K-mean clustering
+## D - Allele clustering
 
-### K-mean clustering
+### Mean Shift clustering
 
 Now that allele have been projected along synthetic axes, it is time to clusterize these alleles. The idea is that the
  structure reflected by the synthetic axis represent the ancestral structure. In this context, the alleles at the
- extremities of the cloud of points will be the ancestral ones. These alleles can be clusterized using a k-mean approche
- with the following command line:
+ extremities of the cloud of points will be the ancestral ones. These alleles can be clusterized using several approaches.
+ In this turorial we will use a Mean Shift clustering approach.
 
 ~~~
-python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --nGroup 4 --iter 1000 --thread 8 --prefix AllClust/ClustAnalysis
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix AllClust/ClustAnalysis
 ~~~
 
-The k-mean clustering is performed with only the 2 first axes of the COA (--dAxes 1:2) because the analysis showed that
- most of the inertia is on these axes. We choose to look for 4 groups (--nGroup 4) because, based on the data we identified
- 3 ancestral groups (the number of groups can be serached with other means, *i.e.*, admixture, SNMF, ... softwares) and we
- also allow a group of ungrouped alleles corresponding to the center of the loud of points.
+The Mean Shift clustering is performed with only the 2 first axes of the COA (--dAxes 1:2) because the analysis showed that
+ most of the inertia is on these axes. With a mean shift approach, the number of group is automatically detected.
 
-The k-mean is performed as followed: 1000 (--iter 1000) independant k-means are performed with 4 (--nGroup 4) random
- startpoints each. Each of the 1000 k-mean runned until centroids do not move. After that, all the 4*1000 centroids are 
- clusterized using a single k-mean which allowed to run a last k-mean on the allele cloud of points with centroids of the
- centroids as startpoints.
-
-During the process, several informations are returned to stdout, but at the end of the process two main informations the
- number of allele grouped within each group is returned and should look like as followed:
+During the process, several informations are returned to stdout, but at the end of the process three main informations are
+ returned: </br>
+ (i) the number of alleles used for the analysis. Allele present or absent in all accessions are removed.</br>
+ (ii) the number of estimated clusters which can be found in the line:
 
 ~~~
-Group g0 contained 1594 dots
-Group g1 contained 1970 dots
-Group g2 contained 7103 dots
-Group g3 contained 4489 dots
+number of estimated clusters : 3
+~~~
+ 
+ (iii) the number of allele grouped within each group is returned and should look like as followed:
+
+~~~
+Group g0 contained 11439 dots
+Group g1 contained 2060 dots
+Group g2 contained 1657 dots
 ~~~
 
-These results suggested a large desequilibrium in the grouping and we will discuss latter the reason of such desequilibrium
- and will focus at the moment on the output and on the way we can interpret the analysis. Five file are generated and can be
+These results suggested a large desequilibrium in the grouping and we will discuss latter the reason of such desequilibrium.
+ We will focus at the moment on the output and on the way we can interpret the analysis. Five file are generated and can be
  found in the **AllClust** folder:
 
-* **ClustAnalysis\_kMean\_allele.tab** file which correspond to the ***ClustAnalysis\_matrix\_4\_PCA.tab*** in which the K-mean
-allele grouping has been recorded.
-* **ClustAnalysis\_centroid\_coordinates.tab** file which regroup the 4*1000 centroids of the 1000 k-mean centroid clustering.
-* **ClustAnalysis\_centroid\_iteration\_grouping.tab** file which records for each of the 1000 repetition the centroid grouping.
+* **ClustAnalysis\_kMean\_allele.tab** file which correspond to the ***ClustAnalysis\_matrix\_4\_PCA.tab*** in which the allele
+ grouping has been recorded.
+* **ClustAnalysis\_centroid\_coordinates.tab** file which regroup the centroids coordinates.
+* **ClustAnalysis\_centroid\_iteration\_grouping.tab** file which records for each centroid its grouping.
 * **ClustAnalysis\_group\_color.tab** file that attribute a color to the groups.
-* **ClustAnalysis\_kMean\_gp\_prop.tab** file that summarise, the proportions of time each allele is regrouped in a group in the
- 1000 k-mean steps
+* **ClustAnalysis\_kMean\_gp\_prop.tab** file that report for each allele the probability to be in each groups. This is not a
+ "real" probability, the idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse
+ of the euclidian distance of one point and each centroids and these values were normalized so that the sum is equal to 1.
 
-### K-mean visualization
+### Clustering visualization
 
-The K-mean visualization can be performed using 2 tools of vcf2struct, a 2d visualization can be performed with --type VISUALIZE_VAR_2D,
- and a 3d interactive visualization can be performed using --type VISUALIZE_VAR_3D. The 2d visualization can be launched with the
- following command line either on centroids.
+The clustering visualization can be performed using 2 tools of vcf2struct, a 2d visualization can be performed with --type VISUALIZE_VAR_2D,
+ and a 3d interactive visualization can be performed using --type VISUALIZE_VAR_3D. The 2d of centroids visualization can be launched with the
+ following command line on centroids.
 
 ~~~
 python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_centroid_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_centroid_iteration_grouping.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/CentroidGrouping
@@ -567,15 +568,11 @@ The output should look like this:
 
 <img src="http://banana-genome-http.cirad.fr/image/CentroidGrouping_axis1_vs_axis2.png"  width="700">
 
-This Figure represent the 4000 centroids grouping obtained from the 1000 independant k-mean. Colors may not be the same when you
- run the analysis because the color attribution is random. Anyway, we can observe that g2 group, is at the center of the cloud of
- points and coresponded to the groups of unasigned alleles (non discriminant allles). One can also observe that the blue centroids
- are more dispersed than the red and black one. This may be due to the fact that hybrids accessions seems to have a strong
- contribution of the ancestral group corresponding to the blue groups which perturbate the analysis! This also explained why the
- blue group (g3) as more specific alleles grouped! 
+This Figure represent the centroids location. Colors may not be the same when you run the analysis because the color attribution
+ is random.
 
 
-Visualization of the allele grouping can be done as followed 
+Visualization of the allele grouping can be done as followed:
 ~~~
 python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
 ~~~
@@ -584,8 +581,9 @@ The outpout named ***prefix + \_axis1\_vs\_axis2\.png*** look like this (color m
 
 <img src="http://banana-genome-http.cirad.fr/image/AlleleGrouping_axis1_vs_axis2.png"  width="700">
 
-In this picture you have the representation of the allele clustering performed by the k-mean approach. We can clearly observe that
- the green group (g2) corresponded to allele not structuring the dataset.</br></br></br>
+In this picture you have the representation of the allele clustering performed by the Mean Shift approach. We can clearly observe that
+ the red group (g0) is over-represented and may be split in two to have alleles representing ancetral group g0 and en central cluster in
+ which allele not fixed/not representing ancestral groups are clustered.</br></br></br>
 
 As in this example we choose to work only with 2 axis, it is not necessary to have a 3d visualization but we can try the command
  anyway:
@@ -603,16 +601,86 @@ This 3d visualisation can be rotated with the mouse.
 
 ### Important remark
 
-In this example we observed that the allele of the blue group are over represented. This may be due to the strong contribution of
- this group to the hybrid accessions (cf accessions projection along synthetic axis) and/or a structuration in hybrid accessions 
- that generate noise in wild accessions structure. This may be a problem because in this case, during chromosome painting, blue
- regions may be over represented and/or the chromosome painting may represent a structure that is not related to the ancestral 
- contribution but rather a mix between ancestral contribution and hybrid structure!!! In this context, it may be clever to re-
-run the COA analysis and k-mean clustering but only on accessions that are not supposed hybrids to have a better allele grouping
- and ultimately a better chromosome painting.
+In this example we observed that the allele of the g0 group are over represented. And maybe this group should be splitted.
+ In fact this group should be splitted as there is 3 ancestral groups in the simulated data! In real dataset you don't have this
+ information but an admixture or SNMF analysis can be carried first which should give you an idea of the group number you expect.
+ In addition the overrepresentation of a group (which is not at the center of the datapoint) is a strong indicator of problem in
+ allele grouping! This problem in grouping may be due to the strong contribution of this group to the hybrid accessions (cf
+ accessions projection along synthetic axis) and/or a structuration in hybrid accessions that generate noise in wild accessions
+ structure or problem in calibration of the clustering (in this example here: estimation of the bandwidth). 
+ This is a problem because during chromosome painting, g0 regions may be over represented and/or the chromosome painting may
+ represent a structure that is not related to the ancestral contribution but rather a mix between ancestral contribution and hybrid
+ structure!!! In this context, it may be clever test several clustering parameters until you reach the good number of cluster and
+ even to re-run the COA analysis and clustering clustering but only on accessions that are not supposed hybrids to have a better
+ allele grouping and ultimately a better chromosome painting.
 
 At this point, you may ask why not suggesting to do this directely as I knew this will happen in our dataset. To this I respond that
- it is not so long to run and this example provide a limit of the method explained here that you should take in account!
+ it is not so long to run and this example provide a limit of the method explained here that you should take in account! The idea is
+ that you can try several multivariate analysis and clustering methods and check which method group the best your alleles.
+
+We will do this in several steps: Firts we will vary the --quantile parameter which will allow to change bandwidth estimation parameter
+ used in mean shift clustering. By default this value is put to 0.2. Lowering it should allow to have more clusters. Try the following
+ command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix AllClust/ClustAnalysis --quantile 0.1
+~~~
+
+The output should look like this:
+~~~
+loading modules
+modules loaded
+number of estimated clusters : 5
+Printing files
+Group g0 contained 9329 dots
+Group g1 contained 2124 dots
+Group g2 contained 1954 dots
+Group g3 contained 850 dots
+Group g4 contained 899 dots
+~~~
+
+At this point you have 5 clusters, while in theory you expected 4 (3 corresponding to ancestral groups and 1 corresponding to
+ unassigned alleles). This clustering can be visualized using the following command line:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
+~~~
+
+<img src="http://banana-genome-http.cirad.fr/image/sub1_AlleleGrouping_axis1_vs_axis2.png"  width="700">
+
+You can observe that g3 and g4 are close and could be merged if we want 4 clusters. I don't say that it is the solution but for
+ our example, we will take this assertion. The idea is just to show you how to use the program and the different command line.
+ So, to reduce the cluster number, we should increase the quantile value. We should then look a value between 0.1 and 0.2. Let's
+ take 0.15!
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix AllClust/ClustAnalysis --quantile 0.15
+~~~
+
+The output should look like this:
+~~~
+loading modules
+modules loaded
+number of estimated clusters : 4
+Printing files
+Group g0 contained 9427 dots
+Group g1 contained 2196 dots
+Group g2 contained 1892 dots
+Group g3 contained 1641 dots
+~~~
+
+This time we have the expected group number. Data visualization should be like this:
+
+~~~
+python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
+~~~
+
+<img src="http://banana-genome-http.cirad.fr/image/sub2_AlleleGrouping_axis1_vs_axis2.png"  width="700">
+
+We have an over represented central group g0, which correspond to unassigned alleles. However, we can observe that the group
+ g2 is steel a little over-represented. This can be due to the presence of admixed accessions with a strong contribution of
+ this ancestral group, that perturbate the multivatiate analysis. We can try to solves this problem by running again the
+ analysis but this time only on homogeneous/ancestral accessions. This is what we will do in the next point.
 
 
 ## E - Runnig again Multivariate analysis and clustering
@@ -637,18 +705,29 @@ python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseqF
 When you look at the ***Final/ClustAnalysis_axis_1_vs_2_accessions.pdf***, you can observe that accessions are separated on the 2
  axis with no intermediate accessions that could perturbate the analysis.
 
-<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig8.png"  width="350"> 
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig8.png"  width="350">
 
 
-And the k-mean clustering:
+And the clustering:
 
 ~~~
-python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST --VarCoord Final/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_matrix_4_PCA.tab --nGroup 4 --iter 1000 --thread 8 --prefix Final/ClustAnalysis
+python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord Final/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix Final/ClustAnalysis  --quantile 0.15
 ~~~
 
-At this point you can observe that clusterised allele are more homogenous with only one over-represented group normally corresponding
- to unassigned alleles. You can observe allele clusering with the previously described command lines:
+~~~
+loading modules
+modules loaded
+number of estimated clusters : 4
+Printing files
+Group g0 contained 9134 dots
+Group g1 contained 1837 dots
+Group g2 contained 1899 dots
+Group g3 contained 1957 dots
+~~~
 
+At this point you can observe that we have 4 clusters and clusterised allele are more homogenous with one over-represented
+ group (g0) corresponding to unassigned alleles (in the center of the cloud of point). You can observe centroids and allele
+ clusering with the previously described command lines:
 
 ~~~
 python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord Final/ClustAnalysis_centroid_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_centroid_iteration_grouping.tab --group Final/ClustAnalysis_group_color.tab --prefix Final/CentroidGrouping

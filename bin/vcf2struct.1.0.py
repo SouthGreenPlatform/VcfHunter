@@ -42,6 +42,11 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
 import numpy
+from sklearn.cluster import KMeans
+from sklearn.cluster import MeanShift, estimate_bandwidth
+from sklearn.datasets.samples_generator import make_blobs
+
+
 import matplotlib
 
 if 'VISUALIZE_VAR_2D' in sys.argv:
@@ -51,8 +56,299 @@ if 'VISUALIZE_VAR_2D' in sys.argv:
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_pdf import PdfPages
+
 sys.stdout.write('modules loaded\n')
 
+# def draw_color_map():
+	
+	# import matplotlib.patches as mpatches
+	
+	# fig = plt.figure(figsize=(11,11))
+	# ax = fig.add_subplot(111)
+	# list = numpy.arange(1000)
+	# ax.set_xlim(0, 1000)
+	# ax.set_ylim(0, 1000)
+	# for n in list:
+		# ax.add_patch(mpatches.Rectangle((n,0), 1, 1000, color=couleur(n/1000)))
+	# plt.show()
+
+def couleur(VALUE):
+	
+	from scipy.stats import norm
+	
+	v0 = norm(0, 0.25)
+	v03 = norm(0.5, 0.25)
+	v06 = norm(1, 0.25)
+	v1 = norm(1.5, 0.25)
+	
+	rouge = min(1, v1.pdf(VALUE)/v1.pdf(1.5)+v03.pdf(VALUE)/v03.pdf(0.5))
+	verte = min(1, v06.pdf(VALUE)/v06.pdf(1))
+	bleu = min(1, v0.pdf(VALUE)/v0.pdf(0))
+	
+	return (rouge, verte, bleu)
+
+def CreateNumpyArray(FILE, AXES, K):
+	
+	"""
+		Fill a set with chromosomes to exclude
+		
+		:param FILE: File name of coordinates
+		:type FILE: str
+		:param AXES: string of axis to work with (each axis should be separated by ":")
+		:type AXES: str
+		:param K: Group number
+		:type K: int
+		:return: A tuple with 2 object: a numpy array and correponding marker names
+		:rtype: void
+	"""
+	
+	# recording axis that will be used
+	axes = list(map(int, AXES.split(':')))
+	if len(axes) < 2:
+		sys.exit('This is embarrassing... The program exited without finishing because at least 2 axes should be filled in --dAxes argument and it is not the case')
+	
+	#-----------------------------------------------------------
+	# Loading coordinates in an array (Absent lines are removed)
+	#-----------------------------------------------------------
+	my_array = []
+	# Opening coordinate file
+	file = open(FILE)
+	# recording header
+	header = file.readline().replace('"','').split()
+	# recording coordinates
+	col_header = []
+	for line in file:
+		data = line.split()
+		if data:
+			if data[0].replace('"','').replace('.',':').split(':')[3] == 'P':
+				col_header.append(data[0].replace('"','').replace('.',':'))
+				my_list = []
+				for ax in axes:
+					my_list.append(data[ax])
+				my_array.append(list(map(float, my_list)))
+	file.close()
+	return (numpy.array(my_array), col_header)
+
+def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE, LABELS, MAT, ALNAME, PROBA, OUT):
+	
+	"""
+		Output results
+		
+		:param CENTROIDSGROUPS: Centroids groups
+		:type CENTROIDSGROUPS: numpy array
+		:param CENTROIDSITERPOS: Centroids of centroids obtained with iteration
+		:type CENTROIDSITERPOS: numpy array
+		:param CENTROID: Coordinates of final centroids
+		:type CENTROID: numpy array
+		:param CORRESPONDANCE: correspondance between centroids of centroids and final centroids 
+		:type CORRESPONDANCE: numpy array
+		:param LABELS: Alleles groups
+		:type LABELS: numpy array
+		:param MAT: Matrix of allele coordinates
+		:type MAT: numpy array
+		:param ALNAME: A list of allele names
+		:type ALNAME: list
+		:param PROBA: Probability to be in each groups
+		:type PROBA: numpy array
+		:param OUT: A string corresponding to prefix for output
+		:type OUT: str
+		:return: perform the k-mean clustering
+		:rtype: void
+	"""
+	
+	outfile = open(OUT+'_centroid_coordinates.tab','w')
+	outfile.write('\taxis'+'\taxis'.join(list(map(str, range(CENTROID.shape[1]))))+'\n')
+	for i in range(CENTROIDSITERPOS.shape[0]):
+		outfile.write('centroid'+str(i)+'\t'+'\t'.join(list(map(str, list(CENTROIDSITERPOS[i,:]))))+'\n')
+	outfile.close()
+		
+	outfile = open(OUT+'_centroid_iteration_grouping.tab','w')
+	outfile.write('\tK-mean_GROUP\n')
+	for i in range(CENTROIDSGROUPS.shape[0]):
+		outfile.write('centroid'+str(i)+'\tg'+str(CORRESPONDANCE[CENTROIDSGROUPS[i]])+'\n')
+	outfile.close()
+	
+	outfile = open(OUT+'_group_color.tab','w')
+	outfile.write('[color]\n')
+	nb_color = CENTROID.shape[0]
+	Interval = 1/float(nb_color-1)
+	Value = 0
+	for n in range(nb_color):
+		coul = couleur(Value)
+		outfile.write('g'+str(n)+'\t'+':'.join(['red='+str(coul[0]), 'green='+str(coul[1]), 'blue='+str(coul[2]), 'alpha=0.5\n']))
+		Value += Interval
+	outfile.close()
+	
+	outfile = open(OUT+'_kMean_allele.tab','w')
+	file = open(MAT)
+	header = file.readline().replace('"','').split()
+	outfile.write('\tK-mean_GROUP\t'+'\t'.join(header)+'\n')
+	i = 0
+	for line in file:
+		data = line.split()
+		if data:
+			if data[0] in ALNAME:
+				outfile.write(data[0]+'\tg'+str(LABELS[ALNAME.index(data[0])])+'\t'+'\t'.join(data[1:])+'\n')
+				i+=1
+	file.close()
+	outfile.close()
+	
+	
+	outfile = open(OUT+'_kMean_gp_prop.tab','w')
+	outfile.write('\tg'+'\tg'.join(list(map(str, range(CENTROID.shape[0]))))+'\n')
+	for n in range(len(ALNAME)):
+		outfile.write('\t'.join(([ALNAME[n]] + list(map(str, list(PROBA[n])))))+'\n')
+	outfile.close()
+	
+	group_count = numpy.bincount(LABELS)
+	for i in range(group_count.shape[0]):
+		sys.stdout.write('Group g'+str(i)+' contained '+str(group_count[i])+' dots\n')
+
+def CalcProbaToBeInGroup(DISTFROMCENTRO):
+	
+	"""
+		Calculate probabilities to be in a group based on distance from centroids.
+		
+		:param DISTFROMCENTRO: File name of coordinates
+		:type DISTFROMCENTRO: str
+		:return: Array with probabilities (1: invert euclidean distance, 2: norme so that sum = 1)
+		:rtype: array
+	"""
+	
+	## This is not a clean probability calculation. This is just a calculation performed to put statistics and in case you want to filter the clusters!
+	## As K-Means assumes spherical cluster, the probability of a datapoint A belonging to cluster B is inversely proportional to the euclidean distance of A to the cluster center of B. 
+	## For each point x: 1. compute distance to all cluster centers. 2. invert the distances 3. norming so that the sum equals 1
+	
+	ListeToReturn = []
+	for n in DISTFROMCENTRO:
+		total = 0
+		for k in n:
+			total += 1/float(k)
+		for k in n:
+			ListeToReturn.append((1/float(k))/total)
+	
+	Dim = DISTFROMCENTRO.shape
+	return numpy.array(ListeToReturn).reshape(Dim[0],Dim[1])
+
+def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, OUT):
+	
+	"""
+		Compute MeanShift clusterization
+		
+		:param FILE: File name of coordinates
+		:type FILE: str
+		:param MAT: File name of allele coding
+		:type MAT: str
+		:param AXES: string of axis to work with (each axis should be separated by ":")
+		:type AXES: str
+		:param K: Quantile value used for bandwidth estimation
+		:type K: float
+		:param ITER: Number of iteration of random seed search
+		:type ITER: int
+		:param THREAD: Number of processors availables
+		:type THREAD: int
+		:param OUT: A string corresponding to prefix for output
+		:type OUT: str
+		:return: perform the k-mean clustering
+		:rtype: void
+	"""
+	
+	Matrix = CreateNumpyArray(FILE, AXES, K)
+	
+	bandwidth = estimate_bandwidth(Matrix[0], quantile=K, n_samples=10000, n_jobs=THREAD)
+	ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, n_jobs=THREAD).fit(Matrix[0])
+	labels = ms.labels_
+	cluster_centers = ms.cluster_centers_
+	
+	labels_unique = numpy.unique(labels)
+	n_clusters_ = len(labels_unique)
+	
+	print("number of estimated clusters : %d" % n_clusters_)
+	
+	# Calculating pseudoprobability to be in a groups
+	DistFromCentro = calc_euclid_dist(Matrix[0], cluster_centers)
+	Proba = CalcProbaToBeInGroup(DistFromCentro)
+	
+	Correspondance = numpy.arange(n_clusters_)
+	
+	sys.stdout.write('Printing files\n')
+	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Proba, OUT)
+
+def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
+	
+	"""
+		Compute K-mean clusterization
+		
+		:param FILE: File name of coordinates
+		:type FILE: str
+		:param MAT: File name of allele coding
+		:type MAT: str
+		:param AXES: string of axis to work with (each axis should be separated by ":")
+		:type AXES: str
+		:param K: Group number
+		:type K: int
+		:param ITER: Number of iteration of random seed search
+		:type ITER: int
+		:param THREAD: Number of processors availables
+		:type THREAD: int
+		:param OUT: A string corresponding to prefix for output
+		:type OUT: str
+		:return: perform the k-mean clustering
+		:rtype: void
+	"""
+	
+	Matrix = CreateNumpyArray(FILE, AXES, K)
+	
+	sys.stdout.write('Running K-mean\n')
+	
+	# Preparing n independent k-means
+	list_kmean = []
+	i = 0
+	list_job = []
+	while i < ITER:
+		list_job.append(['newKMean', K, Matrix[0], i])
+		i+=1
+	
+	# Running the N k-mean
+	pool = mp.Pool(processes=THREAD)
+	result = pool.map(main, list_job)
+	CentroidsIterPos = []
+	if 'error' in result:
+		raise ErrorValue ('Bug in kMean calculation.')
+	else:
+		for n in result:
+			for k in n:
+				CentroidsIterPos.append(k)
+	pool.close()
+	del result
+	
+	CentroidsIterPos = numpy.array(CentroidsIterPos)
+	
+	# print(CentroidsIterPos)
+	
+	# K-mean clustering of centroids and getting centroid positions
+	kmeans = KMeans(n_clusters=K, n_init=ITER, tol=1e-10, max_iter=10000, random_state=0, n_jobs=THREAD).fit(CentroidsIterPos)
+	Centroids = kmeans.cluster_centers_
+	CentroidsGroups = kmeans.labels_
+	
+	sys.stdout.write('K-mean on centroids\n')
+	# It is time to perform the last K-mean with Centroids of Centroids as start points
+	kmeans = KMeans(n_clusters=K, init=Centroids, n_init=1, tol=1e-10, max_iter=10000, random_state=0, n_jobs=THREAD).fit(Matrix[0])
+	labels = kmeans.labels_
+	FinalCentroids = kmeans.cluster_centers_
+	
+	sys.stdout.write('Calculating distance and pseudoprobabilities\n')
+	# Calculating pseudoprobability to be in a groups
+	DistFromCentro = calc_euclid_dist(Matrix[0], FinalCentroids)
+	Proba = CalcProbaToBeInGroup(DistFromCentro)
+	
+	# Indentification of which Centroids of centroids correspond to which FinalCentroid
+	Correspondance = kmeans.predict(Centroids)
+	if len(Correspondance) != K:
+		sys.stdout.write('Warning some centroids of centroids are clustered together in the final centroids data! The k-mean may not be appropriate for your data...')
+		
+	sys.stdout.write('Printing files\n')
+	ClusteringOutput(CentroidsGroups, CentroidsIterPos, FinalCentroids, Correspondance, labels, MAT, Matrix[1], Proba, OUT)
 
 def RecordChromToExclude(EXCLCHR):
 	
@@ -193,50 +489,6 @@ def RecordAlleleGrouping(MAT, GROUP_TO_WORK, CHR_TO_EXCLUDE, DICO_ALLELE, DICO_S
 	
 	sys.stdout.write("Done\n")
 
-def stop_err( msg ):
-	sys.stderr.write( "%s\n" % msg )
-	sys.exit()
-
-def run_job (cmd_line):
-	print (str(datetime.datetime.now())+" : "+cmd_line)
-	sys.stdout.flush()
-	try:
-		tmp = tempfile.NamedTemporaryFile().name
-		error = open(tmp, 'w')
-		proc = subprocess.Popen( args=cmd_line, shell=True, stderr=error)
-		returncode = proc.wait()
-		error.close()
-		error = open( tmp, 'rb' )
-		stderr = ''
-		buffsize = 1048576
-		try:
-			while True:
-				stderr += error.read( buffsize )
-				if not stderr or len( stderr ) % buffsize != 0:
-					break
-		except OverflowError:
-			pass
-		error.close()
-		os.system('rm '+tmp)
-		if returncode != 0:
-			raise Exception (stderr)
-	except Exception as e:
-		stop_err(str( e ) )
-	finally:
-		return returncode
-
-def worker(job):
-	codeError = 0
-	try:
-		run_job(job)
-	except Exception as e:
-		print ("There is an error :")
-		print ("\t"+extract_function_name())
-		print ("\t"+e.__doc__+" ("+e.message+" )\n")
-		codeError = 1
-	finally:
-		return 0
-
 def extract_function_name():
 	"""Extracts failing function name from Traceback
 
@@ -255,6 +507,10 @@ def main(JOB):
 		if JOB[0] == 'kMean':
 			result_main = kMean(JOB[1], JOB[2], JOB[3])
 			sys.stdout.write('Iteration : '+str(JOB[4])+' done\n')
+			sys.stdout.flush()
+		elif JOB[0] == 'newKMean':
+			RESULT_MAIN = KMeans(n_clusters=JOB[1], init='random', n_init=1, tol=1e-10, max_iter=10000, random_state=0, n_jobs=1).fit(JOB[2])
+			result_main = RESULT_MAIN.cluster_centers_
 			sys.stdout.flush()
 		else:
 			raise ErrorValue ('Unknown function name: '+str(JOB[0]))
@@ -3184,48 +3440,6 @@ def comb_ss_repet(liste, rest, liste_total, nb):
 			sub_list.append(rest[i])
 			comb_ss_repet(sub_list, rest, liste_total, nb-1)
 
-def TestMostProbable(PLOIDY, GROUP_TO_DRAW, DICO_EXP, DICO_OBS, WINDOW, SCORE_DIFF):
-
-	"""Calculate most probable genotype"""
-	
-	# creating the list of possible genotypes
-	liste_total = []
-	
-	# recording possible genotypes
-	list_group = list(GROUP_TO_DRAW)
-	# list_group.append('ungrouped')
-	comb([], list_group, PLOIDY, liste_total)
-	# print (list_group)
-	# print(liste_total)
-	# print (GROUP_TO_DRAW)
-	# print (DICO_OBS)
-	# print (DICO_EXP)
-	
-	# Testing possible genotypes
-	best_value = 0
-	second_best_value = 0
-	best_group = ['ungrouped' for i in range(PLOIDY)]
-	
-	for n in liste_total:
-		dico_count_group = {}
-		for group in list_group:
-			dico_count_group[group] = n.count(group)
-		
-		nb_ok = 0
-		for group in set(n):
-			nb_ok += min(DICO_OBS[group][dico_count_group[group]], DICO_EXP[group])
-		# print (n, nb_ok/float(WINDOW*2+1))
-		if best_value < nb_ok/float(WINDOW*2+1):
-			best_value = nb_ok/float(WINDOW*2+1)
-			best_group = n
-		elif second_best_value < nb_ok/float(WINDOW*2+1):
-			second_best_value = nb_ok/float(WINDOW*2+1)
-	
-	if best_value - second_best_value <= SCORE_DIFF:
-		best_group = ['ungrouped' for i in range(PLOIDY)]
-	print (best_group)
-	return best_group
-
 def MergeVcf(VCF, VCF2, COMP1, PREFIX):
 	
 	"""
@@ -3595,7 +3809,7 @@ def __main__():
 	parser.add_option( '',	'--vcf2',			dest='vcf2',		default=None,			help='A second vcf file. If COMPARE is passed in --type argument: can be used to compare two variant calling in two vcf file. [Default: %default]')
 	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
 	parser.add_option( '',	'--outgroup',		dest='outgroup',	default=None,			help='A one column file containing accession names that will not be used for filtering but will remain in the output file. [Default: %default]')
-	parser.add_option( '',	'--type',			dest='type',		default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP. [Default: %default]')
+	parser.add_option( '',	'--type',			dest='type',		default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST-Kmean, SNP_CLUST-MeanShift, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP. [Default: %default]')
 	parser.add_option( '',	'--fasta',			dest='fasta',		default=None,			help='A fasta file containing reference sequence. Not needed if standard vcf file (with sequence length). [Default: %default]')
 	parser.add_option( '',	'--gff3',			dest='gff3',		default=None,			help='A gff3 file containing gene annotation. [Default: %default]')
 	parser.add_option( '',	'--RmType',			dest='RmType',		default=None,			help='Variant status to filter out (several values can be passed in this case they should be separated by :). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
@@ -3617,6 +3831,7 @@ def __main__():
 	parser.add_option( '',	'--VarCoord',		dest='VarCoord',	default=None, 			help='The tabulated file of variables coordinates in new axis. (The --prefix + _variables_coordinates.tab file generated when runing this script with PCA type) [Default: %default]')
 	parser.add_option( '',	'--mat',			dest='mat',			default=None, 			help='The tabulated file containing variant allele encoded. (The --prefix + _matrix_4_PCA.tab file generated when runing this script with PCA type) [Default: %default]')
 	parser.add_option( '',	'--nGroup',			dest='nGroup',		default='2', 			help='Group number for the k-mean algorithm that will cluster variables (alleles) based on their coordinates. [Default: %default]')
+	parser.add_option( '',	'--quantile',		dest='quantile',	default='0.2', 			help='The quantile value to estimate de bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: %default]')
 	parser.add_option( '',	'--ExclChr',		dest='ExclChr',		default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
 	parser.add_option( '',	'--thread',			dest='thread',		default='1', 			help='Number of processor available. [Default: %default]')
 	parser.add_option( '',	'--iter',			dest='iter',		default='100', 			help='Parallele k-mean clustering attempt to try. [Default: %default]')
@@ -3626,6 +3841,8 @@ def __main__():
 
 	(options, args) = parser.parse_args()
 	
+	# draw_color_map()
+	# sys.exit()
 	
 	if options.type == None:
 		sys.exit('Please provide an analysis type to --type argument')
@@ -3693,12 +3910,21 @@ def __main__():
 		Draw2dPlot(options.VarCoord, options.dAxes, options.mat, options.group, options.dGroup, options.prefix)
 	
 	# Cluster SNP
-	if options.type == 'SNP_CLUST':
+	if options.type == 'SNP_CLUST-Kmean':
 		if options.dAxes == None:
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
 			sys.exit('Please provide a matrix file to --mat argument')
-		kMean_clust(options.VarCoord, options.dAxes, int(options.nGroup), options.mat, options.prefix, int(options.thread), int(options.iter))
+		# kMean_clust(options.VarCoord, options.dAxes, int(options.nGroup), options.mat, options.prefix, int(options.thread), int(options.iter))
+		NewKmean(options.VarCoord, options.mat, options.dAxes, int(options.nGroup), int(options.iter), int(options.thread), options.prefix)
+	
+	# Cluster SNP
+	if options.type == 'SNP_CLUST-MeanShift':
+		if options.dAxes == None:
+			sys.exit('Please provide value to --dAxes argument')
+		if options.mat == None:
+			sys.exit('Please provide a matrix file to --mat argument')
+		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.prefix)
 	
 	# Filtering on max grouping proportion
 	if options.type == 'FILTER_ON_MAX_GP_PROP':
