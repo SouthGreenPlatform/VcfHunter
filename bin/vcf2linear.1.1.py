@@ -48,6 +48,8 @@ import matplotlib.patches as mpatches
 from scipy.interpolate import spline
 from textwrap import wrap
 
+from scipy.stats import norm
+
 sys.stdout.write('modules loaded\n')
 
 def remove_values_from_list(the_list, val):
@@ -96,7 +98,7 @@ def Normal_prob(MU, MOY, SD):
 	k= 1/(SD * (math.sqrt(2*math.pi)))
 	u = (MU-MOY)/SD
 	p = k*math.exp(-0.5*u*u)
-	return round(p, 7)
+	return p
 
 def RecordChromToExclude(EXCLCHR):
 	
@@ -367,7 +369,97 @@ def DoTheHybrid(DICO_gp, CROSS, DICO_ACC_GP, DICO, NB_INDIVIDUALS):
 						DICO[simul_id][chr][pos]['grouping'].append(allele)
 		print(TheCross)
 
-def CalcProb(acc_to_draw, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, NB_INDIVIDUALS):
+def CalculateHybridProb(DICO_gp, DICO_ACC_GP, DICO, NB_INDIVIDUALS):
+
+	# recording position shared by all accessions
+	dic_pos = {}
+	for gp in DICO_ACC_GP:
+		for acc in DICO_ACC_GP[gp]:
+			for chr in DICO_gp[acc].keys():
+				if not(chr in dic_pos):
+					dic_pos[chr] = set(DICO_gp[acc][chr].keys())
+				else:
+					TempoSet = set(DICO_gp[acc][chr].keys())
+					dic_pos[chr].intersection_update(TempoSet)
+	
+	
+			
+	# For a simple verification (of bugs...)
+	TOTAL = 0
+	for gpcross in DICO_ACC_GP:
+		TOTAL += len(DICO_ACC_GP[gpcross])
+	
+	# Recording informations
+	for chr in dic_pos:
+		DICO[chr] = {}
+		for pos in dic_pos[chr]:
+			DICO[chr][pos] = {}
+			for gpcross in DICO_ACC_GP:
+				DICO[chr][pos][gpcross] = [0,0,0,0,0,0,0,0]
+				## [ P; Q; p; q; Pn;Qn;pn;qn] (P;Q;Pn;Qn ==> count, p;q;pn;qn ==> proportions, n ==> noise)
+				## [ 0; 1; 2; 3; 4 ;5 ;6 ;7 ]
+			for gpcross in DICO_ACC_GP:
+				for acc in DICO_ACC_GP[gpcross]:
+					group = DICO_gp[acc][chr][pos]['grouping']
+					for gp in group:
+						if gp == gpcross:
+							DICO[chr][pos][gpcross][0] += 1
+						else:
+							DICO[chr][pos][gpcross][1] += 1
+							if gp != 'NA':
+								DICO[chr][pos][gp][4] += 1
+						for noiseGp in DICO_ACC_GP:
+							if noiseGp != gpcross:
+								if gp != noiseGp:
+									DICO[chr][pos][noiseGp][5] += 1
+			for gpcross in DICO_ACC_GP:
+				DICO[chr][pos][gpcross][2] = float(DICO[chr][pos][gpcross][0])/(DICO[chr][pos][gpcross][0]+DICO[chr][pos][gpcross][1])
+				DICO[chr][pos][gpcross][3] = float(DICO[chr][pos][gpcross][1])/(DICO[chr][pos][gpcross][0]+DICO[chr][pos][gpcross][1])
+				DICO[chr][pos][gpcross][6] = float(DICO[chr][pos][gpcross][4])/(DICO[chr][pos][gpcross][4]+DICO[chr][pos][gpcross][5])
+				DICO[chr][pos][gpcross][7] = float(DICO[chr][pos][gpcross][5])/(DICO[chr][pos][gpcross][4]+DICO[chr][pos][gpcross][5])
+				
+				# Verification of bugs
+				if len(DICO_ACC_GP[gpcross])*2 != sum(DICO[chr][pos][gpcross][0:2]):
+					sys.exit('bug in '+gpcross+' count!!!')
+				elif (TOTAL - len(DICO_ACC_GP[gpcross]))*2 != sum(DICO[chr][pos][gpcross][4:6]):
+					sys.exit('bug in '+gpcross+' noise count!!!')
+
+def EstimateHybridValueFromSimulation(DICO_HYBRIDS, GROUPS, PLOIDY, CURRENT_POSITION, NB_INDIVIDUALS, CROSS_2_DO, DO_DICO_HYBRID, CHR):
+	for gp in GROUPS:
+		DICO_HYBRIDS[gp] = {}
+		for plo in range(PLOIDY):
+			DICO_HYBRIDS[gp]["H"+str(plo+1)] = []
+		DICO_HYBRIDS[gp]['noise'] = []
+	
+	gp_done = set()
+	for cross in CROSS_2_DO:
+		ind = 0
+		while ind < NB_INDIVIDUALS:
+			ind += 1
+			simul_id = ":".join(cross+[str(ind)])
+			SetCross = set(cross)
+			for gp in SetCross:
+				hybrid_count = count_allele(DO_DICO_HYBRID[simul_id][CHR], CURRENT_POSITION, GROUPS)
+				DICO_HYBRIDS[gp]["H"+str(cross.count(gp))].append(hybrid_count[gp])
+			for gp_noise in GROUPS:
+				if not(gp_noise in SetCross):
+					DICO_HYBRIDS[gp_noise]['noise'].append(hybrid_count[gp_noise])
+
+def EstimateHybridValueFromBinomial(GROUPS, DICO_HYBRIDS, PLOIDY, CURRENT_POSITION, DICO_HYBRID_MEAN_AND_VAR, CHR):
+	for gp in GROUPS:
+		DICO_HYBRIDS[gp] = {}
+		for plo in range(PLOIDY):
+			DICO_HYBRIDS[gp]["H"+str(plo+1)] = [0,0,0]
+			for position in CURRENT_POSITION:
+				DICO_HYBRIDS[gp]["H"+str(plo+1)][0] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][2]*(plo+1))
+				DICO_HYBRIDS[gp]["H"+str(plo+1)][1] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][2]*(plo+1)*DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][3])
+		
+		DICO_HYBRIDS[gp]['noise'] = [0,0,0]
+		for position in CURRENT_POSITION:
+			DICO_HYBRIDS[gp]['noise'][0] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][6]*PLOIDY)
+			DICO_HYBRIDS[gp]['noise'][1] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][6]*(plo+1)*DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][7])
+
+def CalcProbFromSimulated(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, NB_INDIVIDUALS, DICO_HYBRID_MEAN_AND_VAR, PROPORTION):
 	
 	# For header display
 	HeaderDiplay = []
@@ -391,122 +483,424 @@ def CalcProb(acc_to_draw, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cro
 	for n in groups:
 		HeaderDiplay.append("Prob-noise-"+n)
 	
-	for acc in acc_to_draw:
-		# Working chromosome per chromosome
-		for chr in dico_prop[acc]:
-			outfile = open(PREFIX+'/'+PREFIX+'_'+acc+'_'+chr+'.tab', 'w')
-			outfile.write('\t'.join(['#CHROM','POS']+HeaderDiplay)+'\n')
-			
-			current_position = []
-			current_hetero = []
-			list_position = sorted(list(dico_prop[acc][chr].keys()))
-			for pos in list_position:
-				current_position.append(pos)
-				current_hetero.append(dico_prop[acc][chr][pos]['hetero'])
-				if len(current_position) == (WINDOW*2 + 1):
+	# Working chromosome per chromosome
+	for chr in dico_prop[ACC]:
+		outfile = open(PREFIX+'/'+PREFIX+'_'+ACC+'_'+chr+'.tab', 'w')
+		outfile.write('\t'.join(['#CHROM','POS']+HeaderDiplay)+'\n')
+		
+		current_position = []
+		current_hetero = []
+		list_position = sorted(list(dico_prop[ACC][chr].keys()))
+		for pos in list_position:
+			current_position.append(pos)
+			current_hetero.append(dico_prop[ACC][chr][pos]['hetero'])
+			if len(current_position) == (WINDOW*2 + 1):
 				
-					# We need to count for each group the number of grouped allele
-					acc_gp_count = count_allele(dico_prop[acc][chr], current_position, groups)
+				# We need to count for each group the number of grouped allele
+				acc_gp_count = count_allele(dico_prop[ACC][chr], current_position, groups)
+				
+				# We need to estimate values on simulated accessions
+				dico_hybrids = {}
+				EstimateHybridValueFromSimulation(dico_hybrids, groups, PLOIDY, current_position, NB_INDIVIDUALS, cross_2_do, do_dico_hybrid, chr)
+				
+				
+				# Calculating statistics
+				dico_stat = {}
+				mot_final = []
+				for gp in groups:
+					dico_stat[gp] = {}
+					dico_stat[gp]['count'] = acc_gp_count[gp]
+					mot_final.append(dico_stat[gp]['count'])
 					
-					# We need to estimate values on simulated accessions
-					dico_hybrids = {}
-					for gp in groups:
-						dico_hybrids[gp] = {}
-						for plo in range(PLOIDY):
-							dico_hybrids[gp]["H"+str(plo+1)] = []
-						dico_hybrids[gp]['noise'] = []
-					
-					gp_done = set()
-					for cross in cross_2_do:
-						ind = 0
-						while ind < NB_INDIVIDUALS:
-							ind += 1
-							simul_id = ":".join(cross+[str(ind)])
-							SetCross = set(cross)
-							for gp in SetCross:
-								hybrid_count = count_allele(do_dico_hybrid[simul_id][chr], current_position, groups)
-								dico_hybrids[gp]["H"+str(cross.count(gp))].append(hybrid_count[gp])
-							for gp_noise in groups:
-								if not(gp_noise in SetCross):
-									dico_hybrids[gp_noise]['noise'].append(hybrid_count[gp_noise])
-					
-					# Calculating statistics
-					dico_stat = {}
-					mot_final = []
-					for gp in groups:
-						dico_stat[gp] = {}
-						dico_stat[gp]['count'] = acc_gp_count[gp]
-						mot_final.append(dico_stat[gp]['count'])
-					
-					# Calculating expected values
-					for i in range(PLOIDY):
-						sd_liste = []
-						for gp in groups:
-							dico_stat[gp]["Loc-mu-H"+str(i+1)] = moyenne(dico_hybrids[gp]["H"+str(i+1)])
-							mot_final.append(dico_stat[gp]["Loc-mu-H"+str(i+1)])
-						for gp in groups:
-							dico_stat[gp]["Loc-sd-H"+str(i+1)] = ecart_type(dico_hybrids[gp]["H"+str(i+1)])
-							sd_liste.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
-							mot_final.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
-						dico_stat["Loc-max-sd-H"+str(i+1)] = max(sd_liste)
-						mot_final.append(dico_stat["Loc-max-sd-H"+str(i+1)])
-						
-					# Calculating heterozygosity value
-					dico_stat["hetero"] = sum(current_hetero)/len(current_hetero)
-					mot_final.append(dico_stat["hetero"])
-					
-					# Calculating probabilities
-					for i in range(PLOIDY):
-						for gp in groups:
-							maxi_sd = dico_stat["Loc-max-sd-H"+str(i+1)]
-							mu = dico_stat[gp]["Loc-mu-H"+str(i+1)]
-							mini = mu-maxi_sd
-							maxi = mu+maxi_sd
-							value = dico_stat[gp]['count']
-							if value == 0:
-								dico_stat[gp]["Prob-H"+str(i+1)] = 0
-							elif value > maxi:
-								dico_stat[gp]["Prob-H"+str(i+1)] =1
-							elif value < mini:
-								dico_stat[gp]["Prob-H"+str(i+1)] = Normal_prob(value, mini, maxi_sd)/Normal_prob(mini, mini, maxi_sd)
-							else:
-								dico_stat[gp]["Prob-H"+str(i+1)] = 1
-							mot_final.append(dico_stat[gp]["Prob-H"+str(i+1)])
-					
-					# Calculating mean group noise
-					for gp in groups:
-						dico_stat[gp]["Loc-mu-noise"] = moyenne(dico_hybrids[gp]['noise'])
-						mot_final.append(dico_stat[gp]["Loc-mu-noise"])
-						
-					# Calculating sd group noise
+				# Calculating expected values
+				for i in range(PLOIDY):
 					sd_liste = []
 					for gp in groups:
-						dico_stat[gp]["Loc-sd-noise"] = ecart_type(dico_hybrids[gp]['noise'])
-						mot_final.append(dico_stat[gp]["Loc-sd-noise"])
-						sd_liste.append(dico_stat[gp]["Loc-sd-noise"])
-					dico_stat["Loc-max-sd-noise"] = max(sd_liste)
-					mot_final.append(dico_stat["Loc-max-sd-noise"])
-					
-					# Calculating Noise probabilities
+						dico_stat[gp]["Loc-mu-H"+str(i+1)] = moyenne(dico_hybrids[gp]["H"+str(i+1)])
+						mot_final.append(dico_stat[gp]["Loc-mu-H"+str(i+1)])
 					for gp in groups:
-						maxi_sd = dico_stat["Loc-max-sd-noise"]
-						mu = dico_stat[gp]["Loc-mu-noise"]
+						if PROPORTION:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = dico_stat[gp]["Loc-mu-H"+str(i+1)]*PROPORTION
+						else:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = ecart_type(dico_hybrids[gp]["H"+str(i+1)])
+						sd_liste.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+						mot_final.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+					dico_stat["Loc-max-sd-H"+str(i+1)] = max(sd_liste)
+					mot_final.append(dico_stat["Loc-max-sd-H"+str(i+1)])
+				
+				# Calculating heterozygosity value
+				dico_stat["hetero"] = sum(current_hetero)/len(current_hetero)
+				mot_final.append(dico_stat["hetero"])
+				
+				# Calculating probabilities
+				for i in range(PLOIDY):
+					for gp in groups:
+						maxi_sd = dico_stat["Loc-max-sd-H"+str(i+1)]
+						mu = dico_stat[gp]["Loc-mu-H"+str(i+1)]
 						mini = mu-maxi_sd
 						maxi = mu+maxi_sd
 						value = dico_stat[gp]['count']
-						if value < mini:
-							dico_stat[gp]["Prob-noise"] = 1
+						if value == 0:
+							dico_stat[gp]["Prob-H"+str(i+1)] = 0
 						elif value > maxi:
-							dico_stat[gp]["Prob-noise"] = Normal_prob(value, maxi, maxi_sd)/Normal_prob(maxi, maxi, maxi_sd)
+							dico_stat[gp]["Prob-H"+str(i+1)] =1
+						elif value < mini:
+							dico_stat[gp]["Prob-H"+str(i+1)] = round(Normal_prob(value, mini, maxi_sd)/Normal_prob(mini, mini, maxi_sd), 7)
 						else:
-							dico_stat[gp]["Prob-noise"] = 1
-						mot_final.append(dico_stat[gp]["Prob-noise"])
+							dico_stat[gp]["Prob-H"+str(i+1)] = 1
+						mot_final.append(dico_stat[gp]["Prob-H"+str(i+1)])
+				
+				# Calculating mean group noise
+				for gp in groups:
+					dico_stat[gp]["Loc-mu-noise"] = moyenne(dico_hybrids[gp]['noise'])
+					mot_final.append(dico_stat[gp]["Loc-mu-noise"])
+				
+				# Calculating sd group noise
+				sd_liste = []
+				for gp in groups:
+					if PROPORTION:
+						dico_stat[gp]["Loc-sd-noise"] = dico_stat[gp]["Loc-mu-noise"]*PROPORTION
+					else:
+						dico_stat[gp]["Loc-sd-noise"] = ecart_type(dico_hybrids[gp]['noise'])
+					mot_final.append(dico_stat[gp]["Loc-sd-noise"])
+					sd_liste.append(dico_stat[gp]["Loc-sd-noise"])
+				dico_stat["Loc-max-sd-noise"] = max(sd_liste)
+				mot_final.append(dico_stat["Loc-max-sd-noise"])
+				
+				# Calculating Noise probabilities
+				for gp in groups:
+					maxi_sd = dico_stat["Loc-max-sd-noise"]
+					mu = dico_stat[gp]["Loc-mu-noise"]
+					mini = mu-maxi_sd
+					maxi = mu+maxi_sd
+					value = dico_stat[gp]['count']
+					if value < mini:
+						dico_stat[gp]["Prob-noise"] = 1
+					elif value > maxi:
+						dico_stat[gp]["Prob-noise"] = Normal_prob(value, maxi, maxi_sd)/Normal_prob(maxi, maxi, maxi_sd)
+					else:
+						dico_stat[gp]["Prob-noise"] = 1
+					mot_final.append(dico_stat[gp]["Prob-noise"])
+				
+				outfile.write('\t'.join([chr,str(current_position[WINDOW])]+list(map(str, mot_final)))+'\n')
+				outfile.flush()
+				
+				del current_hetero[0]
+				del current_position[0]
+		outfile.close()
+	return 0
+
+def CalcProbFromBinomial(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, NB_INDIVIDUALS, DICO_HYBRID_MEAN_AND_VAR, PROPORTION):
+	
+	# For header display
+	HeaderDiplay = []
+	for n in groups:
+		HeaderDiplay.append(n)
+	for i in range(PLOIDY):
+		for n in groups:
+			HeaderDiplay.append("Loc-mu-H"+str(i+1)+"-"+n)
+		for n in groups:
+			HeaderDiplay.append("Loc-sd-H"+str(i+1)+"-"+n)
+		HeaderDiplay.append("Loc-max-sd-H"+str(i+1))
+	HeaderDiplay.append('hetero')
+	for i in range(PLOIDY):
+		for n in groups:
+			HeaderDiplay.append("Prob-H"+str(i+1)+"-"+n)
+	for n in groups:
+		HeaderDiplay.append("Loc-mu-noise-"+n)
+	for n in groups:
+		HeaderDiplay.append("Loc-sd-noise-"+n)
+	HeaderDiplay.append("Loc-max-sd-noise")
+	for n in groups:
+		HeaderDiplay.append("Prob-noise-"+n)
+	
+	# Working chromosome per chromosome
+	for chr in dico_prop[ACC]:
+		outfile = open(PREFIX+'/'+PREFIX+'_'+ACC+'_'+chr+'.tab', 'w')
+		outfile.write('\t'.join(['#CHROM','POS']+HeaderDiplay)+'\n')
+		
+		current_position = []
+		current_hetero = []
+		list_position = sorted(list(dico_prop[ACC][chr].keys()))
+		for pos in list_position:
+			current_position.append(pos)
+			current_hetero.append(dico_prop[ACC][chr][pos]['hetero'])
+			if len(current_position) == (WINDOW*2 + 1):
+				
+				# We need to count for each group the number of grouped allele
+				acc_gp_count = count_allele(dico_prop[ACC][chr], current_position, groups)
+				
+				# We need to estimate values on simulated accessions
+				dico_hybrids_bis = {}
+				EstimateHybridValueFromBinomial(groups, dico_hybrids_bis, PLOIDY, current_position, DICO_HYBRID_MEAN_AND_VAR, chr)
+				
+				# Calculating statistics
+				dico_stat = {}
+				mot_final = []
+				for gp in groups:
+					dico_stat[gp] = {}
+					dico_stat[gp]['count'] = acc_gp_count[gp]
+					mot_final.append(dico_stat[gp]['count'])
 					
-					outfile.write('\t'.join([chr,str(current_position[WINDOW])]+list(map(str, mot_final)))+'\n')
-					outfile.flush()
-					del current_hetero[0]
-					del current_position[0]
-			outfile.close()
+				# Calculating expected values
+				for i in range(PLOIDY):
+					sd_liste = []
+					for gp in groups:
+						dico_stat[gp]["Loc-mu-H"+str(i+1)] = dico_hybrids_bis[gp]["H"+str(i+1)][0]
+						mot_final.append(dico_stat[gp]["Loc-mu-H"+str(i+1)])
+					for gp in groups:
+						if PROPORTION:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = dico_stat[gp]["Loc-mu-H"+str(i+1)]*PROPORTION
+						else:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = math.sqrt(dico_hybrids_bis[gp]["H"+str(i+1)][1])
+						sd_liste.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+						mot_final.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+					dico_stat["Loc-max-sd-H"+str(i+1)] = max(sd_liste)
+					mot_final.append(dico_stat["Loc-max-sd-H"+str(i+1)])
+					
+				# Calculating heterozygosity value
+				dico_stat["hetero"] = sum(current_hetero)/len(current_hetero)
+				mot_final.append(dico_stat["hetero"])
+				
+				# Calculating probabilities
+				for i in range(PLOIDY):
+					for gp in groups:
+						maxi_sd = dico_stat["Loc-max-sd-H"+str(i+1)]
+						mu = dico_stat[gp]["Loc-mu-H"+str(i+1)]
+						mini = mu-maxi_sd
+						maxi = mu+maxi_sd
+						value = dico_stat[gp]['count']
+						if value == 0:
+							dico_stat[gp]["Prob-H"+str(i+1)] = 0
+						elif value > maxi:
+							dico_stat[gp]["Prob-H"+str(i+1)] =1
+						elif value < mini:
+							dico_stat[gp]["Prob-H"+str(i+1)] = round(Normal_prob(value, mini, maxi_sd)/Normal_prob(mini, mini, maxi_sd), 7)
+						else:
+							dico_stat[gp]["Prob-H"+str(i+1)] = 1
+						mot_final.append(dico_stat[gp]["Prob-H"+str(i+1)])
+						
+				# Calculating mean group noise
+				for gp in groups:
+					dico_stat[gp]["Loc-mu-noise"] = dico_hybrids_bis[gp]['noise'][0]
+					mot_final.append(dico_stat[gp]["Loc-mu-noise"])
+					
+				# Calculating sd group noise
+				sd_liste = []
+				for gp in groups:
+					if PROPORTION:
+						dico_stat[gp]["Loc-sd-noise"] = dico_stat[gp]["Loc-mu-noise"]*PROPORTION
+					else:
+						dico_stat[gp]["Loc-sd-noise"] = math.sqrt(dico_hybrids_bis[gp]['noise'][1])
+					mot_final.append(dico_stat[gp]["Loc-sd-noise"])
+					sd_liste.append(dico_stat[gp]["Loc-sd-noise"])
+				dico_stat["Loc-max-sd-noise"] = max(sd_liste)
+				mot_final.append(dico_stat["Loc-max-sd-noise"])
+				
+				# Calculating Noise probabilities
+				for gp in groups:
+					maxi_sd = dico_stat["Loc-max-sd-noise"]
+					mu = dico_stat[gp]["Loc-mu-noise"]
+					mini = mu-maxi_sd
+					maxi = mu+maxi_sd
+					value = dico_stat[gp]['count']
+					if value < mini:
+						dico_stat[gp]["Prob-noise"] = 1
+					elif value > maxi:
+						dico_stat[gp]["Prob-noise"] = Normal_prob(value, maxi, maxi_sd)/Normal_prob(maxi, maxi, maxi_sd)
+					else:
+						dico_stat[gp]["Prob-noise"] = 1
+					mot_final.append(dico_stat[gp]["Prob-noise"])
+					
+				outfile.write('\t'.join([chr,str(current_position[WINDOW])]+list(map(str, mot_final)))+'\n')
+				outfile.flush()
+				
+				del current_hetero[0]
+				del current_position[0]
+				# sys.exit()
+		outfile.close()
+	return 0
+
+def CalcProb(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, NB_INDIVIDUALS, DICO_HYBRID_MEAN_AND_VAR, PROPORTION):
+	
+	# For header display
+	HeaderDiplay = []
+	for n in groups:
+		HeaderDiplay.append(n)
+	for i in range(PLOIDY):
+		for n in groups:
+			HeaderDiplay.append("Loc-mu-H"+str(i+1)+"-"+n)
+		for n in groups:
+			HeaderDiplay.append("Loc-sd-H"+str(i+1)+"-"+n)
+		HeaderDiplay.append("Loc-max-sd-H"+str(i+1))
+	HeaderDiplay.append('hetero')
+	for i in range(PLOIDY):
+		for n in groups:
+			HeaderDiplay.append("Prob-H"+str(i+1)+"-"+n)
+	for n in groups:
+		HeaderDiplay.append("Loc-mu-noise-"+n)
+	for n in groups:
+		HeaderDiplay.append("Loc-sd-noise-"+n)
+	HeaderDiplay.append("Loc-max-sd-noise")
+	for n in groups:
+		HeaderDiplay.append("Prob-noise-"+n)
+	
+	# Working chromosome per chromosome
+	for chr in dico_prop[ACC]:
+		outfile = open(PREFIX+'/'+PREFIX+'_'+ACC+'_'+chr+'.tab', 'w')
+		outfile.write('\t'.join(['#CHROM','POS']+HeaderDiplay)+'\n')
+		
+		current_position = []
+		current_hetero = []
+		list_position = sorted(list(dico_prop[ACC][chr].keys()))
+		for pos in list_position:
+			current_position.append(pos)
+			current_hetero.append(dico_prop[ACC][chr][pos]['hetero'])
+			if len(current_position) == (WINDOW*2 + 1):
+				
+				tps1 = time.time()
+				# We need to count for each group the number of grouped allele
+				acc_gp_count = count_allele(dico_prop[ACC][chr], current_position, groups)
+				tps2 = time.time()
+				print('temp bloc1:', tps2-tps1)
+				
+				
+				tps1 = time.time()
+				# We need to estimate values on simulated accessions
+				dico_hybrids = {}
+				EstimateHybridValueFromSimulation(dico_hybrids, groups, PLOIDY, current_position, NB_INDIVIDUALS, cross_2_do, do_dico_hybrid, chr)
+				tps2 = time.time()
+				print('temp bloc2:', tps2-tps1)
+				
+				
+				###############################################################################################################
+				
+				tps1 = time.time()
+				# We need to estimate values on simulated accessions
+				dico_hybrids_bis = {}
+				EstimateHybridValueFromBinomial(groups, dico_hybrids_bis, PLOIDY, current_position, DICO_HYBRID_MEAN_AND_VAR, chr)
+				tps2 = time.time()
+				print('temp bloc2bis:', tps2-tps1)
+				
+				#--------------------------------------------------------------------------------------------------------------
+				
+				
+				tps1 = time.time()
+				# Calculating statistics
+				dico_stat = {}
+				mot_final = []
+				for gp in groups:
+					dico_stat[gp] = {}
+					dico_stat[gp]['count'] = acc_gp_count[gp]
+					mot_final.append(dico_stat[gp]['count'])
+				tps2 = time.time()
+				print('temp bloc3:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating expected values
+				for i in range(PLOIDY):
+					sd_liste = []
+					for gp in groups:
+						dico_stat[gp]["Loc-mu-H"+str(i+1)] = moyenne(dico_hybrids[gp]["H"+str(i+1)])
+						mot_final.append(dico_stat[gp]["Loc-mu-H"+str(i+1)])
+					for gp in groups:
+						if PROPORTION:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = dico_stat[gp]["Loc-mu-H"+str(i+1)]*PROPORTION
+						else:
+							dico_stat[gp]["Loc-sd-H"+str(i+1)] = ecart_type(dico_hybrids[gp]["H"+str(i+1)])
+						sd_liste.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+						mot_final.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+					for gp in groups:
+						print(gp, str(i+1), dico_stat[gp]["Loc-mu-H"+str(i+1)], dico_stat[gp]["Loc-sd-H"+str(i+1)], dico_hybrids_bis[gp]["H"+str(i+1)][0], math.sqrt(dico_hybrids_bis[gp]["H"+str(i+1)][1]), dico_hybrids_bis[gp]["H"+str(i+1), dico_hybrids_bis[gp]["H"+str(i+1)][0]])
+					dico_stat["Loc-max-sd-H"+str(i+1)] = max(sd_liste)
+					mot_final.append(dico_stat["Loc-max-sd-H"+str(i+1)])
+				tps2 = time.time()
+				print('temp bloc4:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating heterozygosity value
+				dico_stat["hetero"] = sum(current_hetero)/len(current_hetero)
+				mot_final.append(dico_stat["hetero"])
+				tps2 = time.time()
+				print('temp bloc5:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating probabilities
+				for i in range(PLOIDY):
+					for gp in groups:
+						maxi_sd = dico_stat["Loc-max-sd-H"+str(i+1)]
+						mu = dico_stat[gp]["Loc-mu-H"+str(i+1)]
+						mini = mu-maxi_sd
+						maxi = mu+maxi_sd
+						value = dico_stat[gp]['count']
+						if value == 0:
+							dico_stat[gp]["Prob-H"+str(i+1)] = 0
+						elif value > maxi:
+							dico_stat[gp]["Prob-H"+str(i+1)] =1
+						elif value < mini:
+							dico_stat[gp]["Prob-H"+str(i+1)] = round(Normal_prob(value, mini, maxi_sd)/Normal_prob(mini, mini, maxi_sd), 7)
+						else:
+							dico_stat[gp]["Prob-H"+str(i+1)] = 1
+						mot_final.append(dico_stat[gp]["Prob-H"+str(i+1)])
+				tps2 = time.time()
+				print('temp bloc6:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating mean group noise
+				for gp in groups:
+					dico_stat[gp]["Loc-mu-noise"] = moyenne(dico_hybrids[gp]['noise'])
+					mot_final.append(dico_stat[gp]["Loc-mu-noise"])
+				tps2 = time.time()
+				print('temp bloc7:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating sd group noise
+				sd_liste = []
+				for gp in groups:
+					if PROPORTION:
+						dico_stat[gp]["Loc-sd-noise"] = dico_stat[gp]["Loc-mu-noise"]*PROPORTION
+					else:
+						dico_stat[gp]["Loc-sd-noise"] = ecart_type(dico_hybrids[gp]['noise'])
+					mot_final.append(dico_stat[gp]["Loc-sd-noise"])
+					sd_liste.append(dico_stat[gp]["Loc-sd-noise"])
+				for gp in groups:
+					print('noise', gp, str(i+1), dico_stat[gp]["Loc-mu-noise"], dico_stat[gp]["Loc-sd-noise"], dico_hybrids_bis[gp]['noise'][0], math.sqrt(dico_hybrids_bis[gp]['noise'][1]), dico_hybrids_bis[gp]['noise'])
+				dico_stat["Loc-max-sd-noise"] = max(sd_liste)
+				mot_final.append(dico_stat["Loc-max-sd-noise"])
+				tps2 = time.time()
+				print('temp bloc8:', tps2-tps1)
+				
+				tps1 = time.time()
+				# Calculating Noise probabilities
+				for gp in groups:
+					maxi_sd = dico_stat["Loc-max-sd-noise"]
+					mu = dico_stat[gp]["Loc-mu-noise"]
+					mini = mu-maxi_sd
+					maxi = mu+maxi_sd
+					value = dico_stat[gp]['count']
+					if value < mini:
+						dico_stat[gp]["Prob-noise"] = 1
+					elif value > maxi:
+						dico_stat[gp]["Prob-noise"] = Normal_prob(value, maxi, maxi_sd)/Normal_prob(maxi, maxi, maxi_sd)
+					else:
+						dico_stat[gp]["Prob-noise"] = 1
+					mot_final.append(dico_stat[gp]["Prob-noise"])
+				tps2 = time.time()
+				print('temp bloc9:', tps2-tps1)
+				
+				tps1 = time.time()
+				outfile.write('\t'.join([chr,str(current_position[WINDOW])]+list(map(str, mot_final)))+'\n')
+				outfile.flush()
+				tps2 = time.time()
+				print('temp bloc10:', tps2-tps1)
+				
+				tps1 = time.time()
+				del current_hetero[0]
+				del current_position[0]
+				tps2 = time.time()
+				print('temp bloc11:', tps2-tps1)
+				# sys.exit()
+		outfile.close()
 
 def get_color(GCOL, GROUP_TO_DRAW, dico_color):
 	if GCOL == None:
@@ -978,7 +1372,7 @@ def Record_data(GROUPS, ACC_TO_DRAW, DIC_CHR, PLOIDY, PREFIX, DICO2DRAW):
 					DICO2DRAW[acc][chr][n]['max'+str(i+1)].append(DICO2DRAW[acc][chr][n]['max'+str(i+1)][-1])
 					DICO2DRAW[acc][chr][n]['Prob'+str(i+1)].append(DICO2DRAW[acc][chr][n]['Prob'+str(i+1)][-1])
 
-def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY):
+def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY, THREAD, TYPE, PROPORTION):
 	
 	"""
 		Identify genome structure
@@ -1001,6 +1395,12 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY):
 		:type GCOL: str
 		:param PLOIDY: Accessions ploidy level
 		:type PLOIDY: int
+		:param THREAD: Number of processors available
+		:type THREAD: int
+		:param TYPE: Type of probability calculation
+		:type TYPE: str
+		:param PROPORTION: Proportion of the expected value to define the probabilities
+		:type PROPORTION: flaot
 		:return: Draw circos picture and return a bloc file identifying genome structure.
 		:rtype: void
 	"""
@@ -1031,7 +1431,7 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY):
 	
 	# Recording hybrid cross to perform
 	cross_2_do = do_cross(dico_acc_gp, PLOIDY)
-	# print (cross_2_do)
+	print (cross_2_do)
 	
 	# recording chromosomes to work with
 	dic_chr = Get_chr_size(VCF)
@@ -1061,11 +1461,27 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY):
 	# Creating the hybrids
 	print ("Creating hybrids")
 	do_dico_hybrid = {}
-	DoTheHybrid(dico_prop, cross_2_do, dico_acc_gp, do_dico_hybrid, nb_individuals)
+	dico_hybrid_mean_and_var = {}
+	if TYPE == "Simul":
+		DoTheHybrid(dico_prop, cross_2_do, dico_acc_gp, do_dico_hybrid, nb_individuals)
+	elif TYPE == "Binom":
+		CalculateHybridProb(dico_prop, dico_acc_gp, dico_hybrid_mean_and_var, nb_individuals)
+	
+	# sys.exit()
 	
 	# Working accession per accession
 	print("Calculating probabilities")
-	CalcProb(acc_to_draw, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals)
+	listJobs = []
+	for acc in acc_to_draw:
+		# CalcProb(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
+		# CalcProbFromBinomial(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
+		listJobs.append([TYPE, acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION])
+	pool = mp.Pool(processes=THREAD)
+	results = pool.map(run_mutithread, listJobs)
+	for n in results:
+		if n != 0:
+			sys.stdout.write(str(n)+'\n')
+			sys.stdout.flush()
 	
 	# We need to record data probabilities
 	print ("Recording informations for drawing")
@@ -1077,20 +1493,41 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY):
 		for chr in dic_chr:
 			draw_plot(dico2draw, PREFIX, GCOL, sorted(groups), acc, chr, dic_chr[chr], PLOIDY)
 
+def run_mutithread(job):
+	
+	try:
+		if job[0] == "Simul":
+			rslt = CalcProbFromSimulated(job[1],job[2],job[3],job[4],job[5],job[6], job[7], job[8], job[9], job[10], job[11])
+		elif job[0] == "Binom":
+			rslt = CalcProbFromBinomial(job[1],job[2],job[3],job[4],job[5],job[6], job[7], job[8], job[9], job[10], job[11])
+		else:
+			raise ErrorValue ('Unknown function name: '+str(job[0]))
+	except Exception as e:
+		print (e)
+		rslt = 1
+	finally:
+		return rslt
 
 def __main__():
 	#Parse Command Line
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
 	# Wrapper options. 
-	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
-	parser.add_option( '',	'--mat',			dest='mat',			default=None,			help='Grouping information file. [Default: %default]')
-	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
-	parser.add_option( '',	'--namesH',			dest='namesH',		default=None,			help='A one column file containing accession names used to simulate populations. [Default: %default]')
-	parser.add_option( '',	'--prefix',			dest='prefix',		default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
-	parser.add_option( '',	'--chr',			dest='chr',			default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
-	parser.add_option( '',	'--win',			dest='win',			default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
-	parser.add_option( '',	'--gcol',			dest='gcol',		default=None, 			help='Group color. [Default: %default]')
-	parser.add_option( '',	'--ploidy',			dest='ploidy',		default='2', 			help='Ploidy level. Possible values: 2, 3 [Default: %default]')
+	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
+	parser.add_option( '-m',	'--mat',			dest='mat',			default=None,			help='Grouping information file. [Default: %default]')
+	parser.add_option( '-n',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
+	parser.add_option( '-N',	'--namesH',			dest='namesH',		default=None,			help='A one column file containing accession names used to simulate populations. [Default: %default]')
+	parser.add_option( '-c',	'--chr',			dest='chr',			default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
+	parser.add_option( '-w',	'--win',			dest='win',			default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
+	parser.add_option( '-g',	'--gcol',			dest='gcol',		default=None, 			help='Group color. [Default: %default]')
+	parser.add_option( '-P',	'--ploidy',			dest='ploidy',		default='2', 			help='Ploidy level. Possible values: 2, 3 [Default: %default]')
+	parser.add_option( '-t',	'--thread',			dest='thread',		default='1',			help='Max number of accessions treated at the same time (integer), [default: %default]')
+	parser.add_option( '-T',	'--type',			dest='type',		default='Binom',		help='Type of estimation performed: "Simul", "Binom". If "Simul", a total of 100 individuals are simulated for '
+	'each combinations of haplotype and mean values and sd values are estimated based on these simulation. If "Binom", mean value is calculated as the sum of binomial mean at each point (exact estimator) and '
+	'sd value is estimated as sqrt(sum variance at each point). This is not the exact sd but the analysis is a lot more faster! If you do not trust this sd estimation, you can choose to change this estimator '
+	' by filling a value between ]0,1] to --prop parameter. In this case, the program will use the maximal_expected_value*prop_argument instead of using the maximal sd observed for all groups for probability '
+	'calculation [default: %default]')
+	parser.add_option( '-d',	'--prop',			dest='prop',		default='0',			help='Type of analysis performed: "Simul", "Binom" [default: %default]')
+	parser.add_option( '-p',	'--prefix',			dest='prefix',		default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
 
 	(options, args) = parser.parse_args()
 	
@@ -1104,6 +1541,6 @@ def __main__():
 		sys.exit('Please provide a namesH file to --namesH argument')
 	if options.gcol == None:
 		sys.exit('Please provide a gcol file to --gcol argument')
-	CalcGroupProp(options.vcf, options.names, options.namesH, options.prefix, options.chr, int(options.win), options.mat, options.gcol, int(options.ploidy))
+	CalcGroupProp(options.vcf, options.names, options.namesH, options.prefix, options.chr, int(options.win), options.mat, options.gcol, int(options.ploidy), int(options.thread), options.type, float(options.prop))
 		
 if __name__ == "__main__": __main__()

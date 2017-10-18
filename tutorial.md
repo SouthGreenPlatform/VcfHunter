@@ -571,8 +571,8 @@ The output should look like this:
 This Figure represent the centroids location. Colors may not be the same when you run the analysis because the color attribution
  is random.
 
-
 Visualization of the allele grouping can be done as followed:
+
 ~~~
 python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
 ~~~
@@ -627,6 +627,7 @@ python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/
 ~~~
 
 The output should look like this:
+
 ~~~
 loading modules
 modules loaded
@@ -658,6 +659,7 @@ python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/
 ~~~
 
 The output should look like this:
+
 ~~~
 loading modules
 modules loaded
@@ -774,7 +776,7 @@ This figure showed the impact of the ancestral accession sampling on the simulat
 Create a file to match allele groups names with accessions acestral groups:
 
 ~~~
-grep sample ../data/config/AncestryInfo.tab | sed 's/X1/g1/' | sed 's/Y1/g0/' | sed 's/Z1/g3/' | grep -v 'UN' > ancestor.gp
+grep sample ../data/config/AncestryInfo.tab | sed 's/X1/g1/' | sed 's/Y1/g2/' | sed 's/Z1/g3/' | grep -v 'UN' > ancestor.gp
 ~~~
 
 **Be carreful, as the group attribution is random, you will have to check to which group (X1, Y1 and Z1) correspond the allele
@@ -792,17 +794,17 @@ Several output are generated in the ***Painting*** folder. For each accessions n
  to the following nomenclature ***prefix\_accessionName\_chr.tab*** is generated. This file record, for each allele at the center
  of the window of 201 (--win 100 means a window of 100 alleles before and after the considered allele), the number of counted grouped alleles
  in the accession for each groups (g1, g2, g3), the expected
- grouped alleles in case of only one haplotype (**H1**) of the considered group is expected (Loc-mu-H1-g3, Loc-mu-H1-g1, Loc-mu-H1-g0), the
- corresponding standard deviation value (Loc-sd-H1-g3, Loc-sd-H1-g1, Loc-sd-H1-g0) and the maximal standard deviation retained (Loc-max-sd-H1).
+ grouped alleles in case of only one haplotype (**H1**) of the considered group is expected (Loc-mu-H1-g3, Loc-mu-H1-g1, Loc-mu-H1-g2), the
+ corresponding standard deviation value (Loc-sd-H1-g3, Loc-sd-H1-g1, Loc-sd-H1-g2) and the maximal standard deviation retained (Loc-max-sd-H1).
  Depending on the ploidy level of the studied accessions (--ploidy) these values are calculated for 2 haplotypes of a same group (**H2**), 3
  haplotypes (**H3**), 4 haplotypes (**H4**), ...
  These values are followed by a column named *hetero*, which calculated the heterozygosity level in the window (proportion of heterozygous sites).
- Then, probalility to have at least 1, 2, 3, ... (depending on the --ploidy option) haplotypes for each group is rapported (Prob-H1-g3, Prob-H1-g1, Prob-H1-g0)
- for at least one haplotype and (Prob-H2-g3, Prob-H2-g1, Prob-H2-g0) for at least 2 haplotypes. The expected counted alleles of a group resulting from noise
+ Then, probalility to have at least 1, 2, 3, ... (depending on the --ploidy option) haplotypes for each group is rapported (Prob-H1-g3, Prob-H1-g1, Prob-H1-g2)
+ for at least one haplotype and (Prob-H2-g3, Prob-H2-g1, Prob-H2-g2) for at least 2 haplotypes. The expected counted alleles of a group resulting from noise
  is calculated in all simulated accessions that have no contributors of these groups. The mean values are reported in columns named : *Loc-mu-noise-g3*,
- *Loc-mu-noise-g1*, *Loc-mu-noise-g0* and the coresponding standard deviation can be found in columns named : *Loc-sd-noise-g3*, *Loc-sd-noise-g1*, *Loc-sd-noise-g0*.
+ *Loc-mu-noise-g1*, *Loc-mu-noise-g2* and the coresponding standard deviation can be found in columns named : *Loc-sd-noise-g3*, *Loc-sd-noise-g1*, *Loc-sd-noise-g2*.
  The maximal variance is also reported in column *Loc-max-sd-noise*. These values allowed to calculate the probability that the counted alleles of a group
- is from noise and these values are reported in column named: *Prob-noise-g3*, *Prob-noise-g1*, *Prob-noise-g0*.
+ is from noise and these values are reported in column named: *Prob-noise-g3*, *Prob-noise-g1*, *Prob-noise-g2*.
  
 
 Haplotype probabilities are calculated as followed:
@@ -852,7 +854,7 @@ The chromsome painting can be vizualized from distinct ways. For example you can
 
 ~~~
 cd Painting
-python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
 ~~~
 
 This command line outpout a pdf named ***sample67.pdf*** which should look like this:
@@ -877,7 +879,7 @@ At this point we have generated 2 additionnals chromosomes (RefSeq1 and RefSeq2)
  sample66. To do the chromosoime painting of this "false" accession run the following command line:
 
 ~~~
-python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
 ~~~
 
 This command line overwrite the original Figure and the outpout should look like this:
@@ -898,7 +900,7 @@ tail -n 10 ../DNAseq_names.tab | sed 's/$/\t2/' > ../DNAseq_names_admix.tab
 Then create the Figure:
 
 ~~~
-python3 ../../bin/haplo2karByChr.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix All_Admix 
+python3 ../../bin/haplo2karByChr.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --prefix All_Admix 
 ~~~
 
 This command creates a file named ***All_Admix_RefSeq_1.pdf*** which contained haplotypes for accessions passed in --acc option. The outpout should
@@ -914,7 +916,7 @@ And finally, you may also want to generate a circos representation of your data 
  be done with the haplo2Circos.1.0.py. This can be done with the following command line:
 
 ~~~
-python3 ../../bin/haplo2Circos.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_All_Admix
+python3 ../../bin/haplo2Circos.1.0.py --acc ../DNAseq_names_admix.tab --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_All_Admix
 ~~~
 
 This programs outpouts 4 files:
@@ -966,7 +968,7 @@ echo "sample70 2" >> for_circos.tab
 And then, it is time to draw the Circos:
 
 ~~~
-python3 ../../bin/haplo2Circos.1.0.py --acc for_circos.tab --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g0:g1:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_Acc
+python3 ../../bin/haplo2Circos.1.0.py --acc for_circos.tab --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --prefix Circos_Acc
 ~~~
 
 The output should look like this:

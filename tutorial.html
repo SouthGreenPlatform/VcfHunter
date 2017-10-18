@@ -243,7 +243,8 @@ Group g2 contained 1657 dots</code></pre>
 <p>Output is as much files as axis combinations named according to the following nomenclature <strong><em>prefix + _axisX_vs_axisY.png</em></strong>. The output should look like this:</p>
 <p><img src="http://banana-genome-http.cirad.fr/image/CentroidGrouping_axis1_vs_axis2.png"  width="700"></p>
 <p>This Figure represent the centroids location. Colors may not be the same when you run the analysis because the color attribution is random.</p>
-<p>Visualization of the allele grouping can be done as followed: <sub>~</sub> python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping <sub>~</sub></p>
+<p>Visualization of the allele grouping can be done as followed:</p>
+<pre><code>python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping</code></pre>
 <p>The outpout named <strong><em>prefix + _axis1_vs_axis2.png</em></strong> look like this (color may be different):</p>
 <p><img src="http://banana-genome-http.cirad.fr/image/AlleleGrouping_axis1_vs_axis2.png"  width="700"></p>
 <p>In this picture you have the representation of the allele clustering performed by the Mean Shift approach. We can clearly observe that the red group (g0) is over-represented and may be split in two to have alleles representing ancetral group g0 and en central cluster in which allele not fixed/not representing ancestral groups are clustered.</br></br></br></p>
@@ -257,13 +258,30 @@ Group g2 contained 1657 dots</code></pre>
 <p>At this point, you may ask why not suggesting to do this directely as I knew this will happen in our dataset. To this I respond that it is not so long to run and this example provide a limit of the method explained here that you should take in account! The idea is that you can try several multivariate analysis and clustering methods and check which method group the best your alleles.</p>
 <p>We will do this in several steps: Firts we will vary the --quantile parameter which will allow to change bandwidth estimation parameter used in mean shift clustering. By default this value is put to 0.2. Lowering it should allow to have more clusters. Try the following command line:</p>
 <pre><code>python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix AllClust/ClustAnalysis --quantile 0.1</code></pre>
-<p>The output should look like this: <sub>~</sub> loading modules modules loaded number of estimated clusters : 5 Printing files Group g0 contained 9329 dots Group g1 contained 2124 dots Group g2 contained 1954 dots Group g3 contained 850 dots Group g4 contained 899 dots <sub>~</sub></p>
+<p>The output should look like this:</p>
+<pre><code>loading modules
+modules loaded
+number of estimated clusters : 5
+Printing files
+Group g0 contained 9329 dots
+Group g1 contained 2124 dots
+Group g2 contained 1954 dots
+Group g3 contained 850 dots
+Group g4 contained 899 dots</code></pre>
 <p>At this point you have 5 clusters, while in theory you expected 4 (3 corresponding to ancestral groups and 1 corresponding to unassigned alleles). This clustering can be visualized using the following command line:</p>
 <pre><code>python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping</code></pre>
 <p><img src="http://banana-genome-http.cirad.fr/image/sub1_AlleleGrouping_axis1_vs_axis2.png"  width="700"></p>
 <p>You can observe that g3 and g4 are close and could be merged if we want 4 clusters. I don't say that it is the solution but for our example, we will take this assertion. The idea is just to show you how to use the program and the different command line. So, to reduce the cluster number, we should increase the quantile value. We should then look a value between 0.1 and 0.2. Let's take 0.15!</p>
 <pre><code>python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix AllClust/ClustAnalysis --quantile 0.15</code></pre>
-<p>The output should look like this: <sub>~</sub> loading modules modules loaded number of estimated clusters : 4 Printing files Group g0 contained 9427 dots Group g1 contained 2196 dots Group g2 contained 1892 dots Group g3 contained 1641 dots <sub>~</sub></p>
+<p>The output should look like this:</p>
+<pre><code>loading modules
+modules loaded
+number of estimated clusters : 4
+Printing files
+Group g0 contained 9427 dots
+Group g1 contained 2196 dots
+Group g2 contained 1892 dots
+Group g3 contained 1641 dots</code></pre>
 <p>This time we have the expected group number. Data visualization should be like this:</p>
 <pre><code>python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping</code></pre>
 <p><img src="http://banana-genome-http.cirad.fr/image/sub2_AlleleGrouping_axis1_vs_axis2.png"  width="700"></p>
