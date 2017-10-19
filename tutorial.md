@@ -1,17 +1,17 @@
-# Tutorial for VcfExplorer
+# Tutorial for VcfHunter
 
 This tutorial go through all steps from variant calling from DNAseq and/or RNAseq to caracterization of genome mosaic structure
- using ***vcfExplorer tools***
+ using ***VcfHunter tools***
 
-Go to the vcfExplorer folder (Scripts can be run from any folder but the command lines in this tutorial assume you are in this
+Go to the VcfHunter folder (Scripts can be run from any folder but the command lines in this tutorial assume you are in this
  folder and that you have python 2.7 and 3 versions).
 
 ### Available data:
 
 *data/reference/* is a folder containing a fasta file with the reference sequence and a gff file containing the reference
  sequence annotation
-*data/reads/* is a folder containing DNAseq paired reads simulated from 3 gene pools of diploid ancestral accessions (10
- accessions from each gene pool) and 10 DNAseq and 10 RNAseq paired reads simulated from hybrids diploids accessions resulting
+*data/reads/* is a folder containing DNAseq paired reads simulated from 3 gene pools of diploid ancestral accessions (11, 10 and 9
+ accessions from each gene pool respectively) and 10 DNAseq and 10 RNAseq paired reads simulated from hybrids diploids accessions resulting
  from several crosses of accessions from the ancestral pool.
 *data/config/* is a folder containing two configuration files needed for the RNAseq and DNAseq variant calling
 
@@ -761,19 +761,38 @@ This figure explained the impact of an unbalance in the allele fixation levels o
  allele number at a position. We can observe that depending on the allele fixation level in the population, for the same number of allele
  grouped, the expected allele number of Gp2 is lower than Gp1 because all alleles of Gp2 are not fixed! In the case you have a large sample
  of your ancestral populations, estimating the expected grouped allele number on the window is relatively easy, but this is not always the
- case. In this context the program try to recreate the ancestral population from the few representatives provided by simulating 100 "accessions"
- by sampling alleles from the ancestral population representatives. This is also done for hybrids population, to estimate the number of grouped
- alleles in case of several ancestral origin at a site (example: one haploype of Gp1 and one haplotype of Gp2).
+ case. In this context the program try to recreate the ancestral population from the few representatives provided. This can be done by
+ simulating ancestral (our programs creates populations or 100 individuals) based on alleles sampling from ancestral
+ population representatives. Then in each populations, the mean and standard deviation number of grouped alleles is calculated on given window
+ size which give the expectation of grouped alleles on these windows to attribute 1, 2, 3, ... haplotypes. This simulation step can be called
+ with the *-T Simul* option in the program.  Because this simulation step is long and because sampling alleles at a site followed a binomial
+ test, the mean and sd expected groups at a site, can be directely calculated from grouped alleles at the site. Then the expected number of
+ grouped alleles on a window is the sum of the mean value obtained at a site. However, the standard deviation on the window is not easy to calculate
+ and then this value is approximated by calcutating the square root of the sum of the variances at each sites of the windows. This algorithm as also
+ been implemented in our program and can be called with *-T Binom* option. Because the estimation of standard deviation is not completly
+ satisfactory we also added a *--prop* option which allowed to define an arbitrary *standard deviation* value calculated as --prop * Mean_Expected_value.
+ All these calculations or simulations are also done for hybrids population, to estimate the number of grouped alleles in case of several ancestral
+ origin at a site (example: one haploype of Gp1 and one haplotype of Gp2).
 
 An additional complexity level is that depending on the sampling of the ancestral representative of the ancestral groups, the variance of the
- expected number of alleles of a group can be greatly underestimated as well as the mean value. (cf Figure below)
+ expected number of alleles of a group can be greatly underestimated as well as the mean value (cf Figure below). In this context, the --prop value
+ may be more appropriate.
 
 <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig10.png"  width="600">
 
 This figure showed the impact of the ancestral accession sampling on the simulating of ancestral population. To partially solve this problem,
  we chose to attribute the maximal variance found in a group and on a window, to all groups in the same window.
 
-Create a file to match allele groups names with accessions acestral groups:
+ 
+After this short introduction, it is time to try the command line! First you need to create a file which identify which accession belong to
+ which ancestral group. This can be donne by comparing the clustering and accession grouping. In the following picture we showed the clustering
+ of alleles and accession projections allong synthetic axis.
+
+<img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig10bis.png"  width="600">
+
+In this picture we can observe that sample1 to sample20 are accession corresponding to the group **g1**, accessions from sample21 to sample40
+ belonged to group **g2** and accessions from sample41 to sample 49 corresponded to group **g3**. You can create this file manually, by because
+ I am lazy and I already have a preformated file, you can simply run the following command line:
 
 ~~~
 grep sample ../data/config/AncestryInfo.tab | sed 's/X1/g1/' | sed 's/Y1/g2/' | sed 's/Z1/g3/' | grep -v 'UN' > ancestor.gp
@@ -782,17 +801,18 @@ grep sample ../data/config/AncestryInfo.tab | sed 's/X1/g1/' | sed 's/Y1/g2/' | 
 **Be carreful, as the group attribution is random, you will have to check to which group (X1, Y1 and Z1) correspond the allele
  group (g0, g1, g2 and g3) to adjust the command line**
 
+
+Once this file is ready, it is time to run the chromosome painting. In this example, we will use the fast algorithm (*-T Binom* option). This
+ can be done with the ***vcf2linear.1.1.py** program by running the following command line:
+
 ~~~
 mkdir Painting
-python3 ../bin/vcf2linear.1.1.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseq_names.tab --namesH ancestor.gp --win 100 --mat Final/ClustAnalysis_kMean_allele.tab --prefix Painting --gcol Final/ClustAnalysis_group_color.tab --chr RefSeq --ploidy 2
+python3 ../bin/vcf2linear.1.1.py --vcf DNA_RNAseq_final_filt.vcf --names DNAseq_names.tab --namesH ancestor.gp --win 50 --mat Final/ClustAnalysis_kMean_allele.tab --prefix Painting --gcol Final/ClustAnalysis_group_color.tab --chr RefSeq --ploidy 2 -t 8 -T Binom
 ~~~
-
-This is a long step that could be optimized but unfortunatelly at the time I am writting this tutorial, I don't have time to
- do it...
 
 Several output are generated in the ***Painting*** folder. For each accessions name in the ***DNAseq_names.tab*** file, a file named according
  to the following nomenclature ***prefix\_accessionName\_chr.tab*** is generated. This file record, for each allele at the center
- of the window of 201 (--win 100 means a window of 100 alleles before and after the considered allele), the number of counted grouped alleles
+ of the window of 101 (--win 50 means a window of 50 alleles before and after the considered allele), the number of counted grouped alleles
  in the accession for each groups (g1, g2, g3), the expected
  grouped alleles in case of only one haplotype (**H1**) of the considered group is expected (Loc-mu-H1-g3, Loc-mu-H1-g1, Loc-mu-H1-g2), the
  corresponding standard deviation value (Loc-sd-H1-g3, Loc-sd-H1-g1, Loc-sd-H1-g2) and the maximal standard deviation retained (Loc-max-sd-H1).
@@ -801,7 +821,8 @@ Several output are generated in the ***Painting*** folder. For each accessions n
  These values are followed by a column named *hetero*, which calculated the heterozygosity level in the window (proportion of heterozygous sites).
  Then, probalility to have at least 1, 2, 3, ... (depending on the --ploidy option) haplotypes for each group is rapported (Prob-H1-g3, Prob-H1-g1, Prob-H1-g2)
  for at least one haplotype and (Prob-H2-g3, Prob-H2-g1, Prob-H2-g2) for at least 2 haplotypes. The expected counted alleles of a group resulting from noise
- is calculated in all simulated accessions that have no contributors of these groups. The mean values are reported in columns named : *Loc-mu-noise-g3*,
+ is calculated in all simulated accessions (in case of simulation) that have no contributors of these groups or based on the sum of the binomial expected values
+ calculated as the number of time an allele of a group appear in individuals of other groups. The mean values are reported in columns named : *Loc-mu-noise-g3*,
  *Loc-mu-noise-g1*, *Loc-mu-noise-g2* and the coresponding standard deviation can be found in columns named : *Loc-sd-noise-g3*, *Loc-sd-noise-g1*, *Loc-sd-noise-g2*.
  The maximal variance is also reported in column *Loc-max-sd-noise*. These values allowed to calculate the probability that the counted alleles of a group
  is from noise and these values are reported in column named: *Prob-noise-g3*, *Prob-noise-g1*, *Prob-noise-g2*.
@@ -837,7 +858,7 @@ These files will be used to draw figures in the following steps.
 
 
 All these statistics are also plotted in files named according to the following nomenclature ***accessionName\_chr\_density.pdf*** and can be found in the
- folder passed in --prefix option. The following Figure is obtained from the accession *sample67*
+ folder passed in --prefix option. The following Figure is obtained from the accession *sample68*
 
 <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig12.png"  width="600">
 
@@ -854,10 +875,10 @@ The chromsome painting can be vizualized from distinct ways. For example you can
 
 ~~~
 cd Painting
-python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+python3 ../../bin/haplo2kar.1.0.py --acc sample68 --chr RefSeq --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
 ~~~
 
-This command line outpout a pdf named ***sample67.pdf*** which should look like this:
+This command line outpout a pdf named ***sample68.pdf*** which should look like this:
 
 <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig13.png"  width="600">
 
@@ -869,17 +890,17 @@ Just to have an idea of what it looks like when you have several chromosomes you
  simulate new chromosomes:
 
 ~~~
-sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo1.tab > sample67_RefSeq1_haplo1.tab
-sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo2.tab > sample67_RefSeq1_haplo2.tab
-sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo1.tab > sample67_RefSeq2_haplo1.tab
-sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo2.tab > sample67_RefSeq2_haplo2.tab
+sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo1.tab > sample68_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample7_RefSeq_haplo2.tab > sample68_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo1.tab > sample68_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample66_RefSeq_haplo2.tab > sample68_RefSeq2_haplo2.tab
 ~~~
 
-At this point we have generated 2 additionnals chromosomes (RefSeq1 and RefSeq2) for sample67 which are in fact the chromosome painting of sample7 and
+At this point we have generated 2 additionnals chromosomes (RefSeq1 and RefSeq2) for sample68 which are in fact the chromosome painting of sample7 and
  sample66. To do the chromosoime painting of this "false" accession run the following command line:
 
 ~~~
-python3 ../../bin/haplo2kar.1.0.py --acc sample67 --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
+python3 ../../bin/haplo2kar.1.0.py --acc sample68 --chr RefSeq:RefSeq1:RefSeq2 --gcol ../Final/ClustAnalysis_group_color.tab --dg g1:g2:g3 --centro ../../data/reference/centro_pos.tab --ploidy 2
 ~~~
 
 This command line overwrite the original Figure and the outpout should look like this:
@@ -933,14 +954,14 @@ The Figure obtained should look like this:
  
 In the circos picture, accessions are ordered from the outside to the inside in following the order passed in --acc option.
  
-Again in this example, because we do not have more than one chromosome, we will do the same thing than previously for sample67: we will generate 2
+Again in this example, because we do not have more than one chromosome, we will do the same thing than previously for sample68: we will generate 2
  additionnal chromosomes for 4 other accessions to have an idea of what the circos looks like whit several chromosomes.
 
 ~~~
-sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo1.tab > sample68_RefSeq1_haplo1.tab
-sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo2.tab > sample68_RefSeq1_haplo2.tab
-sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo1.tab > sample68_RefSeq2_haplo1.tab
-sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo2.tab > sample68_RefSeq2_haplo2.tab
+sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo1.tab > sample67_RefSeq1_haplo1.tab
+sed 's/RefSeq/RefSeq1/' sample21_RefSeq_haplo2.tab > sample67_RefSeq1_haplo2.tab
+sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo1.tab > sample67_RefSeq2_haplo1.tab
+sed 's/RefSeq/RefSeq2/' sample65_RefSeq_haplo2.tab > sample67_RefSeq2_haplo2.tab
 sed 's/RefSeq/RefSeq1/' sample40_RefSeq_haplo1.tab > sample69_RefSeq1_haplo1.tab
 sed 's/RefSeq/RefSeq1/' sample40_RefSeq_haplo2.tab > sample69_RefSeq1_haplo2.tab
 sed 's/RefSeq/RefSeq2/' sample64_RefSeq_haplo1.tab > sample69_RefSeq2_haplo1.tab

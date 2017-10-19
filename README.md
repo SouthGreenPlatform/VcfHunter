@@ -1,4 +1,4 @@
-# Purpose of VcfExplorer
+# Purpose of VcfHunter
 
 VcfExplorer regroups several programs which principale aims are to map RNAseq data onto reference genome sequence, perform variant calling, manipulate vcf files and perform chromosome painting of accessions based on the contribution of ancestral groups.
 
@@ -508,11 +508,23 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 <br/>
 
 
-### vcf2linear.1.0.py (python3)
+### vcf2linear.1.1.py (python3)
 
-This programs aims at performing a chromosome painting of accessions along chromosome based on the allele grouping correponding to the ancestral groups. The idea is to search, for distinct regions (along the chromosomes) of the accession we want to study, the probability of an ancestral origin (homozygous or heterozygous). Because, distinct ancestral groups can contain different specific alleles, show distinct heterozygosity levels and allele fixation (du to distinct reproductive mode for example) such probability is not straightforward. An idea can be to calculate for each regions, the expected ancestral allele grouping proportion (based on ancestral accessions) and compare this value to the observed one. Because dataset can be small and/or representatives of ancestral group are very few, the expected ancestral allele grouping proportion can be difficult to estimate. <br/>
-This programs solves the problem by simulating ancestral population from accessions identified as representatives of the ancestral groups under panmixie hypothesis. For each ancestral populations a total of 100 individuals were simulated. The same was performed for hybrids between two populations. At the and of this simulation process mean and standard deviation of allele grouping proportions were calculated for each ancestral group on sliding windows of size n overlapping of n-1.<br/>
-These grouping proportions were then calculated on tested accessions and estimated proportion were used to calculate the ancestry probability as followed.<br/>
+This programs aims at performing a chromosome painting of accessions along chromosome based on the allele grouping correponding to the ancestral
+ groups. The idea is to search, for distinct regions (along the chromosomes) of the accession we want to study, the probability of an ancestral
+ origin (homozygous or heterozygous). Because, distinct ancestral groups can contain different specific alleles, show distinct heterozygosity
+ levels and allele fixation (du to distinct reproductive mode for example) such probability is not straightforward. An idea can be to calculate
+ for each regions, the expected ancestral allele grouping proportion (based on ancestral accessions) and compare this value to the observed one.
+ Because dataset can be small and/or representatives of ancestral group are very few, the expected ancestral allele grouping proportion can be
+ difficult to estimate. <br/>
+This programs solves the problem by simulating ancestral population from accessions identified as representatives of the ancestral groups under
+ panmixie hypothesis. For each ancestral populations a total of 100 individuals were simulated. The same was performed for hybrids between two
+ populations. At the and of this simulation process mean and standard deviation of allele grouping proportions were calculated for each ancestral
+ group on sliding windows of size n overlapping of n-1. Because the simulation process and access to the simulation is a long process, we also
+ implemented a function that estimated grouping proportions based on sums of binomial densities. The mean values estimated are exact but standard
+ deviations are approximated.<br/>
+These grouping proportions were then calculated on tested accessions and estimated proportion were used to calculate the ancestry probability as
+ followed.<br/>
 
 With:<br/>
 **_Hmu_**: Mean gX expected number for the group gX based on simulations on homozygous groups,<br/>
@@ -548,6 +560,18 @@ Genotype grouping at the window was then attributed based on the maximal probabi
 --namesH: A two column file containing accession names used to simulate populations. 
 --chr: Chromosomes names to work with (each chromosome names should be separated by ":"). If not filled, all chromosomes will be used.
 --win: Half window size (allele number) around a variant site to evaluate the structure at the site (integer). [Default: 25]
+--ploidy: Ploidy level (integer). [Default: 2]
+--thread: Number of processors to use (integer), [default: 1]
+--type: Type of estimation performed: "Simul", "Binom". If "Simul", a total of 100 individuals are simulated for
+ each combinations of haplotype and mean values and sd values are estimated based on these simulation. If
+ "Binom", mean value is calculated as the sum of binomial mean at each point (exact estimator) and sd
+ value is estimated as sqrt(sum variance at each point). This is not the exact sd but the analysis is a
+ lot more faster! If you do not trust this sd estimation, you can choose to change this estimator
+ by filling a value between ]0,1] to --prop parameter. In this case, the program will use the
+ maximal_expected_value*prop_argument instead of using the maximal sd observed for all groups for probability
+ calculation [default: Binom]
+--prop: Estimator different from sd calculated as mean_value*--prop. Value should be comprised in ]0,1].
+ A value of 0, means that this parameter is not used. [default: 0]
 --gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 ```

@@ -1519,14 +1519,15 @@ def __main__():
 	parser.add_option( '-c',	'--chr',			dest='chr',			default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
 	parser.add_option( '-w',	'--win',			dest='win',			default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
 	parser.add_option( '-g',	'--gcol',			dest='gcol',		default=None, 			help='Group color. [Default: %default]')
-	parser.add_option( '-P',	'--ploidy',			dest='ploidy',		default='2', 			help='Ploidy level. Possible values: 2, 3 [Default: %default]')
-	parser.add_option( '-t',	'--thread',			dest='thread',		default='1',			help='Max number of accessions treated at the same time (integer), [default: %default]')
+	parser.add_option( '-P',	'--ploidy',			dest='ploidy',		default='2', 			help='Ploidy level (integer). [Default: %default]')
+	parser.add_option( '-t',	'--thread',			dest='thread',		default='1',			help='Number of processors to use (integer), [default: %default]')
 	parser.add_option( '-T',	'--type',			dest='type',		default='Binom',		help='Type of estimation performed: "Simul", "Binom". If "Simul", a total of 100 individuals are simulated for '
 	'each combinations of haplotype and mean values and sd values are estimated based on these simulation. If "Binom", mean value is calculated as the sum of binomial mean at each point (exact estimator) and '
 	'sd value is estimated as sqrt(sum variance at each point). This is not the exact sd but the analysis is a lot more faster! If you do not trust this sd estimation, you can choose to change this estimator '
 	' by filling a value between ]0,1] to --prop parameter. In this case, the program will use the maximal_expected_value*prop_argument instead of using the maximal sd observed for all groups for probability '
 	'calculation [default: %default]')
-	parser.add_option( '-d',	'--prop',			dest='prop',		default='0',			help='Type of analysis performed: "Simul", "Binom" [default: %default]')
+	parser.add_option( '-d',	'--prop',			dest='prop',		default='0',			help='Estimator different from sd calculated as mean_value*--prop. Value should be comprised in ]0,1]. A value of '
+	'0, means that this parameter is not used. [default: %default]')
 	parser.add_option( '-p',	'--prefix',			dest='prefix',		default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
 
 	(options, args) = parser.parse_args()

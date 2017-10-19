@@ -331,7 +331,7 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PREFIX):
 	################################################
 	outfile.write('<ideogram>\n')
 	outfile.write('<spacing>\n')
-	outfile.write('default = 0.05r\n')
+	outfile.write('default = 0.01r\n')
 	outfile.write('</spacing>\n')
 	outfile.write('thickness        = 50p\n')
 	outfile.write('stroke_thickness = 2\n')
