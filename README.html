@@ -1,11 +1,11 @@
 <h1 id="purpose-of-vcfhunter">Purpose of VcfHunter</h1>
-<p>VcfExplorer regroups several programs which principale aims are to map RNAseq data onto reference genome sequence, perform variant calling, manipulate vcf files and perform chromosome painting of accessions based on the contribution of ancestral groups.</p>
+<p>VcfExplorer regroups several programs which principale aims are to map RNAseq data onto reference genome sequence, perform variant calling, manipulate vcf files and perform chromosome painting of accessions based on the contribution of ancestral groups. <br><br><br></p>
 <h2 id="installation">Installation</h2>
 <p>All proposed tools described here are written in python and work on linux system To install the tools:</p>
 <ol style="list-style-type: decimal">
 <li>unzip the tar.gz file with the following command line : tar -xvzf</li>
 <li>open the loca_programs.conf file</li>
-<li>set the path to each programs required</li>
+<li>set the path to each programs required <br><br><br></li>
 </ol>
 <h2 id="dependencies">Dependencies</h2>
 <ol style="list-style-type: decimal">
@@ -18,7 +18,7 @@
 <li>gnuplot, http://www.gnuplot.info/</li>
 <li>circos-0.67 or greater, http://circos.ca/software/download/circos/</li>
 </ol>
-<p>Python2, Python3, Java and Biopython are also required.</p>
+<p>Python2, Python3, Java and Biopython are also required. <br><br><br></p>
 <h2 id="description">Description</h2>
 <p>The package provided comprised X programs listed here:</p>
 <ul>
@@ -31,8 +31,9 @@
 <li>haplo2karByChr.1.0.py (python3)</li>
 <li>haplo2Circos.1.0.py (python3)</li>
 </ul>
-<p>All X programs run using the following command: <sub>~</sub> python program-name &lt;--options-name value&gt; <sub>~</sub></p>
+<p>All X programs run using the following command: <sub>~</sub> python program-name &lt;--options-name value&gt; <sub>~</sub> <br><br><br></p>
 <h2 id="programs">Programs</h2>
+<p><br><br></p>
 <h3 id="process_rnaseq.1.0.py-python2">process_RNAseq.1.0.py (python2)</h3>
 <p>This program takes a reference DNA sequence multifasta file and several fastq files and returns a bam file for each accessions and a final VCF file containing alleles count at each variant site having at least one variant allele supported by at least one read.</p>
 <div class="figure">
@@ -86,7 +87,7 @@ gff3 (optional) = path to a gff3 file used to calculate statistics on genes cove
 <li><strong>step j:</strong> generates for each accessions and each chromosomes a file (Accession + &quot;<em>allele</em>count_&quot;+ chromosome + &quot;.gz&quot;) counting variant at each covered bases,</li>
 <li><strong>step k:</strong> generates several vcf (one for each reference sequences) (--prefix + reference sequence + &quot;<em>allele</em>count.vcf&quot;) file counting for each variant sites (at least on reads supporting a variant) and each accession the number of reads supporting each allele. For each accession in the vcf a genotype (GT tag) was called based on a binomial test, allelic depth was counted (AD tag) and total depth was rapported (DP tag),</li>
 <li><strong>step l:</strong> generates a uniq vcf file (--prefix + &quot;<em>all</em>allele_count.vcf&quot;) resulting in the concatenation of all vcf files generated at step k,</li>
-<li><strong>step m:</strong> Calculate exon coverage proportion of each accession for genes provided in the gff file</li>
+<li><strong>step m:</strong> Calculate exon coverage proportion of each accession for genes provided in the gff file <br><br></li>
 </ul>
 <h3 id="process_reseq.1.0.py-python2">process_reseq.1.0.py (python2)</h3>
 <p>This program takes a reference DNA sequence multifasta file and several fastq files and returns a bam file for each accessions and a final VCF file containing alleles count at each variant site having at least one variant allele supported by at least one read.</p>
@@ -126,7 +127,7 @@ genome = path_to_the_reference_sequence</code></pre>
 <li><strong>step e:</strong> generates for each accessions and each chromosomes a file (Accession + &quot;<em>allele</em>count_&quot;+ chromosome + &quot;.gz&quot;) counting variant at each covered bases,</li>
 <li><strong>step f:</strong> generates a generates several vcf (one for each reference sequences) (--prefix + reference sequence + &quot;<em>allele</em>count.vcf&quot;) file counting for each variant sites (at least on reads supporting a variant) and each accession the number of reads supporting each allele. For each accession in the vcf a genotype (GT tag) was called based on a binomial test, allelic depth was counted (AD tag) and total depth was rapported (DP tag),</li>
 <li><strong>step g:</strong> generates a generates a uniq vcf file resulting in the concatenation of all vcf files generated at step g,</li>
-<li><strong>step h:</strong> generates two files (*_acc.stats and *_lib.stats) collecting mapping statistics on each libraries and accessions respectively,</li>
+<li><strong>step h:</strong> generates two files (*_acc.stats and *_lib.stats) collecting mapping statistics on each libraries and accessions respectively <br><br></li>
 </ul>
 <h3 id="vcfprefilter.1.0.py-python2">VcfPreFilter.1.0.py (python2)</h3>
 <p>This script filter VCF file generated by Process_RNAseq.1.0.py by removing homozygous sites for all accessions based on accession minimal and maximal coverage, accession minimal allele coverage and frequency parameters passed. The idea of this tool is to filter out variant lines resulting from sequencing errors. Filter are applicated as followed:</p>
@@ -143,6 +144,7 @@ genome = path_to_the_reference_sequence</code></pre>
 --minFreq: Minimal allele frequency in an accession to keep the allele for calling in the row
 --MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: 3]
 --out: Prefix for output files. [Default: Pop]</code></pre>
+<p><br><br></p>
 <h3 id="vcf2struct.1.0.py-python3">vcf2struct.1.0.py (python3)</h3>
 <p>This program has been designed to perform statistics, filter, manipulate vcf files as well as analysing the mosaique structure of genomes.</p>
 <h4 id="mandatory-options">Mandatory Options:</h4>
@@ -172,12 +174,20 @@ Possible values are:
 <pre><code>--vcf: A vcf file.
 --nRand: Number of variant site to get randomly from the vcf file (integer). [Default: 1000]
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> **_subset.vcf:** A vcf file corresponding to a random line subset of the first vcf<br /><br /> - <strong>STAT:</strong> Calculate statistics on the vcf file.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_subset.vcf:</strong> A vcf file corresponding to a random line subset of the first vcf</p>
+<ul>
+<li><strong>STAT:</strong> Calculate statistics on the vcf file.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to treat.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --gff3: (optional) A gff3 file containing gene annotation. If not filled, the statistics will return 0 for these coding sequence values.</code></pre>
-<p><em>Outputs:</em><br /> **_general.stat:** A file containing vcf global statistics such as number of indel and SNP sites, number of different tags in the FILTER columns, number of sites with 1,2,3,4, ... variants, number of transitions, transversions and variant in annotated regions.<br /> **_accession.stat:** A file containing for each accessions missing data number, number of alleles specific to this accession in the vcf, number of homozygous sites identical to the reference, number of homozygous sites different from the reference and number of heterozygous sites.<br /><br /> - <strong>FILTER:</strong> Filter a vcf file based on several parameters such as datapoint coverage and allele coverage, number of variant and variant type.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_general.stat:</strong> A file containing vcf global statistics such as number of indel and SNP sites, number of different tags in the FILTER columns, number of sites with 1,2,3,4, ... variants, number of transitions, transversions and variant in annotated regions.<br /> <strong>*_accession.stat:</strong> A file containing for each accessions missing data number, number of alleles specific to this accession in the vcf, number of homozygous sites identical to the reference, number of homozygous sites different from the reference and number of heterozygous sites.</p>
+<ul>
+<li><strong>FILTER:</strong> Filter a vcf file based on several parameters such as datapoint coverage and allele coverage, number of variant and variant type.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to treat.
 --outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the output file.
@@ -190,27 +200,46 @@ Possible values are:
     Possible values: 
         *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
         *Other values: INDELS, SNP, AUTAPO (accession specific variant site).</code></pre>
-<p><em>Outputs:</em><br /> **_filt.vcf:** a filtered vcf file based on passed options.<br /><br /> - <strong>COMPARE:</strong> Compare two variant accessions (from two different vcf files, in the same vcf file). This will output in standard output specific variant lines for accession1 and specific variant lines for accession2 as well as shared variant sites. In addition, identical variant calling will be counted and proportion among shared variant sites will be calculated.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_filt.vcf:</strong> a filtered vcf file based on passed options.</p>
+<ul>
+<li><strong>COMPARE:</strong> Compare two variant accessions (from two different vcf files, in the same vcf file). This will output in standard output specific variant lines for accession1 and specific variant lines for accession2 as well as shared variant sites. In addition, identical variant calling will be counted and proportion among shared variant sites will be calculated.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --comp1: Accession name to compare. If 2 vcf files are provided and only one accession name is passed, this name will be searched in both vcf files.
 --vcf2: (optional if --comp2 filled) A second vcf file.
 --comp2:(optional if --vcf2 filled) Second accession to compare.
-If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be searched in vcf2.</code></pre>
-<p><br /><br /> - <strong>ADD_REF:</strong> Add a haploid accession corresponding to the reference to the vcf called ref_silico_call.<br /> <em>Options:</em></p>
+If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be searched in vcf2.\</code></pre>
+<ul>
+<li><strong>ADD_REF:</strong> Add a haploid accession corresponding to the reference to the vcf called ref_silico_call.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --ref_cov: Value to put to AD and DP flags (integer). [Default: 1000]</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>add</em>ref.vcf:</strong> A new vcf file.<br /><br /> - <strong>AL_IDENTITY:</strong> Calculate genotype identity.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_add_ref.vcf:</strong> A new vcf file.</p>
+<ul>
+<li><strong>AL_IDENTITY:</strong> Calculate genotype identity.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> **_ident.mat:** A matrix containing genotype pairwise identity.<br /><br /> - <strong>FACTORIAL:</strong> Perform factorial analysis on the vcf file. This analysis is performed in several steaps.<br /> 1- First the vcf file is recoded as followed: For each allele at each variants site two markers were generated; One marker for the presence of the allele (0/1 coded) and one for the absence of the allele (0/1 coded).<br /> <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig1.png" /><br /> Only alleles present or absent in <strong>part</strong> (not all) of selected accessions were included in the final matrix file.<br /> If groups information was passed to the script, alleles groups were attributed based on the following rule: the allele is attributed to a group if it is only present in this group but not in other defined groups. If no grouping information the GROUP column is filled with UN value. This grouping value <strong>doesn't have any influence on the analysis</strong>, it only allows to add colors graphs drawn. It will also help to validate if the structure of your data correspond to the one you suspect.<br /> 2- The factorial analysis was performed on the transposed matrix using R. Graphical outputs of the analysis were draw and for example accessions and alleles can be projected along axis in the following picture.<br /> <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig2.png" /><br /> In this example allele projected along synthetic axis were colorated if group informations were passed to the program.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_ident.mat:</strong> A matrix containing genotype pairwise identity.</p>
+<ul>
+<li><strong>FACTORIAL:</strong> Perform factorial analysis on the vcf file. This analysis is performed in several steaps.<br /></li>
+</ul>
+<p>1- First the vcf file is recoded as followed: For each allele at each variants site two markers were generated; One marker for the presence of the allele (0/1 coded) and one for the absence of the allele (0/1 coded).<br /> <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig1.png" /><br /> Only alleles present or absent in <strong>part</strong> (not all) of selected accessions were included in the final matrix file.<br /> If groups information was passed to the script, alleles groups were attributed based on the following rule: the allele is attributed to a group if it is only present in this group but not in other defined groups. If no grouping information the GROUP column is filled with UN value. This grouping value <strong>doesn't have any influence on the analysis</strong>, it only allows to add colors graphs drawn. It will also help to validate if the structure of your data correspond to the one you suspect.<br /> 2- The factorial analysis was performed on the transposed matrix using R. Graphical outputs of the analysis were draw and for example accessions and alleles can be projected along axis in the following picture.<br /> <img src="http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig2.png" /><br /> In this example allele projected along synthetic axis were colorated if group informations were passed to the program.<br /> <em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to work with.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --nAxes: Axis number to keep for the factorial analysis (integer). [Default: 4]
 --mulType: Multivariate analysis type. Possible values: coa, pca and pca_normed [Default: coa]
 --group: (optional) A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>axis</em>x_vs_y_accessions.pdf:</strong> Several pdf files showing accessions projected along x and y axis.<br /> <strong><em>axis</em>x_vs_y.pdf:</strong> Several pdf files showing accessions projected along x and y synthetic axis in a first graphe and allele projection along x and y synthetic axis.<br /> **_inertia.pdf:** A pdf files showing axis inertia.<br /> <strong><em>matrix</em>4_PCA.tab:</strong> A tabulated file of the recoded vcf file passed to R for the factorial analysis.<br /> **_multivariate.R:** The R script file passed to R to do the abalysis.<br /> **_multivariate.Rout:** The R script log file.<br /> <strong><em>individuals</em>coordinates.tab:</strong> A tabulated file of individuals coordinates along synthetic axis.<br /> <strong><em>variables</em>coordinates.tab:</strong> A tabulated file of allele coordinates along synthetic axis.<br /><br /> - <strong>SNP_CLUST-Kmean:</strong> Perform a k-mean clustering of allele based on their coordinates on synthetic axis. It uses the k-mean algorithm of scikit-learn.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_axis<em>x</em>_vs_<em>y</em>_accessions.pdf:</strong> Several pdf files showing accessions projected along x and y axis.<br /> <strong>*_axis<em>x</em>_vs_<em>y</em>.pdf:</strong> Several pdf files showing accessions projected along x and y synthetic axis in a first graphe and allele projection along x and y synthetic axis.<br /> <strong>*_inertia.pdf:</strong> A pdf files showing axis inertia.<br /> <strong>*_matrix<em>4_PCA.tab:<strong> A tabulated file of the recoded vcf file passed to R for the factorial analysis.<br /> </strong>*_multivariate.R:<strong> The R script file passed to R to do the abalysis.<br /> </strong>*_multivariate.Rout:<strong> The R script log file.<br /> </strong>*_individuals</em>coordinates.tab:</strong> A tabulated file of individuals coordinates along synthetic axis.<br /> ***_variables*coordinates.tab:** A tabulated file of allele coordinates along synthetic axis.</p>
+<ul>
+<li><strong>SNP_CLUST-Kmean:</strong> Perform a k-mean clustering of allele based on their coordinates on synthetic axis. It uses the k-mean algorithm of scikit-learn.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: Axes to use in kmean clustering. Axis should be separated by &quot;:&quot;.
 --nGroup: Group number for the k-mean algorithm that will cluster variables (alleles) based on their coordinates. [Default: 2]
@@ -218,21 +247,33 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --thread: Number of processor available. [Default: 1]
 --iter: Parallele k-mean clustering different startpoints performed. [Default: 100]</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>centroid</em>coordinates.tab:</strong> Coordinates of the distincts final centroides calculated for the X k-mean random starpoints.<br /> <strong><em>centroid</em>iteration_grouping.tab:</strong> A tabulated file indicating centroid group attribution.<br /> <strong><em>kMean</em>allele.tab:</strong> A tabulated file equivalent to *<em>matrix</em>4_PCA.tab in which an column (named K-mean_GROUP) containing k-mean allele grouping has been added.<br /> <strong><em>group</em>color.tab:</strong> Color file in which a RGB color as been attributed to each k-mean cluster group. This file can be used for VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.<br /> <strong><em>kMean</em>gp_prop.tab:</strong> A tabulated file reporting for each allele the probability to be in each groups. This is not a &quot;real&quot; probability, the idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse of the euclidian distance of one point and each centroids and these values were normalized so that the sum is equal to 1.<br /><br /> - <strong>SNP_CLUST-MeanShift:</strong> Perform a clustering using the MeanShift algorithm of scikit-learn of allele based on their coordinates on synthetic axis.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_centroid_coordinates.tab:</strong> Coordinates of the distincts final centroides calculated for the X k-mean random starpoints.<br /> ***_centroid*iteration_grouping.tab:<strong> A tabulated file indicating centroid group attribution.<br /> </strong>*_kMean_allele.tab:<strong> A tabulated file equivalent to </strong>*_matrix_4_PCA.tab in which an column (named K-mean_GROUP) containing k-mean allele grouping has been added.<br /> <strong>*_group_color.tab:</strong> Color file in which a RGB color as been attributed to each k-mean cluster group. This file can be used for VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.<br /> <strong>*_kMean_gp_prop.tab:</strong> A tabulated file reporting for each allele the probability to be in each groups. This is not a &quot;real&quot; probability, the idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse of the euclidian distance of one point and each centroids and these values were normalized so that the sum is equal to 1.</p>
+<ul>
+<li><strong>SNP_CLUST-MeanShift:</strong> Perform a clustering using the MeanShift algorithm of scikit-learn of allele based on their coordinates on synthetic axis.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: Axes to use in mean shift clustering. Axis should be separated by &quot;:&quot;.
 --quantile: The quantile value to estimate de bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: 0.2]
 --mat: The *_matrix_4_PCA.tab tabulated file containing variant allele encoded generated by FACTORIAL.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --thread: Number of processor available. [Default: 1]</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>centroid</em>coordinates.tab:</strong> Coordinates of centroides calculated.<br /> <strong><em>centroid</em>iteration_grouping.tab:</strong> A tabulated file indicating centroid group attribution.<br /> <strong><em>kMean</em>allele.tab:</strong> A tabulated file equivalent to *<em>matrix</em>4_PCA.tab in which an column (named K-mean_GROUP) containing k-mean allele grouping has been added.<br /> <strong><em>group</em>color.tab:</strong> Color file in which a RGB color as been attributed to each k-mean cluster group. This file can be used for VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.<br /> <strong><em>kMean</em>gp_prop.tab:</strong> A tabulated file reporting for each allele the probability to be in each groups. This is not a &quot;real&quot; probability, the idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse of the euclidian distance of one point and each centroids and these values were normalized so that the sum is equal to 1.<br /><br /> - <strong>VISUALIZE_VAR_2D:</strong> Perform plots of alleles projected along synthetic axes.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_centroid_coordinates.tab:</strong> Coordinates of centroides calculated.<br /> <strong>*_centroid_iteration_grouping.tab:</strong> A tabulated file indicating centroid group attribution.<br /> <strong>*_kMean_allele.tab:</strong> A tabulated file equivalent to <strong>*_matrix_4_PCA.tab in which an column (named K-mean_GROUP) containing k-mean allele grouping has been added.<br /> </strong>*_group_color.tab:** Color file in which a RGB color as been attributed to each k-mean cluster group. This file can be used for VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.<br /> <strong>*_kMean_gp_prop.tab:</strong> A tabulated file reporting for each allele the probability to be in each groups. This is not a &quot;real&quot; probability, the idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse of the euclidian distance of one point and each centroids and these values were normalized so that the sum is equal to 1.</p>
+<ul>
+<li><strong>VISUALIZE_VAR_2D:</strong> Perform plots of alleles projected along synthetic axes.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: Axes to plot. Axis should be separated by &quot;:&quot;. All conbination between axis will be drawn.
 --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
 --group: (optional) A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --dGroup: Groups IDs to draw. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>2d</em>axis</strong><em>x</em><strong><em>vs</em>axis</strong><em>y</em><strong>.png:</strong> Several png files showing grouped alleles projected along x and y synthetic axes.<br /><br /> - <strong>VISUALIZE_VAR_3D:</strong> Perform an interactive 3d plots of alleles projected along 3 synthetic axes.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> *<strong>axis<em>x</em>_vs_axis<em>y</em>.png:</strong> Several png files showing grouped alleles projected along x and y synthetic axes.</p>
+<ul>
+<li><strong>VISUALIZE_VAR_3D:</strong> Perform an interactive 3d plots of alleles projected along 3 synthetic axes.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: 3 axes to plot. Axis should be separated by &quot;:&quot;. All conbination between axis will be drawn.
 --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
@@ -246,29 +287,46 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --mat: The *_kMean_allele.tab file generated by SNP_CLUST.
 --gpPropValue: Minimal value to keep the allele grouped. This value should be comprised between 0 and 1 [Default: 0.95]
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>kMean</em>allele_filtered_with_</strong> <em>x</em> **_value.tab:** A filtered file of *<em>kMean</em>allele.tab file in which ambiguous alleles were removed.<br /><br /> - <strong>MERGE_VCF:</strong> Add an accession from a vcf to a second one vcf file. If the variant line is absent for the added accession, missing genotype if filled. If a variant line is present for the accession but absent in the vcf, this line will not be added.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_kMean_allele_filtered_with_<em>x</em>_value.tab:</strong> A filtered file of *<strong>_kMean_allele.tab</strong> file in which ambiguous alleles were removed.</p>
+<ul>
+<li><strong>MERGE_VCF:</strong> Add an accession from a vcf to a second one vcf file. If the variant line is absent for the added accession, missing genotype if filled. If a variant line is present for the accession but absent in the vcf, this line will not be added.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file in which you want to add an accession.
 --vcf2: A vcf file containing accession you want to add to the fist vcf file.
 --comp1: Accession name to add to the first vcf.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> **_merged.vcf:** A new vcf file with the accessions variant calling added.<br /><br /> - <strong>ALL_PROP:</strong> Calculate for each accessions the number of grouped allele for each groups.<br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_merged.vcf:</strong> A new vcf file with the accessions variant calling added.</p>
+<ul>
+<li><strong>ALL_PROP:</strong> Calculate for each accessions the number of grouped allele for each groups.<br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab) or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab). 
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --names: (optional) A one column file containing accession names to calculate proportion on (it can be accessions that were not used for PCA analysis but originating from the same original vcf).
 --dGroup: (optional) Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --ExclChr: (optional) A list of chromosome to exclude from the analysis separated by &quot;:&quot;.</code></pre>
-<p><em>Outputs:</em><br /> <strong><em>gp</em>prop.tab:</strong> A tabulated file containing for each accessions the number of grouped allele for each groups.<br /><br /> - <strong>GET_GENOTYPE:</strong> Sometimes as a biologist you want to see the data and more precisely have a look at the genotypes (in term of A,T,G,C) along chromosomes. <strong>This tool if for you!</strong><br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_gp_prop.tab:</strong> A tabulated file containing for each accessions the number of grouped allele for each groups.</p>
+<ul>
+<li><strong>GET_GENOTYPE:</strong> Sometimes as a biologist you want to see the data and more precisely have a look at the genotypes (in term of A,T,G,C) along chromosomes. <strong>This tool if for you!</strong><br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to plot genotypes
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> **_genotype.gen:** A tabulated file containing, for each accessions (columns) and at each positions (rows) along chromosomes, the genotype.<br /><br /> - <strong>GET_GENOTYPE_AND_GROUP:</strong> Sometimes as a biologist you want to see the data and more precisely have a look at the genotypes (in term of A,T,G,C)and allele grouping along chromosomes. <strong>This tool if for you!</strong><br /> <em>Options:</em></p>
+<p><em>Outputs:</em><br /> <strong>*_genotype.gen:</strong> A tabulated file containing, for each accessions (columns) and at each positions (rows) along chromosomes, the genotype.</p>
+<ul>
+<li><strong>GET_GENOTYPE_AND_GROUP:</strong> Sometimes as a biologist you want to see the data and more precisely have a look at the genotypes (in term of A,T,G,C)and allele grouping along chromosomes. <strong>This tool if for you!</strong><br /></li>
+</ul>
+<p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to plot genotypes
 --mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab) or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
 --dGroup: Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Outputs:</em><br /> **_genotype.gen:** A tabulated file containing, for each accessions (2 columns per accessions) and at each positions (rows) along chromosomes, the genotype (first of the two columns) and allele grouping (second of the two columns).<br /><br /> ### vcf2linear.1.1.py (python3)</p>
+<p><em>Outputs:</em><br /> <strong>*_genotype.gen:</strong> A tabulated file containing, for each accessions (2 columns per accessions) and at each positions (rows) along chromosomes, the genotype (first of the two columns) and allele grouping (second of the two columns). <br><br></p>
+<h3 id="vcf2linear.1.1.py-python3">vcf2linear.1.1.py (python3)</h3>
 <p>This programs aims at performing a chromosome painting of accessions along chromosome based on the allele grouping correponding to the ancestral groups. The idea is to search, for distinct regions (along the chromosomes) of the accession we want to study, the probability of an ancestral origin (homozygous or heterozygous). Because, distinct ancestral groups can contain different specific alleles, show distinct heterozygosity levels and allele fixation (du to distinct reproductive mode for example) such probability is not straightforward. An idea can be to calculate for each regions, the expected ancestral allele grouping proportion (based on ancestral accessions) and compare this value to the observed one. Because dataset can be small and/or representatives of ancestral group are very few, the expected ancestral allele grouping proportion can be difficult to estimate.<br /> This programs solves the problem by simulating ancestral population from accessions identified as representatives of the ancestral groups under panmixie hypothesis. For each ancestral populations a total of 100 individuals were simulated. The same was performed for hybrids between two populations. At the and of this simulation process mean and standard deviation of allele grouping proportions were calculated for each ancestral group on sliding windows of size n overlapping of n-1. Because the simulation process and access to the simulation is a long process, we also implemented a function that estimated grouping proportions based on sums of binomial densities. The mean values estimated are exact but standard deviations are approximated.<br /> These grouping proportions were then calculated on tested accessions and estimated proportion were used to calculate the ancestry probability as followed.<br /> With:<br /> <strong><em>Hmu</em></strong>: Mean gX expected number for the group gX based on simulations on homozygous groups,<br /> <strong><em>Hsd</em></strong>: Maximal standard deviation value calculated for all groups based on simulations on homozygous groups,<br /> <strong><em>Emu</em></strong>: Mean gX expected number for the group gX based on simulations on heterozygous groups,<br /> <strong><em>Esd</em></strong>: Maximal standard deviation value calculated for all groups based on simulations on heterozygous groups,<br /> <strong><em>Nmu</em></strong>: Mean noisy allele grouped based on simulations (calculated as the number of alleles not from the right group according to the simulated population),<br /> <strong><em>Nsd</em></strong>: Noise standard deviation,<br /> <strong><em>obs</em></strong>: gX number observed for the accession on the window,<br /> <strong><em>PgX</em></strong>: Probability to be at least gX,<br /> <strong><em>PgN</em></strong>: Probability to be in the noise (unknown/additionnal ancestor),<br /> <strong><em>N(x, mu, sd)</em></strong>: Probability density function of the normal distribution for mean = <em>mu</em> and standard deviation = <em>sd</em>.</p>
 <ul>
 <li>probability to be homozygous for group gX:<br />- if <em>obs</em> <strong><em>superior or equal</em></strong> (<em>Hmu</em> - <em>Hsd</em>): <em>PgX</em> = 1<br />- if <em>obs</em> <strong><em>inferior</em></strong> (<em>Hmu</em> - <em>Hsd</em>) : <em>PgX = N(obs, Hmu-Hsd, Hsd)/N(Hmu-Hsd, Hmu-Hsd, Hsd)</em><br /></li>
@@ -297,7 +355,7 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
  A value of 0, means that this parameter is not used. [default: 0]
 --gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
-<p><em>Output</em><br /> A folder with the name passed in --prefix options which contained several files for each accessions and each chromosomes:<br /> <strong><em>Accession</em>chromosome.tab:</strong> A tabulated file with for each window around a given position:</p>
+<p><em>Output</em><br /> A folder with the name passed in --prefix options which contained several files for each accessions and each chromosomes:<br /> ***_Accession_chromosome.tab:** A tabulated file with for each window around a given position:</p>
 <ul>
 <li>1- the count of each grouped alleles <em>(as much columns as ancestral groups)</em>,</li>
 <li>2- the expected number of grouped alleles, for a given group, in case of single ancestral origin (homozygous) <em>(as much column as ancestral groups)</em>,</li>
@@ -316,7 +374,8 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 <li>15- the retained maximal noise standart deviation,</li>
 <li>16- accession noise probabilities <em>(as much columns as ancestral groups)</em>.<br /></li>
 </ul>
-<p><strong>Accession_chromosome_haplo1.tab:</strong> A tabulated file listing grouped region bloacs for haplotype1<br /> <strong>Accession_chromosome_haplo2.tab:</strong> A tabulated file listing grouped region bloacs for haplotype2<br /> <strong>Accession_chromosome_density.pdf:</strong> A pdf file summarysing all statistics (heterozygosity, expected and observed ancestries along chromosomes, accessions ancestry probabilities and infered accession haplotypes)<br /><br /> ### haplo2kar.1.0.py</p>
+<p><strong>Accession_chromosome_haplo1.tab:</strong> A tabulated file listing grouped region bloacs for haplotype1<br /> <strong>Accession_chromosome_haplo2.tab:</strong> A tabulated file listing grouped region bloacs for haplotype2<br /> <strong>Accession_chromosome_density.pdf:</strong> A pdf file summarysing all statistics (heterozygosity, expected and observed ancestries along chromosomes, accessions ancestry probabilities and infered accession haplotypes) <br><br></p>
+<h3 id="haplo2kar.1.0.py">haplo2kar.1.0.py</h3>
 <p>This program perform a synthesis of the haplotypes reconstructed by vcf2linear.1.0.py by drawing for an accession the chromosomal painting for all its chromosomes.</p>
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession name.
@@ -324,7 +383,8 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.</code></pre>
-<p><em>Output:</em><br /> <strong>Accession.pdf:</strong> A pdf file with chromosome painting for all chromosomes of this accession.<br /><br /> ### haplo2karByChr.1.0.py</p>
+<p><em>Output:</em><br /> <strong>Accession.pdf:</strong> A pdf file with chromosome painting for all chromosomes of this accession. <br><br></p>
+<h3 id="haplo2karbychr.1.0.py">haplo2karByChr.1.0.py</h3>
 <p>This program perform a synthesis of the haplotypes reconstructed by vcf2linear.1.0.py by drawing for a chromosome the chromosomal painting for all selected accessions.</p>
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession names configuration file with Column1: accession name and column2: ploidy level.
@@ -334,7 +394,8 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.
 --prefix: Prefix for output files. [Default: All_acc]
 --maxChr: Maximal haplotype number to draw in a pdf. [Default: 53]</code></pre>
-<p><em>Output:</em><br /> <strong>prefix_chromosme_X.pdf:</strong> As much pdf file as necessary with chromosome painting for all chromosomes of this accession.<br /><br /> ### haplo2Circos.1.0.py</p>
+<p><em>Output:</em><br /> <strong>*_chromosme_X.pdf:</strong> As much pdf file as necessary with chromosome painting for all chromosomes of this accession. <br><br></p>
+<h3 id="haplo2circos.1.0.py">haplo2Circos.1.0.py</h3>
 <p>This program perform a synthesis of the haplotypes reconstructed by vcf2linear.1.0.py by drawing a circos representation of the chromosomal painting for all selected accessions and chromosomes.</p>
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession names configuration file with Column1: accession name and column2: ploidy level.
@@ -343,4 +404,4 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.
 --prefix: Prefix for output files. [Default: All_acc]</code></pre>
-<p><em>Output:</em><br /> * <strong>Circos_All_Admix.conf</strong>: the configuration file used by circos. I choose to keep this file so that it can be edited to change aspect of the Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : <em>circos -conf Circos_All_Admix.conf -noparanoid</em> * <strong>Circos_All_Admix_housekeeping.conf</strong>: a second file used by circos, * <strong>Circos_All_Admix.kar</strong>: a third file also used by circos, * <strong>Circos_All_Admix.png</strong>: the circos Figure.<br /><br /></p>
+<p><em>Output:</em><br /> <strong>*.conf</strong>: the configuration file used by circos. I choose to keep this file so that it can be edited to change aspect of the Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : <em>circos -conf Circos_All_Admix.conf -noparanoid</em><br /><strong>*_housekeeping.conf</strong>: a second file used by circos<br /><strong>*.kar</strong>: a third file also used by circos<br /><strong>*.png</strong>: the circos Figure</p>

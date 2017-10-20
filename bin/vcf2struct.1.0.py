@@ -183,13 +183,12 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 	file = open(MAT)
 	header = file.readline().replace('"','').split()
 	outfile.write('\tK-mean_GROUP\t'+'\t'.join(header)+'\n')
-	i = 0
+	
 	for line in file:
 		data = line.split()
 		if data:
 			if data[0] in ALNAME:
 				outfile.write(data[0]+'\tg'+str(LABELS[ALNAME.index(data[0])])+'\t'+'\t'.join(data[1:])+'\n')
-				i+=1
 	file.close()
 	outfile.close()
 	
