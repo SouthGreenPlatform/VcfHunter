@@ -104,8 +104,8 @@ def CreateNumpyArray(FILE, AXES, K):
 	
 	# recording axis that will be used
 	axes = list(map(int, AXES.split(':')))
-	if len(axes) < 2:
-		sys.exit('This is embarrassing... The program exited without finishing because at least 2 axes should be filled in --dAxes argument and it is not the case')
+	# if len(axes) < 2:
+		# sys.exit('This is embarrassing... The program exited without finishing because at least 2 axes should be filled in --dAxes argument and it is not the case')
 	
 	#-----------------------------------------------------------
 	# Loading coordinates in an array (Absent lines are removed)
