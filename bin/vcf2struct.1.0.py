@@ -229,7 +229,7 @@ def CalcProbaToBeInGroup(DISTFROMCENTRO):
 	Dim = DISTFROMCENTRO.shape
 	return numpy.array(ListeToReturn).reshape(Dim[0],Dim[1])
 
-def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, OUT):
+def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, OUT):
 	
 	"""
 		Compute MeanShift clusterization
@@ -246,20 +246,33 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 		:type ITER: int
 		:param THREAD: Number of processors availables
 		:type THREAD: int
+		:param NewMeanShift: Argument to cluster all points or not
+		:type NewMeanShift: str
 		:param OUT: A string corresponding to prefix for output
 		:type OUT: str
 		:return: perform the k-mean clustering
 		:rtype: void
 	"""
 	
+	sys.stdout.write('Recording Matrix\n')
 	Matrix = CreateNumpyArray(FILE, AXES, K)
 	
+	sys.stdout.write('Performing MeanShift\n')
 	bandwidth = estimate_bandwidth(Matrix[0], quantile=K, n_samples=10000, n_jobs=THREAD)
-	ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, n_jobs=THREAD).fit(Matrix[0])
+	if NewMeanShift == 'y':
+		ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, n_jobs=THREAD).fit(Matrix[0])
+	elif NewMeanShift == 'n':
+		ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, n_jobs=THREAD, cluster_all=False).fit(Matrix[0])
+	else:
+		sys.exit('The program exited without finishing because argument "'+NewMeanShift+'" is not recognized in --MeanShiftAll option\n')
 	labels = ms.labels_
 	cluster_centers = ms.cluster_centers_
 	
-	labels_unique = numpy.unique(labels)
+	
+	intermediate = list(numpy.unique(labels))
+	if -1 in intermediate:
+		intermediate.remove(-1)
+	labels_unique = numpy.array(intermediate)
 	n_clusters_ = len(labels_unique)
 	
 	print("number of estimated clusters : %d" % n_clusters_)
@@ -3804,39 +3817,40 @@ def __main__():
 	#Parse Command Line
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
 	# Wrapper options. 
-	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
-	parser.add_option( '',	'--vcf2',			dest='vcf2',		default=None,			help='A second vcf file. If COMPARE is passed in --type argument: can be used to compare two variant calling in two vcf file. [Default: %default]')
-	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
-	parser.add_option( '',	'--outgroup',		dest='outgroup',	default=None,			help='A one column file containing accession names that will not be used for filtering but will remain in the output file. [Default: %default]')
-	parser.add_option( '',	'--type',			dest='type',		default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST-Kmean, SNP_CLUST-MeanShift, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP. [Default: %default]')
-	parser.add_option( '',	'--fasta',			dest='fasta',		default=None,			help='A fasta file containing reference sequence. Not needed if standard vcf file (with sequence length). [Default: %default]')
-	parser.add_option( '',	'--gff3',			dest='gff3',		default=None,			help='A gff3 file containing gene annotation. [Default: %default]')
-	parser.add_option( '',	'--RmType',			dest='RmType',		default=None,			help='Variant status to filter out (several values can be passed in this case they should be separated by :). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
-	parser.add_option( '',	'--RmAlAlt',		dest='RmAlAlt',		default=None,			help='Number of alleles at the site to remove the variant site (several values can be passed and should be sepatated by :). Values: 1,2,3,...,n [Default: %default]')
-	parser.add_option( '',	'--MinCov',			dest='MinCov',		default='10',			help='Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to unknown for the concerned accession. [Default: %default]')
-	parser.add_option( '',	'--MinAl',			dest='MinAl',		default='3',			help='Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele, genotype will be converted to unknown for the concerned accession. [Default: %default]')
-	parser.add_option( '',	'--nMiss',			dest='nMiss',		default='0',			help='Maximal number of missing genotype in a line to keep the line (integer). [Default: %default]')
-	parser.add_option( '',	'--nRand',			dest='nRand',		default='1000',			help='Number of variant site to get randomly from the vcf file (integer). [Default: %default]')
-	parser.add_option( '',	'--mulType',		dest='mulType',		default='coa',			help='Multivariate analysis type. Possible values: coa, pca and pca_normed [Default: %default]')
-	parser.add_option( '',	'--nAxes',			dest='nAxes',		default='4',			help='Axes number to keep after PCA analysis (integer). [Default: %default]')
-	parser.add_option( '',	'--dAxes',			dest='dAxes',		default=None,			help='Axes to draw/use in 3d plot/kmean clustering. Axis should be separated by ":". Three values are required for 3d plot. [Default: %default]')
-	parser.add_option( '',	'--group',			dest='group',		default=None,			help='A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for unknown group, accessions with unknown group could be ommited). A section [color], that define for each group a color for pca drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). [Default: %default]')
-	parser.add_option( '',	'--dGroup',			dest='dGroup',		default=None,			help='Groups ids to draw. Groups names should be separated by ":". Groups names will be searched in the file provided in --mat argument in the "K-mean_GROUP" column, and if such column is not present, they will be searched in "GROUP" columns. If none of these columns are found the program will exit without finishing. [Default: %default]')
-	parser.add_option( '',	'--gCol',			dest='gCol',		default=None,			help='A file containing color attributed to group. This is a table file with column 1 : group name, column 2 : rgb color (ex: group1 red=1:green=0:blue=0) [Default: %default]')
-	parser.add_option( '',	'--prefix',			dest='prefix',		default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
-	parser.add_option( '',	'--comp1',			dest='comp1',		default=None, 			help='First accession name to compare. [Default: %default]')
-	parser.add_option( '',	'--comp2',			dest='comp2',		default=None, 			help='Second accession name to compare. If not provided, the same accession name will be searched to compare calling vcf passed in --vcf and --vcf2 arguments. If --comp2 and --vcf2 arguments are passed --comp2 accession name will be searched in vcf2. If --vcf2 argument is not passed, --comp2 accession name will be searched in vcf. [Default: %default]')
-	parser.add_option( '',	'--ref_cov',		dest='ref_cov',		default='1000', 		help='Value to put to AD and DP flags if "ADD_REF" is passed to --type. [Default: %default]')
-	parser.add_option( '',	'--VarCoord',		dest='VarCoord',	default=None, 			help='The tabulated file of variables coordinates in new axis. (The --prefix + _variables_coordinates.tab file generated when runing this script with PCA type) [Default: %default]')
-	parser.add_option( '',	'--mat',			dest='mat',			default=None, 			help='The tabulated file containing variant allele encoded. (The --prefix + _matrix_4_PCA.tab file generated when runing this script with PCA type) [Default: %default]')
-	parser.add_option( '',	'--nGroup',			dest='nGroup',		default='2', 			help='Group number for the k-mean algorithm that will cluster variables (alleles) based on their coordinates. [Default: %default]')
-	parser.add_option( '',	'--quantile',		dest='quantile',	default='0.2', 			help='The quantile value to estimate de bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: %default]')
-	parser.add_option( '',	'--ExclChr',		dest='ExclChr',		default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
-	parser.add_option( '',	'--thread',			dest='thread',		default='1', 			help='Number of processor available. [Default: %default]')
-	parser.add_option( '',	'--iter',			dest='iter',		default='100', 			help='Parallele k-mean clustering attempt to try. [Default: %default]')
-	parser.add_option( '',	'--gpPropFile',		dest='gpPropFile',	default=None, 			help='The group file proportion (*_kMean_gp_prop.tab file generated with SNP_CLUST). [Default: %default]')
-	parser.add_option( '',	'--gpPropValue',	dest='gpPropValue',	default='0.95',			help='The minimal value the max group proportion file to keep the dot (float between 0 and 1). [Default: %default]')
-	parser.add_option( '',	'--win',			dest='win',			default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
+	parser.add_option( '',	'--vcf',			dest='vcf',				default=None,			help='The vcf file. [Default: %default]')
+	parser.add_option( '',	'--vcf2',			dest='vcf2',			default=None,			help='A second vcf file. If COMPARE is passed in --type argument: can be used to compare two variant calling in two vcf file. [Default: %default]')
+	parser.add_option( '',	'--names',			dest='names',			default=None,			help='A one column file containing accession names to treat. [Default: %default]')
+	parser.add_option( '',	'--outgroup',		dest='outgroup',		default=None,			help='A one column file containing accession names that will not be used for filtering but will remain in the output file. [Default: %default]')
+	parser.add_option( '',	'--type',			dest='type',			default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST-Kmean, SNP_CLUST-MeanShift, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP. [Default: %default]')
+	parser.add_option( '',	'--fasta',			dest='fasta',			default=None,			help='A fasta file containing reference sequence. Not needed if standard vcf file (with sequence length). [Default: %default]')
+	parser.add_option( '',	'--gff3',			dest='gff3',			default=None,			help='A gff3 file containing gene annotation. [Default: %default]')
+	parser.add_option( '',	'--RmType',			dest='RmType',			default=None,			help='Variant status to filter out (several values can be passed in this case they should be separated by :). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
+	parser.add_option( '',	'--RmAlAlt',		dest='RmAlAlt',			default=None,			help='Number of alleles at the site to remove the variant site (several values can be passed and should be sepatated by :). Values: 1,2,3,...,n [Default: %default]')
+	parser.add_option( '',	'--MinCov',			dest='MinCov',			default='10',			help='Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to unknown for the concerned accession. [Default: %default]')
+	parser.add_option( '',	'--MinAl',			dest='MinAl',			default='3',			help='Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele, genotype will be converted to unknown for the concerned accession. [Default: %default]')
+	parser.add_option( '',	'--nMiss',			dest='nMiss',			default='0',			help='Maximal number of missing genotype in a line to keep the line (integer). [Default: %default]')
+	parser.add_option( '',	'--nRand',			dest='nRand',			default='1000',			help='Number of variant site to get randomly from the vcf file (integer). [Default: %default]')
+	parser.add_option( '',	'--mulType',		dest='mulType',			default='coa',			help='Multivariate analysis type. Possible values: coa, pca and pca_normed [Default: %default]')
+	parser.add_option( '',	'--nAxes',			dest='nAxes',			default='4',			help='Axes number to keep after PCA analysis (integer). [Default: %default]')
+	parser.add_option( '',	'--dAxes',			dest='dAxes',			default=None,			help='Axes to draw/use in 3d plot/kmean clustering. Axis should be separated by ":". Three values are required for 3d plot. [Default: %default]')
+	parser.add_option( '',	'--group',			dest='group',			default=None,			help='A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for unknown group, accessions with unknown group could be ommited). A section [color], that define for each group a color for pca drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). [Default: %default]')
+	parser.add_option( '',	'--dGroup',			dest='dGroup',			default=None,			help='Groups ids to draw. Groups names should be separated by ":". Groups names will be searched in the file provided in --mat argument in the "K-mean_GROUP" column, and if such column is not present, they will be searched in "GROUP" columns. If none of these columns are found the program will exit without finishing. [Default: %default]')
+	parser.add_option( '',	'--gCol',			dest='gCol',			default=None,			help='A file containing color attributed to group. This is a table file with column 1 : group name, column 2 : rgb color (ex: group1 red=1:green=0:blue=0) [Default: %default]')
+	parser.add_option( '',	'--prefix',			dest='prefix',			default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
+	parser.add_option( '',	'--comp1',			dest='comp1',			default=None, 			help='First accession name to compare. [Default: %default]')
+	parser.add_option( '',	'--comp2',			dest='comp2',			default=None, 			help='Second accession name to compare. If not provided, the same accession name will be searched to compare calling vcf passed in --vcf and --vcf2 arguments. If --comp2 and --vcf2 arguments are passed --comp2 accession name will be searched in vcf2. If --vcf2 argument is not passed, --comp2 accession name will be searched in vcf. [Default: %default]')
+	parser.add_option( '',	'--ref_cov',		dest='ref_cov',			default='1000', 		help='Value to put to AD and DP flags if "ADD_REF" is passed to --type. [Default: %default]')
+	parser.add_option( '',	'--VarCoord',		dest='VarCoord',		default=None, 			help='The tabulated file of variables coordinates in new axis. (The --prefix + _variables_coordinates.tab file generated when runing this script with PCA type) [Default: %default]')
+	parser.add_option( '',	'--mat',			dest='mat',				default=None, 			help='The tabulated file containing variant allele encoded. (The --prefix + _matrix_4_PCA.tab file generated when runing this script with PCA type) [Default: %default]')
+	parser.add_option( '',	'--nGroup',			dest='nGroup',			default='2', 			help='Group number for the k-mean algorithm that will cluster variables (alleles) based on their coordinates. [Default: %default]')
+	parser.add_option( '',	'--quantile',		dest='quantile',		default='0.2', 			help='The quantile value to estimate de bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: %default]')
+	parser.add_option( '',	'--ExclChr',		dest='ExclChr',			default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
+	parser.add_option( '',	'--thread',			dest='thread',			default='1', 			help='Number of processor available. [Default: %default]')
+	parser.add_option( '',	'--iter',			dest='iter',			default='100', 			help='Parallele k-mean clustering attempt to try. [Default: %default]')
+	parser.add_option( '',	'--gpPropFile',		dest='gpPropFile',		default=None, 			help='The group file proportion (*_kMean_gp_prop.tab file generated with SNP_CLUST). [Default: %default]')
+	parser.add_option( '',	'--gpPropValue',	dest='gpPropValue',		default='0.95',			help='The minimal value the max group proportion file to keep the dot (float between 0 and 1). [Default: %default]')
+	parser.add_option( '',	'--win',			dest='win',				default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
+	parser.add_option( '',	'--MeanShiftAll',	dest='MeanShiftAll',	default='y', 			help='Cluster all point in the MeanShift. Possible values, "y" or "n" [Default: %default]')
 
 	(options, args) = parser.parse_args()
 	
@@ -3923,7 +3937,7 @@ def __main__():
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
 			sys.exit('Please provide a matrix file to --mat argument')
-		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.prefix)
+		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.MeanShiftAll, options.prefix)
 	
 	# Filtering on max grouping proportion
 	if options.type == 'FILTER_ON_MAX_GP_PROP':
