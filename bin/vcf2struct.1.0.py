@@ -21,20 +21,21 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.stdout.write('loading modules\n')
-import optparse
 import os
-import shutil
-import subprocess
-import tempfile
-import fileinput
-import time
-import random
+import csv
 import math
+import time
+import shutil
+import random
 import datetime
+import optparse
+import tempfile
 import traceback
+import fileinput
+import subprocess
 import multiprocessing as mp
-from inspect import currentframe, getframeinfo
 from operator import itemgetter
+from inspect import currentframe, getframeinfo
 
 from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna
@@ -87,6 +88,15 @@ def couleur(VALUE):
 	
 	return (rouge, verte, bleu)
 
+def OuputMultiTread(TABLE, LABELS, ALNAME, SetAlname, OUT):
+	outfile = open(OUT,'w', 1)
+	for data in TABLE:
+		if data[0] in SetAlname:
+			outfile.write('\t'.join([data[0]] + ['g'+str(LABELS[ALNAME.index(data[0])])] + data[1:]))
+			outfile.write('\n')
+	outfile.close()
+	return 0
+
 def CreateNumpyArray(FILE, AXES, K):
 	
 	"""
@@ -129,7 +139,7 @@ def CreateNumpyArray(FILE, AXES, K):
 	file.close()
 	return (numpy.array(my_array), col_header)
 
-def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE, LABELS, MAT, ALNAME, PROBA, OUT):
+def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE, LABELS, MAT, ALNAME, PROBA, THREAD, OUT):
 	
 	"""
 		Output results
@@ -150,6 +160,8 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		:type ALNAME: list
 		:param PROBA: Probability to be in each groups
 		:type PROBA: numpy array
+		:param THREAD: Number of processors availables
+		:type THREAD: int
 		:param OUT: A string corresponding to prefix for output
 		:type OUT: str
 		:return: perform the k-mean clustering
@@ -181,20 +193,39 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		Value += Interval
 	outfile.close()
 	
-	outfile = open(OUT+'_kMean_allele.tab','w', 1)
-	file = open(MAT,'r', 1)
-	header = file.readline().replace('"','').split()
-	outfile.write('\tK-mean_GROUP\t'+'\t'.join(header)+'\n')
-	
 	# tps1 = time.time()
-	for line in file:
-		data = line.split()
-		if data:
-			if data[0] in SetAlname:
-				outfile.write('\t'.join([data[0]] + ['g'+str(LABELS[ALNAME.index(data[0])])] + data[1:]))
-				outfile.write('\n')
-	file.close()
+	with open(MAT, 'r') as csvfile:
+		file = csv.reader(csvfile, delimiter='\t')
+		table = [r for r in file]
+	header = table[0]
+	TotalLines = len(table[1:])
+	NbLines = int(TotalLines / THREAD)
+	
+	i = 0
+	list_job = []
+	ListToCat = []
+	while i+1 < THREAD:
+		list_job.append(['OuputMultiTread', table[(i*NbLines)+1:(i+1)*NbLines+1], LABELS, ALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
+		ListToCat.append(OUT+'_'+str(i)+'_kMean_allele.tab')
+		i+=1
+	list_job.append(['OuputMultiTread', table[(i*NbLines)+1:TotalLines], LABELS, ALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
+	ListToCat.append(OUT+'_'+str(i)+'_kMean_allele.tab')
+	
+	pool = mp.Pool(processes=THREAD)
+	result = pool.map(main, list_job)
+	for n in result:
+		if n:
+			sys.exit('There was a bug during output...')
+	pool.close()
+	del result
+	
+	outfile = open(OUT+'_kMean_allele.tab','w', 1)
+	outfile.write('\tK-mean_GROUP\t'+'\t'.join(header[1:])+'\n')
+	for i in ListToCat:
+		shutil.copyfileobj(open(i, 'r'), outfile)
+		os.remove(i)
 	outfile.close()
+	
 	# tps2 = time.time()
 	# print('temp bloc4:', tps2-tps1)
 	
@@ -289,7 +320,7 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, OUT):
 	Correspondance = numpy.arange(n_clusters_)
 	
 	sys.stdout.write('Printing files\n')
-	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Proba, OUT)
+	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Proba, THREAD, OUT)
 
 def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 	
@@ -365,7 +396,7 @@ def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 		sys.stdout.write('Warning some centroids of centroids are clustered together in the final centroids data! The k-mean may not be appropriate for your data...')
 		
 	sys.stdout.write('Printing files\n')
-	ClusteringOutput(CentroidsGroups, CentroidsIterPos, FinalCentroids, Correspondance, labels, MAT, Matrix[1], Proba, OUT)
+	ClusteringOutput(CentroidsGroups, CentroidsIterPos, FinalCentroids, Correspondance, labels, MAT, Matrix[1], Proba, THREAD, OUT)
 
 def RecordChromToExclude(EXCLCHR):
 	
@@ -528,6 +559,9 @@ def main(JOB):
 		elif JOB[0] == 'newKMean':
 			RESULT_MAIN = KMeans(n_clusters=JOB[1], init='random', n_init=1, tol=1e-10, max_iter=10000, random_state=0, n_jobs=1).fit(JOB[2])
 			result_main = RESULT_MAIN.cluster_centers_
+			sys.stdout.flush()
+		elif JOB[0] == 'OuputMultiTread':
+			result_main = OuputMultiTread(JOB[1], JOB[2], JOB[3], JOB[4], JOB[5])
 			sys.stdout.flush()
 		else:
 			raise ErrorValue ('Unknown function name: '+str(JOB[0]))
