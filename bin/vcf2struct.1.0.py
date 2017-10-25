@@ -156,12 +156,14 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		:rtype: void
 	"""
 	
+	SetAlname = set(ALNAME)
+	
 	outfile = open(OUT+'_centroid_coordinates.tab','w')
 	outfile.write('\taxis'+'\taxis'.join(list(map(str, range(CENTROID.shape[1]))))+'\n')
 	for i in range(CENTROIDSITERPOS.shape[0]):
 		outfile.write('centroid'+str(i)+'\t'+'\t'.join(list(map(str, list(CENTROIDSITERPOS[i,:]))))+'\n')
 	outfile.close()
-		
+	
 	outfile = open(OUT+'_centroid_iteration_grouping.tab','w')
 	outfile.write('\tK-mean_GROUP\n')
 	for i in range(CENTROIDSGROUPS.shape[0]):
@@ -179,19 +181,22 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		Value += Interval
 	outfile.close()
 	
-	outfile = open(OUT+'_kMean_allele.tab','w')
-	file = open(MAT)
+	outfile = open(OUT+'_kMean_allele.tab','w', 1)
+	file = open(MAT,'r', 1)
 	header = file.readline().replace('"','').split()
 	outfile.write('\tK-mean_GROUP\t'+'\t'.join(header)+'\n')
 	
+	# tps1 = time.time()
 	for line in file:
 		data = line.split()
 		if data:
-			if data[0] in ALNAME:
-				outfile.write(data[0]+'\tg'+str(LABELS[ALNAME.index(data[0])])+'\t'+'\t'.join(data[1:])+'\n')
+			if data[0] in SetAlname:
+				outfile.write('\t'.join([data[0]] + ['g'+str(LABELS[ALNAME.index(data[0])])] + data[1:]))
+				outfile.write('\n')
 	file.close()
 	outfile.close()
-	
+	# tps2 = time.time()
+	# print('temp bloc4:', tps2-tps1)
 	
 	outfile = open(OUT+'_kMean_gp_prop.tab','w')
 	outfile.write('\tg'+'\tg'.join(list(map(str, range(CENTROID.shape[0]))))+'\n')
