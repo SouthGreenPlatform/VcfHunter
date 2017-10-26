@@ -1838,7 +1838,7 @@ def CalcAllelicIdent(VCF, PREFIX):
 		outfile.write('\n')
 	outfile.close()
 
-def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
+def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE, DGROUP, MAT):
 	
 	"""
 		Return a matrix file containing accession identity
@@ -1853,9 +1853,36 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 		:type GROUP: str
 		:param AXIS: Axis number to keep at the end of pca.
 		:type AXIS: int
+		:param MULTYPE: Type of multivariate analysis to perform.
+		:type MULTYPE: str
+		:param DGROUP: A list of group to remove from the analysis.
+		:type DGROUP: str
+		:param MAT: File name of allele coding and grouping
+		:type MAT: str
 		:return: (1) A matrix file containing accession identity, (2) A script file that will be used by R to run multivariate analysis.
 		:rtype: void
 	"""
+	
+	# Recording alleles to remove from the analysis
+	ListeAlleleToRemove = set()
+	if DGROUP:
+		if not(MAT):
+			sys.exit('Please, provide a matrix of clustered alleles to --mat option as grouped alleles should be removed according to --dGroup option')
+		ListGroupToRemove = DGROUP.split(':')
+		file = open(MAT)
+		header = file.readline().split('\t')
+		TailleHeader = len(header)
+		for line in file:
+			data = line.split('\t')
+			if data:
+				if 'K-mean_GROUP' in header:
+					if data[header.index('K-mean_GROUP')] in ListGroupToRemove:
+						ListeAlleleToRemove.add(':'.join(data[0].split(':')[0:3]))
+				elif 'GROUP' in header:
+					if data[header.index('GROUP')] in ListGroupToRemove:
+						ListeAlleleToRemove.add(':'.join(data[0].split(':')[0:3]))
+				else:
+					sys.exit('There must be a probleme in formating of the matrix of clustered alleles passed to --mat option. Please see the tutorial to have an idea of the format.')
 	
 	# Recording group to plot
 	dico_group = {}
@@ -1925,15 +1952,20 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 					outfile.write('\t'+acc)
 				outfile.write('\n')
 			elif data[0][0] != "#":
+				# recording variant position
+				var_pos = data[header.index('POS')]
+				var_chr = data[header.index('#CHROM')]
 				# recording allele information
 				ref_allele = [data[header.index('REF')]]
 				alt_allele = data[header.index('ALT')].split(',')
 				set_ref_allele = set(ref_allele)
 				set_alt_allele = set(alt_allele)
 				set_all_allele = set_alt_allele.union(set_ref_allele)
-				# recording variant position
-				var_pos = data[header.index('POS')]
-				var_chr = data[header.index('#CHROM')]
+				AlleleToRemove = set()
+				for allele in set_all_allele:
+					if var_chr+':'+var_pos+':'+allele in ListeAlleleToRemove:
+						AlleleToRemove.add(allele)
+				set_all_allele.difference_update(AlleleToRemove)
 				# recoding genotype
 				dico_coded = {}
 				have_missing = False
@@ -3974,9 +4006,11 @@ def __main__():
 	# Do ACP
 	if options.type == 'FACTORIAL':
 		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--names\n\t--prefix\n\t--group\n\t--nAxes\n\t--mulType\n')
+		sys.stdout.write('Optional and dependant parameters:\n\t--dGroup: If passed, all alleles belonging to groups passed to this option will be removed.\n\t--mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column).'
+		' If a K-mean_GROUP column is found, the filter will be performed on this column, else it will be performed on the GROUP one\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
-		FormatForPCA(options.vcf, options.names, options.prefix, options.group, int(options.nAxes), options.mulType)
+		FormatForPCA(options.vcf, options.names, options.prefix, options.group, int(options.nAxes), options.mulType, options.dGroup, options.mat)
 		os.system('R CMD BATCH '+options.prefix+'_multivariate.R')
 	
 	# Draw 3d plot

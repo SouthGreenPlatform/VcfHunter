@@ -418,7 +418,10 @@ sites.
     --nAxes: Axis number to keep for the factorial analysis (integer). [Default: 4]
     --mulType: Multivariate analysis type. Possible values: coa, pca and pca_normed [Default: coa]
     --group: (optional) A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)
-
+	Optional and dependant parameters:
+	--dGroup: If passed, all alleles belonging to groups passed to this option will be removed.
+	--mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the filter will be performed on this column, else it will be performed on the GROUP one.
+	
 *Outputs:*\
  **\*\_axis*x*\_vs\_*y*\_accessions.pdf:** Several pdf files showing
 accessions projected along x and y axis.\
