@@ -483,6 +483,7 @@ sum is equal to 1.
     --prefix: The prefix for output files. [Default: WorkOnVcf]
     --thread: Number of processor available. [Default: 1]
 	--MeanShiftAll: Cluster all point in the MeanShift. Possible values, "y" or "n" [Default: y]
+	--bandwidth: Bandwidth value used for mean shift. If filled, the --quantile parameter is ignored. [Default: None]
 
 *Outputs:*\
  **\*\_centroid\_coordinates.tab:** Coordinates of centroides calculated.\

@@ -277,7 +277,7 @@ def CalcProbaToBeInGroup(DISTFROMCENTRO):
 	Dim = DISTFROMCENTRO.shape
 	return numpy.array(ListeToReturn).reshape(Dim[0],Dim[1])
 
-def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, OUT):
+def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT):
 	
 	"""
 		Compute MeanShift clusterization
@@ -296,6 +296,8 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, OUT):
 		:type THREAD: int
 		:param NewMeanShift: Argument to cluster all points or not
 		:type NewMeanShift: str
+		:param BANDWIDTH: Bandwidth value for mean shift
+		:type BANDWIDTH: Boolean or string
 		:param OUT: A string corresponding to prefix for output
 		:type OUT: str
 		:return: perform the k-mean clustering
@@ -306,7 +308,12 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, OUT):
 	Matrix = CreateNumpyArray(FILE, AXES, K)
 	
 	sys.stdout.write('Performing MeanShift\n')
-	bandwidth = estimate_bandwidth(Matrix[0], quantile=K, n_samples=10000, n_jobs=THREAD)
+	if BANDWIDTH:
+		bandwidth = float(BANDWIDTH)
+		sys.stdout.write('Bandwidth fixed to: '+str(bandwidth)+'\n')
+	else:
+		bandwidth = estimate_bandwidth(Matrix[0], quantile=K, n_samples=10000, n_jobs=THREAD)
+		sys.stdout.write('Bandwidth estimation: '+str(bandwidth)+'\n')
 	if NewMeanShift == 'y':
 		ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, n_jobs=THREAD).fit(Matrix[0])
 	elif NewMeanShift == 'n':
@@ -3905,6 +3912,7 @@ def __main__():
 	parser.add_option( '',	'--gpPropValue',	dest='gpPropValue',		default='0.95',			help='The minimal value the max group proportion file to keep the dot (float between 0 and 1). [Default: %default]')
 	parser.add_option( '',	'--win',			dest='win',				default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
 	parser.add_option( '',	'--MeanShiftAll',	dest='MeanShiftAll',	default='y', 			help='Cluster all point in the MeanShift. Possible values, "y" or "n" [Default: %default]')
+	parser.add_option( '',	'--bandwidth',		dest='bandwidth',		default=None, 			help='Bandwidth value used for mean shift. If filled, the --quantile parameter is ignored. [Default: %default]')
 
 	(options, args) = parser.parse_args()
 	
@@ -3916,12 +3924,14 @@ def __main__():
 	
 	# Extract a random sub-set of the VCF
 	if options.type == 'RANDOM_SUB_SET':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--nRand\n\t--prefix\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		random_sub_set(options.vcf, int(options.nRand), options.prefix)
 	
 	# Calculating statistics
 	if options.type == 'STAT':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--prefix\n\t--names\n\t--gff3\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		if options.names == None:
@@ -3930,6 +3940,7 @@ def __main__():
 	
 	# Filtering vcf file
 	if options.type == 'FILTER':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--names\n\t--outgroup\n\t--prefix\n\t--RmType\n\t--MinCov\n\t--MinAl\n\t--nMiss\n\t--RmAlAlt\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		if options.names == None:
@@ -3938,6 +3949,7 @@ def __main__():
 	
 	# Comparing two variant calling
 	if options.type == 'COMPARE':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--vcf2\n\t--comp1\n\t--comp2\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		if options.comp1 == None:
@@ -3946,12 +3958,14 @@ def __main__():
 	
 	# Add reference to calling
 	if options.type == 'ADD_REF':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--prefix\n\t--ref_cov\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		AddRefToCall(options.vcf, options.prefix, int(options.ref_cov))
 	
 	# Callculate genotype identity
 	if options.type == 'AL_IDENTITY':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--prefix\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		sys.stdout.write('Warning, the statistic used here has been designed to work with data with different ploidy level and does not correpondond to an identity as you may expect\n')
@@ -3959,6 +3973,7 @@ def __main__():
 	
 	# Do ACP
 	if options.type == 'FACTORIAL':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--names\n\t--prefix\n\t--group\n\t--nAxes\n\t--mulType\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		FormatForPCA(options.vcf, options.names, options.prefix, options.group, int(options.nAxes), options.mulType)
@@ -3966,18 +3981,21 @@ def __main__():
 	
 	# Draw 3d plot
 	if options.type == 'VISUALIZE_VAR_3D':
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--dAxes\n\t--mat\n\t--group\n\t--dGroup\n')
 		if options.VarCoord == None:
 			sys.exit('Please provide a file name to --VarCoord argument')
 		Draw3dPlot(options.VarCoord, options.dAxes, options.mat, options.group, options.dGroup)
 	
 	# Draw 2d plot
 	if options.type == 'VISUALIZE_VAR_2D':
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--dAxes\n\t--mat\n\t--group\n\t--dGroup\n\t--prefix\n')
 		if options.VarCoord == None:
 			sys.exit('Please provide a file name to --VarCoord argument')
 		Draw2dPlot(options.VarCoord, options.dAxes, options.mat, options.group, options.dGroup, options.prefix)
 	
 	# Cluster SNP
 	if options.type == 'SNP_CLUST-Kmean':
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--nGroup\n\t--iter\n\t--thread\n\t--prefix\n')
 		if options.dAxes == None:
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
@@ -3987,14 +4005,16 @@ def __main__():
 	
 	# Cluster SNP
 	if options.type == 'SNP_CLUST-MeanShift':
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--quantile\n\t--iter\n\t--thread\n\t--MeanShiftAll\n\t--bandwidth\n\t--prefix\n')
 		if options.dAxes == None:
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
 			sys.exit('Please provide a matrix file to --mat argument')
-		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.MeanShiftAll, options.prefix)
+		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.MeanShiftAll, options.bandwidth, options.prefix)
 	
 	# Filtering on max grouping proportion
 	if options.type == 'FILTER_ON_MAX_GP_PROP':
+		sys.stdout.write('Associated parameters:\n\t--gpPropFile\n\t--mat\n\t--gpPropValue\n\t--prefix\n')
 		if options.gpPropFile == None:
 			sys.exit('Please provide a file to --gpPropFile argument')
 		if options.mat == None:
@@ -4005,6 +4025,7 @@ def __main__():
 	
 	# Merging vcf based on names
 	if options.type == 'MERGE_VCF':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--vcf2\n\t--comp1\n\t--prefix\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		if options.vcf2 == None:
@@ -4015,16 +4036,21 @@ def __main__():
 	
 	# Get genotype from VCF
 	if options.type == 'GET_GENOTYPE':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--names\n\t--prefix\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		get_genotype(options.vcf, options.names, options.prefix)
 	
 	# Calculate allele group proportions
 	if options.type == 'ALL_PROP':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--mat\n\t--prefix\n\t--names\n\t--dGroup\n\t--ExclChr\n')
+		if options.vcf == None:
+			sys.exit('Please provide a vcf file to --vcf argument')
 		get_allele_group_prop(options.vcf, options.mat, options.prefix, options.names, options.dGroup, options.ExclChr)
 	
 	# Get genotype from VCF
 	if options.type == 'GET_GENOTYPE_AND_GROUP':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--mat\n\t--dGroup\n\t--names\n\t--prefix\n')
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		get_genotype_and_group(options.vcf, options.mat, options.dGroup, options.names, options.prefix)
