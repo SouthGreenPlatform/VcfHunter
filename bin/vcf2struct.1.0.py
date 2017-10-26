@@ -194,6 +194,7 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 	outfile.close()
 	
 	# tps1 = time.time()
+	
 	with open(MAT, 'r') as csvfile:
 		file = csv.reader(csvfile, delimiter='\t')
 		table = [r for r in file]
@@ -235,9 +236,13 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		outfile.write('\t'.join(([ALNAME[n]] + list(map(str, list(PROBA[n])))))+'\n')
 	outfile.close()
 	
-	group_count = numpy.bincount(LABELS)
-	for i in range(group_count.shape[0]):
-		sys.stdout.write('Group g'+str(i)+' contained '+str(group_count[i])+' dots\n')
+	intermediate = list(numpy.unique(LABELS))
+	if -1 in intermediate:
+		pass
+	else:
+		group_count = numpy.bincount(LABELS)
+		for i in range(group_count.shape[0]):
+			sys.stdout.write('Group g'+str(i)+' contained '+str(group_count[i])+' dots\n')
 
 def CalcProbaToBeInGroup(DISTFROMCENTRO):
 	
@@ -255,12 +260,19 @@ def CalcProbaToBeInGroup(DISTFROMCENTRO):
 	## For each point x: 1. compute distance to all cluster centers. 2. invert the distances 3. norming so that the sum equals 1
 	
 	ListeToReturn = []
+	
 	for n in DISTFROMCENTRO:
 		total = 0
 		for k in n:
-			total += 1/float(k)
+			if k == 0:
+				pass
+			else:
+				total += 1/float(k)
 		for k in n:
-			ListeToReturn.append((1/float(k))/total)
+			if k == 0:
+				ListeToReturn.append(1)
+			else:
+				ListeToReturn.append((1/float(k))/total)
 	
 	Dim = DISTFROMCENTRO.shape
 	return numpy.array(ListeToReturn).reshape(Dim[0],Dim[1])
@@ -2121,6 +2133,9 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE):
 		outfile.write('dev.off()\n')
 	# Printing variables coordinates
 	outfile.write('write.table(multivariate_analysis$co, file = "'+PREFIX+'_variables_coordinates.tab")\n')
+	# Printing normalized variable coordinates
+	outfile.write('scaled.dat <- scale(multivariate_analysis$co)\n')
+	outfile.write('write.table(scaled.dat, file = "'+PREFIX+'_variables_coordinates_scaled.tab")\n')
 	# Printing individuals coordinates
 	outfile.write('write.table(multivariate_analysis$li, file = "'+PREFIX+'_individuals_coordinates.tab")\n')
 	outfile.close()

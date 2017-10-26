@@ -469,6 +469,10 @@ Individual and variables coordinates for the selected 6 fisrt axis
 (--nAxes option) are recorded in files named
 ***AllClust/ClustAnalysis\_individuals\_coordinates.tab*** and
 ***AllClust/ClustAnalysis\_variables\_coordinates.tab*** respectively.
+A third file named
+***AllClust/ClustAnalysis\_variables\_coordinates\scaled.tab***
+containing allele scaled coordinates (colums centered and reduced)
+along synthetic axis is generated.
 
 ### The --group option
 
