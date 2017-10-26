@@ -2450,7 +2450,8 @@ def Draw_2d_Plot(DICO, HEAD, NAME, TITLE):
 	ax = plt.subplot2grid((1,13),(0,0), colspan=10, rowspan=1)
 	legend = []
 	legend_name = []
-	for n in DICO:
+	ListeOrdered = sorted(list(DICO.keys()))
+	for n in ListeOrdered:
 		dot_legend, = ax.plot(DICO[n]['to_plot'][:,HEAD[0]], DICO[n]['to_plot'][:,HEAD[1]], 'o', markersize=5, color=DICO[n]['color'])
 		legend.append(dot_legend)
 		legend_name.append('group '+str(n))
