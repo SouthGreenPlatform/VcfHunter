@@ -97,7 +97,7 @@ def OuputMultiTread(TABLE, LABELS, DICOALNAME, SetAlname, OUT):
 	outfile.close()
 	return 0
 
-def CreateNumpyArray(FILE, AXES, K):
+def CreateNumpyArray(FILE, AXES, K, AP):
 	
 	"""
 		Fill a set with chromosomes to exclude
@@ -108,6 +108,8 @@ def CreateNumpyArray(FILE, AXES, K):
 		:type AXES: str
 		:param K: Group number
 		:type K: int
+		:param AP: Work on present/absent alleles 'y' or only on present allele 'n'
+		:type AP: str
 		:return: A tuple with 2 object: a numpy array and correponding marker names
 		:rtype: void
 	"""
@@ -127,16 +129,30 @@ def CreateNumpyArray(FILE, AXES, K):
 	header = file.readline().replace('"','').split()
 	# recording coordinates
 	col_header = []
-	for line in file:
-		data = line.split()
-		if data:
-			if data[0].replace('"','').replace('.',':').split(':')[3] == 'P':
+	
+	if AP == 'n':
+		for line in file:
+			data = line.split()
+			if data:
+				if data[0].replace('"','').replace('.',':').split(':')[3] == 'P':
+					col_header.append(data[0].replace('"','').replace('.',':'))
+					my_list = []
+					for ax in axes:
+						my_list.append(data[ax])
+					my_array.append(list(map(float, my_list)))
+		file.close()
+	elif AP == 'y':
+		for line in file:
+			data = line.split()
+			if data:
 				col_header.append(data[0].replace('"','').replace('.',':'))
 				my_list = []
 				for ax in axes:
 					my_list.append(data[ax])
 				my_array.append(list(map(float, my_list)))
-	file.close()
+		file.close()
+	else:
+		sys.exit('Unrecognized argument passed to --AP '+AP+' Only possible values are "y" or "n".')
 	
 	DicoCol = {}
 	for i in range(len(col_header)):
@@ -284,7 +300,7 @@ def CalcProbaToBeInGroup(DISTFROMCENTRO):
 	Dim = DISTFROMCENTRO.shape
 	return numpy.array(ListeToReturn).reshape(Dim[0],Dim[1])
 
-def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT):
+def NewMeanShift(FILE, MAT, AXES, K, AP, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT):
 	
 	"""
 		Compute MeanShift clusterization
@@ -312,7 +328,7 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT)
 	"""
 	
 	sys.stdout.write('Recording Matrix\n')
-	Matrix = CreateNumpyArray(FILE, AXES, K)
+	Matrix = CreateNumpyArray(FILE, AXES, K, AP)
 	
 	sys.stdout.write('Performing MeanShift\n')
 	if BANDWIDTH:
@@ -348,7 +364,7 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT)
 	sys.stdout.write('Printing files\n')
 	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Matrix[2], Proba, THREAD, OUT)
 
-def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
+def NewKmean(FILE, MAT, AXES, K, AP, ITER, THREAD, OUT):
 	
 	"""
 		Compute K-mean clusterization
@@ -371,7 +387,7 @@ def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 		:rtype: void
 	"""
 	
-	Matrix = CreateNumpyArray(FILE, AXES, K)
+	Matrix = CreateNumpyArray(FILE, AXES, K, AP)
 	
 	sys.stdout.write('Running K-mean\n')
 	
@@ -3953,6 +3969,7 @@ def __main__():
 	parser.add_option( '',	'--win',			dest='win',				default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
 	parser.add_option( '',	'--MeanShiftAll',	dest='MeanShiftAll',	default='y', 			help='Cluster all point in the MeanShift. Possible values, "y" or "n" [Default: %default]')
 	parser.add_option( '',	'--bandwidth',		dest='bandwidth',		default=None, 			help='Bandwidth value used for mean shift. If filled, the --quantile parameter is ignored. [Default: %default]')
+	parser.add_option( '',	'--AP',				dest='AP',				default='n', 			help='Cluster absent (A) and present (P) lines. Possible values, "y" or "n" [Default: %default]')
 
 	(options, args) = parser.parse_args()
 	
@@ -4037,22 +4054,22 @@ def __main__():
 	
 	# Cluster SNP
 	if options.type == 'SNP_CLUST-Kmean':
-		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--nGroup\n\t--iter\n\t--thread\n\t--prefix\n')
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--nGroup\n\t--AP\n\t--iter\n\t--thread\n\t--prefix\n')
 		if options.dAxes == None:
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
 			sys.exit('Please provide a matrix file to --mat argument')
 		# kMean_clust(options.VarCoord, options.dAxes, int(options.nGroup), options.mat, options.prefix, int(options.thread), int(options.iter))
-		NewKmean(options.VarCoord, options.mat, options.dAxes, int(options.nGroup), int(options.iter), int(options.thread), options.prefix)
+		NewKmean(options.VarCoord, options.mat, options.dAxes, int(options.nGroup), options.AP, int(options.iter), int(options.thread), options.prefix)
 	
 	# Cluster SNP
 	if options.type == 'SNP_CLUST-MeanShift':
-		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--quantile\n\t--iter\n\t--thread\n\t--MeanShiftAll\n\t--bandwidth\n\t--prefix\n')
+		sys.stdout.write('Associated parameters:\n\t--VarCoord\n\t--mat\n\t--dAxes\n\t--quantile\n\t--AP\n\t--iter\n\t--thread\n\t--MeanShiftAll\n\t--bandwidth\n\t--prefix\n')
 		if options.dAxes == None:
 			sys.exit('Please provide value to --dAxes argument')
 		if options.mat == None:
 			sys.exit('Please provide a matrix file to --mat argument')
-		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), int(options.iter), int(options.thread), options.MeanShiftAll, options.bandwidth, options.prefix)
+		NewMeanShift(options.VarCoord, options.mat, options.dAxes, float(options.quantile), options.AP, int(options.iter), int(options.thread), options.MeanShiftAll, options.bandwidth, options.prefix)
 	
 	# Filtering on max grouping proportion
 	if options.type == 'FILTER_ON_MAX_GP_PROP':

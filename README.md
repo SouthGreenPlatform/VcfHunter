@@ -454,6 +454,7 @@ coordinates (colums centered and reduced) along synthetic axis.
     --prefix: The prefix for output files. [Default: WorkOnVcf]
     --thread: Number of processor available. [Default: 1]
     --iter: Parallele k-mean clustering different startpoints performed. [Default: 100]
+	--AP: Cluster absent (A) and present (P) lines. Possible values, "y" or "n" [Default: y]
 
 *Outputs:*\
  **\*\_centroid\_coordinates.tab:** Coordinates of the distincts final
@@ -487,6 +488,7 @@ sum is equal to 1.
     --thread: Number of processor available. [Default: 1]
 	--MeanShiftAll: Cluster all point in the MeanShift. Possible values, "y" or "n" [Default: y]
 	--bandwidth: Bandwidth value used for mean shift. If filled, the --quantile parameter is ignored. [Default: None]
+	--AP: Cluster absent (A) and present (P) lines. Possible values, "y" or "n" [Default: y]
 
 *Outputs:*\
  **\*\_centroid\_coordinates.tab:** Coordinates of centroides calculated.\
