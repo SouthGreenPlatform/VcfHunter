@@ -88,11 +88,11 @@ def couleur(VALUE):
 	
 	return (rouge, verte, bleu)
 
-def OuputMultiTread(TABLE, LABELS, ALNAME, SetAlname, OUT):
+def OuputMultiTread(TABLE, LABELS, DICOALNAME, SetAlname, OUT):
 	outfile = open(OUT,'w', 1)
 	for data in TABLE:
 		if data[0] in SetAlname:
-			outfile.write('\t'.join([data[0]] + ['g'+str(LABELS[ALNAME.index(data[0])])] + data[1:]))
+			outfile.write('\t'.join([data[0]] + ['g'+str(LABELS[DICOALNAME[data[0]]])] + data[1:]))
 			outfile.write('\n')
 	outfile.close()
 	return 0
@@ -137,9 +137,14 @@ def CreateNumpyArray(FILE, AXES, K):
 					my_list.append(data[ax])
 				my_array.append(list(map(float, my_list)))
 	file.close()
-	return (numpy.array(my_array), col_header)
+	
+	DicoCol = {}
+	for i in range(len(col_header)):
+		DicoCol[col_header[i]] = i
+	
+	return (numpy.array(my_array), col_header, DicoCol)
 
-def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE, LABELS, MAT, ALNAME, PROBA, THREAD, OUT):
+def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE, LABELS, MAT, ALNAME, DICOALNAME, PROBA, THREAD, OUT):
 	
 	"""
 		Output results
@@ -158,6 +163,8 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 		:type MAT: numpy array
 		:param ALNAME: A list of allele names
 		:type ALNAME: list
+		:param DICOALNAME: A dictionnary with allele names and their corresponding position in the matrix
+		:type DICOALNAME: dict
 		:param PROBA: Probability to be in each groups
 		:type PROBA: numpy array
 		:param THREAD: Number of processors availables
@@ -206,10 +213,10 @@ def ClusteringOutput(CENTROIDSGROUPS, CENTROIDSITERPOS, CENTROID, CORRESPONDANCE
 	list_job = []
 	ListToCat = []
 	while i+1 < THREAD:
-		list_job.append(['OuputMultiTread', table[(i*NbLines)+1:(i+1)*NbLines+1], LABELS, ALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
+		list_job.append(['OuputMultiTread', table[(i*NbLines)+1:(i+1)*NbLines+1], LABELS, DICOALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
 		ListToCat.append(OUT+'_'+str(i)+'_kMean_allele.tab')
 		i+=1
-	list_job.append(['OuputMultiTread', table[(i*NbLines)+1:TotalLines], LABELS, ALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
+	list_job.append(['OuputMultiTread', table[(i*NbLines)+1:TotalLines], LABELS, DICOALNAME, SetAlname, OUT+'_'+str(i)+'_kMean_allele.tab'])
 	ListToCat.append(OUT+'_'+str(i)+'_kMean_allele.tab')
 	
 	pool = mp.Pool(processes=THREAD)
@@ -339,7 +346,7 @@ def NewMeanShift(FILE, MAT, AXES, K, ITER, THREAD, NewMeanShift, BANDWIDTH, OUT)
 	Correspondance = numpy.arange(n_clusters_)
 	
 	sys.stdout.write('Printing files\n')
-	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Proba, THREAD, OUT)
+	ClusteringOutput(Correspondance, cluster_centers, cluster_centers, Correspondance, labels, MAT, Matrix[1], Matrix[2], Proba, THREAD, OUT)
 
 def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 	
@@ -415,7 +422,7 @@ def NewKmean(FILE, MAT, AXES, K, ITER, THREAD, OUT):
 		sys.stdout.write('Warning some centroids of centroids are clustered together in the final centroids data! The k-mean may not be appropriate for your data...')
 		
 	sys.stdout.write('Printing files\n')
-	ClusteringOutput(CentroidsGroups, CentroidsIterPos, FinalCentroids, Correspondance, labels, MAT, Matrix[1], Proba, THREAD, OUT)
+	ClusteringOutput(CentroidsGroups, CentroidsIterPos, FinalCentroids, Correspondance, labels, MAT, Matrix[1], Matrix[2], Proba, THREAD, OUT)
 
 def RecordChromToExclude(EXCLCHR):
 	
