@@ -655,6 +655,8 @@ def CalcProbFromBinomial(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW,
 							dico_stat[gp]["Loc-sd-H"+str(i+1)] = math.sqrt(dico_hybrids_bis[gp]["H"+str(i+1)][1])
 						sd_liste.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
 						mot_final.append(dico_stat[gp]["Loc-sd-H"+str(i+1)])
+					if max(sd_liste) == 0:
+						sd_liste.append(1e-16)
 					dico_stat["Loc-max-sd-H"+str(i+1)] = max(sd_liste)
 					mot_final.append(dico_stat["Loc-max-sd-H"+str(i+1)])
 					
@@ -694,6 +696,8 @@ def CalcProbFromBinomial(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW,
 						dico_stat[gp]["Loc-sd-noise"] = math.sqrt(dico_hybrids_bis[gp]['noise'][1])
 					mot_final.append(dico_stat[gp]["Loc-sd-noise"])
 					sd_liste.append(dico_stat[gp]["Loc-sd-noise"])
+				if max(sd_liste) == 0:
+					sd_liste.append(1e-16)
 				dico_stat["Loc-max-sd-noise"] = max(sd_liste)
 				mot_final.append(dico_stat["Loc-max-sd-noise"])
 				
@@ -1474,14 +1478,14 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY, 
 	listJobs = []
 	for acc in acc_to_draw:
 		# CalcProb(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
-		# CalcProbFromBinomial(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
-		listJobs.append([TYPE, acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION])
-	pool = mp.Pool(processes=THREAD)
-	results = pool.map(run_mutithread, listJobs)
-	for n in results:
-		if n != 0:
-			sys.stdout.write(str(n)+'\n')
-			sys.stdout.flush()
+		CalcProbFromBinomial(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
+		# listJobs.append([TYPE, acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION])
+	# pool = mp.Pool(processes=THREAD)
+	# results = pool.map(run_mutithread, listJobs)
+	# for n in results:
+		# if n != 0:
+			# sys.stdout.write(str(n)+'\n')
+			# sys.stdout.flush()
 	
 	# We need to record data probabilities
 	print ("Recording informations for drawing")
