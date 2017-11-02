@@ -1480,12 +1480,12 @@ def CalcGroupProp(VCF, NAMES, NAMES2, PREFIX, CHR, WINDOW, GROUP, GCOL, PLOIDY, 
 		# CalcProb(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
 		# CalcProbFromBinomial(acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION)
 		listJobs.append([TYPE, acc, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, nb_individuals, dico_hybrid_mean_and_var, PROPORTION])
-	# pool = mp.Pool(processes=THREAD)
-	# results = pool.map(run_mutithread, listJobs)
-	# for n in results:
-		# if n != 0:
-			# sys.stdout.write(str(n)+'\n')
-			# sys.stdout.flush()
+	pool = mp.Pool(processes=THREAD)
+	results = pool.map(run_mutithread, listJobs)
+	for n in results:
+		if n != 0:
+			sys.stdout.write(str(n)+'\n')
+			sys.stdout.flush()
 	
 	# We need to record data probabilities
 	print ("Recording informations for drawing")
