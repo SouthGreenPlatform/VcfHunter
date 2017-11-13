@@ -898,7 +898,8 @@ attributed. This probability is the probability to have at least X
 haplotypes in the analysed region. If the observed value is lower the
 probability is calculated based on a density probability of a normal
 distribution of mean value = **expected value - the maximal standard
-deviation** and sd = **the maximal standard deviation**. This density
+deviation** and sd = **the maximal standard deviation \* --sdMult**.
+By default --sdMult = 1. This density
 probability is normalized to reach a probability of 1 when the observed
 value is equal to **expected value - the maximal standard deviation**.
 The noise probability is calculated following the same phylosophie but
@@ -907,7 +908,7 @@ allele number is lower than the **expected value + the maximal standard
 deviation**. Else, the probability to be in the noise is calculated
 based on a density probability of a normal distribution of mean value =
 **expected value + the maximal standard deviation** and sd = **the
-maximal standard deviation**. This density probability is normalized to
+maximal standard deviation \* --sdMult**. This density probability is normalized to
 reach a probability of 1 when the observed value is equal to **expected
 value + the maximal standard deviation**. Based on these probabilities,
 an ancestral origin is attributed to each haplotypes of the studied

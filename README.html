@@ -190,12 +190,16 @@ Possible values are:
 <p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to treat.
---outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the output file.
+--outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the
+ output file.
 --prefix: The prefix for output files. [Default: WorkOnVcf]
---MinCov: Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to unknown for the concerned accession. [Default: 10]
---MinAl: Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele, genotype will be converted to unknown for the concerned accession. [Default: 3]
+--MinCov: Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to
+ unknown for the concerned accession. [Default: 10]
+--MinAl: Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele,
+ genotype will be converted to unknown for the concerned accession. [Default: 3]
 --nMiss: Maximal number of missing genotype in a line to keep the line (integer). [Default: 0]
---RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be passed and should be sepatated by &quot;:&quot;). Values: 1,2,3,...,n
+--RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be
+ passed and should be sepatated by &quot;:&quot;). Values: 1,2,3,...,n
 --RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by &quot;:&quot;). 
     Possible values: 
         *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
@@ -206,7 +210,8 @@ Possible values are:
 </ul>
 <p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
---comp1: Accession name to compare. If 2 vcf files are provided and only one accession name is passed, this name will be searched in both vcf files.
+--comp1: Accession name to compare. If 2 vcf files are provided and only one accession name is passed, this name will be
+ searched in both vcf files.
 --vcf2: (optional if --comp2 filled) A second vcf file.
 --comp2:(optional if --vcf2 filled) Second accession to compare.
 If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be searched in vcf2.\</code></pre>
@@ -234,10 +239,13 @@ If 2 vcf and 2 names are passed, comp1 will be searched in vcf and comp2 will be
 --prefix: The prefix for output files. [Default: WorkOnVcf]
 --nAxes: Axis number to keep for the factorial analysis (integer). [Default: 4]
 --mulType: Multivariate analysis type. Possible values: coa, pca and pca_normed [Default: coa]
---group: (optional) A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)
+--group: (optional) A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for
+ unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca
+ drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)
 Optional and dependant parameters:
 --dGroup: If passed, all alleles belonging to groups passed to this option will be removed.
---mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the filter will be performed on this column, else it will be performed on the GROUP one.</code></pre>
+--mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the
+ filter will be performed on this column, else it will be performed on the GROUP one.</code></pre>
 <p><em>Outputs:</em><br /> <strong>*_axis<em>x</em>_vs_<em>y</em>_accessions.pdf:</strong> Several pdf files showing accessions projected along x and y axis.<br /> <strong>*_axis<em>x</em>_vs_<em>y</em>.pdf:</strong> Several pdf files showing accessions projected along x and y synthetic axis in a first graphe and allele projection along x and y synthetic axis.<br /> <strong>*_inertia.pdf:</strong> A pdf files showing axis inertia.<br /> <strong>*_matri_4_PCA.tab:</strong> A tabulated file of the recoded vcf file passed to R for the factorial analysis.<br /> <strong>*_multivariate.R:</strong> The R script file passed to R to do the abalysis.<br /> <strong>*_multivariate.Rout:</strong> The R script log file.<br /> <strong>*_individuals_coordinates.tab:</strong> A tabulated file of individuals coordinates along synthetic axis.<br /> <strong>*_variables_coordinates.tab:</strong> A tabulated file of allele coordinates along synthetic axis.<br /> <strong>*_variables_coordinates_scaled.tab:</strong> A tabulated file of allele scaled coordinates (colums centered and reduced) along synthetic axis.</p>
 <ul>
 <li><strong>SNP_CLUST-Kmean:</strong> Perform a k-mean clustering of allele based on their coordinates on synthetic axis. It uses the k-mean algorithm of scikit-learn.<br /></li>
@@ -273,8 +281,12 @@ Optional and dependant parameters:
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: Axes to plot. Axis should be separated by &quot;:&quot;. All conbination between axis will be drawn.
 --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
---group: (optional) A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
---dGroup: Groups IDs to draw. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
+--group: (optional) A file containing at least the a section [color], that define for each group a color
+ (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab
+ generated by SNP_CLUST.
+--dGroup: Groups IDs to draw. Groups names should be separated by &quot;:&quot;. Groups names will be searched in
+ the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they
+ will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
 <p><em>Outputs:</em><br /> *<strong>axis<em>x</em>_vs_axis<em>y</em>.png:</strong> Several png files showing grouped alleles projected along x and y synthetic axes.</p>
 <ul>
@@ -284,8 +296,11 @@ Optional and dependant parameters:
 <pre><code>--VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
 --dAxes: 3 axes to plot. Axis should be separated by &quot;:&quot;. All conbination between axis will be drawn.
 --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
---dGroup: Groups IDs to draw. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
---group: (optional) A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1).</code></pre>
+--dGroup: Groups IDs to draw. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the
+ file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will
+ be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
+--group: (optional) A file containing at least the a section [color], that define for each group a color
+ (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1).</code></pre>
 <ul>
 <li><strong>FILTER_ON_MAX_GP_PROP:</strong> Filter the matrix file by removing ambiguous grouped alleles. <em>i.e.</em> alleles which changed of groups during the k-mean distinct attempts.<br /></li>
 </ul>
@@ -309,10 +324,15 @@ Optional and dependant parameters:
 </ul>
 <p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
---mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab) or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab). 
+--mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not
+ exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab)
+ or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab). 
 --prefix: The prefix for output files. [Default: WorkOnVcf]
---names: (optional) A one column file containing accession names to calculate proportion on (it can be accessions that were not used for PCA analysis but originating from the same original vcf).
---dGroup: (optional) Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
+--names: (optional) A one column file containing accession names to calculate proportion on (it can be accessions that were
+ not used for PCA analysis but originating from the same original vcf).
+--dGroup: (optional) Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched
+ in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in
+ &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --ExclChr: (optional) A list of chromosome to exclude from the analysis separated by &quot;:&quot;.</code></pre>
 <p><em>Outputs:</em><br /> <strong>*_gp_prop.tab:</strong> A tabulated file containing for each accessions the number of grouped allele for each groups.</p>
 <ul>
@@ -329,8 +349,12 @@ Optional and dependant parameters:
 <p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
 --names: A one column file containing accession names to plot genotypes
---mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab) or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
---dGroup: Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
+--mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not
+ exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab)
+ or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
+--dGroup: Groups IDs to calculate proportion on. Groups names should be separated by &quot;:&quot;. Groups names will be searched
+ in the file provided in --mat argument in the &quot;K-mean_GROUP&quot; column, and if such column is not present, they will be searched
+ in &quot;GROUP&quot; columns. If none of these columns are found the program will exit without finishing.
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
 <p><em>Outputs:</em><br /> <strong>*_genotype.gen:</strong> A tabulated file containing, for each accessions (2 columns per accessions) and at each positions (rows) along chromosomes, the genotype (first of the two columns) and allele grouping (second of the two columns). <br><br></p>
 <h3 id="vcf2linear.1.1.py-python3">vcf2linear.1.1.py (python3)</h3>
@@ -343,8 +367,11 @@ Optional and dependant parameters:
 <p>Genotype grouping at the window was then attributed based on the maximal probability and haplotypes representation was performed trying to minimize the recombination events.</p>
 <p><em>Options:</em></p>
 <pre><code>--vcf: A vcf file.
---mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab) or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
---names: A one column file containing accession names to treat (it is not necessarilly thoses used in the Factorial analysis but they must share variant sites).
+--mat: A matrix file containing allele grouping with either &quot;K-mean_GROUP&quot; or &quot;GROUP&quot; columns, if &quot;K-mean_GROUP&quot; does not
+ exists the &quot;GROUP&quot; column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab)
+ or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
+--names: A one column file containing accession names to treat (it is not necessarilly thoses used in the Factorial analysis
+but they must share variant sites).
 --namesH: A two column file containing accession names used to simulate populations. 
 --chr: Chromosomes names to work with (each chromosome names should be separated by &quot;:&quot;). If not filled, all chromosomes will be used.
 --win: Half window size (allele number) around a variant site to evaluate the structure at the site (integer). [Default: 25]
@@ -360,7 +387,19 @@ Optional and dependant parameters:
  calculation [default: Binom]
 --prop: Estimator different from sd calculated as mean_value*--prop. Value should be comprised in ]0,1].
  A value of 0, means that this parameter is not used. [default: 0]
---gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
+--gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage,
+ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
+--Ambiguous: A 2 column file containing accession names used to simulate populations and their group.
+ In this file we only pass admixed representative of a group not represented in nameH. These accessions will
+ be used to infer expected allele of a group at the observed position. This inference is calculated as followed:
+ a probability to have an allele of this group in an accession of this group is of 1 an allele of the group is
+ found in the passed accession. Accessions passed to this option are not used for noise inference.
+--FormerFolder: Folder containing previous chromosome painting. This chromosome painting will be used to better
+estimate the expected number of alleles based on admixed accessions representative of a group. If only the ancestral
+ group is found in the haplotypes of the admixed accessions (passed to --Ambiguous), the probability is calculated has
+ the number of alleles of the groupe observed at this position. In others cases, the probability is still 1 if an alleles
+ of the group is observed.
+--sdMult: Multiplicator of standard deviation for probability calculation of a segment to be of a group. [Default: 1]
 --prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
 <p><em>Output</em><br /> A folder with the name passed in --prefix options which contained several files for each accessions and each chromosomes:<br /> ***_Accession_chromosome.tab:** A tabulated file with for each window around a given position:</p>
 <ul>
@@ -387,7 +426,8 @@ Optional and dependant parameters:
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession name.
 --chr: Chromosomes list to draw (separated by &quot;:&quot;)
---gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
+--gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage,
+ ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.</code></pre>
 <p><em>Output:</em><br /> <strong>Accession.pdf:</strong> A pdf file with chromosome painting for all chromosomes of this accession. <br><br></p>
@@ -396,7 +436,8 @@ Optional and dependant parameters:
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession names configuration file with Column1: accession name and column2: ploidy level.
 --chr: Chromosome to draw
---gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
+--gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage,
+ ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.
 --prefix: Prefix for output files. [Default: All_acc]
@@ -407,7 +448,8 @@ Optional and dependant parameters:
 <p><em>Options:</em></p>
 <pre><code>--acc: Accession names configuration file with Column1: accession name and column2: ploidy level.
 --chr: Chromosome(s) to draw, separated by &quot;:&quot;
---gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
+--gcol: A file containing at least the a section [color], that define for each group a color (in RGB+alpha percentage,
+ ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab generated by SNP_CLUST.
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.
 --prefix: Prefix for output files. [Default: All_acc]</code></pre>
