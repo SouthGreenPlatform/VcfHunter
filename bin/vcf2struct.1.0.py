@@ -1275,16 +1275,19 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	outfile = open(PREFIX+'_filt.vcf','w')
 	
 	# Reading vcf file
+	PrintFilter = 1
 	file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
-			# Recording header
-			if data[0] == '#CHROM':
-				header = list(data)
+			if data[0][0:8] == "##contig" and PrintFilter:
 				outfile.write('##FILTER=<ID=TAGs, Description="'+' '.join(exclude)+' variant are removed">\n')
 				outfile.write('##FILTER=<ID=COVERAGE, Description="Genotype having less than '+str(MINCOV)+' x coverage and less than '+str(MINAL)+' x coverage for each allele are converted to missing">\n')
 				outfile.write('##FILTER=<ID=MISSING, Description="SNP with more than '+str(NMISS)+' genotype missing are removed">\n')
+				PrintFilter = 0
+			# Recording header
+			if data[0] == '#CHROM':
+				header = list(data)
 				list_to_print_in_output = []
 				for n in header:
 					list_to_print_in_output.append(n)

@@ -194,10 +194,12 @@ def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
 		# print (best_value, second_best)
 	# print (best_value, second_best, dico_proba)
 	# print (-math.log(second_best,10)+math.log(best_value,10))
-	if second_best == 0:
-		return best_genotype, (999)
+	if best_value == 0:
+		return best_genotype, (1)
+	elif second_best == 0:
+		return best_genotype, (9999)
 	else:
-		return best_genotype, (-math.log(second_best,10)+math.log(best_value,10))
+		return best_genotype, best_value/second_best
 
 def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCESSION_START):
 	"""
@@ -344,11 +346,14 @@ def __main__():
 	
 	
 	# Working line by line
+	PrintFilter = 1
 	file = open(options.vcf)
 	for line in file:
 		data = line.split()
+		if data[0][0:8] == "##contig" and PrintFilter:
+			outvcf.write('##FORMAT=<ID=GC,Number=1,Type=Float,Description="Ratio between best genotype probability and second best genotype probability">\n')
+			PrintFilter = 0
 		if data[0] == "#CHROM":
-			outvcf.write('##FORMAT=<ID=GC,Number=1,Type=Float,Description="Difference between -log10(best genotype probability) and -log10(second best genotype probability)">\n')
 			outvcf.write(line)
 			header = data
 			Accession_start = header.index('FORMAT')+1
