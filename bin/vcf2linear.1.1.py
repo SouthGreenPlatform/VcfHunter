@@ -494,7 +494,7 @@ def EstimateHybridValueFromBinomial(GROUPS, DICO_HYBRIDS, PLOIDY, CURRENT_POSITI
 		DICO_HYBRIDS[gp]['noise'] = [0,0,0]
 		for position in CURRENT_POSITION:
 			DICO_HYBRIDS[gp]['noise'][0] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][6]*PLOIDY)
-			DICO_HYBRIDS[gp]['noise'][1] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][6]*(plo+1)*DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][7])
+			DICO_HYBRIDS[gp]['noise'][1] += (DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][6]*(PLOIDY+1)*DICO_HYBRID_MEAN_AND_VAR[CHR][position][gp][7])
 
 def CalcProbFromSimulated(ACC, dico_prop, PREFIX, groups, do_dico_hybrid, WINDOW, cross_2_do, PLOIDY, NB_INDIVIDUALS, DICO_HYBRID_MEAN_AND_VAR, PROPORTION, SDMULT):
 	
@@ -1130,8 +1130,8 @@ def draw_plot(DICO, PREFIX, GCOL, GROUPS, ACC, CHROM, CHR_LEN, PLOIDY):
 		ax.set_xlim(0, CHR_LEN)
 		ax.set_ylim(0, max([max(DICO[ACC][CHROM][gp]['max'+str(PLOIDY)]),max(DICO[ACC][CHROM]['count'][gp])])*1.05)
 		for i in range(PLOIDY):
-			ax.plot([],[], color=list_color[i], alpha=0.5, label=gp+' H'+str(i+1)+' interval', linewidth=10)
-			ax.fill_between(DICO[ACC][CHROM]['pos'], DICO[ACC][CHROM][gp]['min'+str(i+1)],	DICO[ACC][CHROM][gp]['max'+str(i+1)],		color=list_color[i],	alpha=0.5, label=gp+' H'+str(i+1)+' interval')
+			ax.plot([],[], color=list_color[i%5], alpha=0.5, label=gp+' H'+str(i+1)+' interval', linewidth=10)
+			ax.fill_between(DICO[ACC][CHROM]['pos'], DICO[ACC][CHROM][gp]['min'+str(i+1)],	DICO[ACC][CHROM][gp]['max'+str(i+1)],		color=list_color[i%5],	alpha=0.5, label=gp+' H'+str(i+1)+' interval')
 		ax.plot([],[], color='grey',	alpha=0.5, label=gp+' Noise interval',	linewidth=10)
 		
 		ax.fill_between(DICO[ACC][CHROM]['pos'], DICO[ACC][CHROM]['noise']['min'+gp],	DICO[ACC][CHROM]['noise']['max'+gp],	color='grey',	alpha=0.5, label=gp+' noise interval')
@@ -1146,7 +1146,7 @@ def draw_plot(DICO, PREFIX, GCOL, GROUPS, ACC, CHROM, CHR_LEN, PLOIDY):
 	ax = plt.subplot2grid((X,15),(POSSPAN,0), colspan=13, rowspan=10)
 	for i in range(PLOIDY):
 		for gp in GROUPS:
-			ax.plot(DICO[ACC][CHROM]['pos'], DICO[ACC][CHROM][gp]['Prob'+str(i+1)], linewidth=1, linestyle=list_line[i], color=dico_color[gp][0:3], label=gp+' H'+str(i+1)+' Prob.')
+			ax.plot(DICO[ACC][CHROM]['pos'], DICO[ACC][CHROM][gp]['Prob'+str(i+1)], linewidth=1, linestyle=list_line[i%3], color=dico_color[gp][0:3], label=gp+' H'+str(i+1)+' Prob.')
 	ax.set_ylim(-0.01, 1.05)
 	ax.set_xlim(0, CHR_LEN)
 	ax.axes.xaxis.set_ticklabels([])

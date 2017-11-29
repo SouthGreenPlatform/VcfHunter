@@ -1134,6 +1134,7 @@ def stat_on_vcf(VCF, PREFIX, NAMES, GFF3):
 				autapo = ident_autapo(dico_autapo)
 				for k in autapo:
 					dico_acc[k]['autapo'] += 1
+					# print(k, data[0], data[1], 1, 'autapo')
 	
 	outfile = open(PREFIX+'_general.stat','w')
 	
