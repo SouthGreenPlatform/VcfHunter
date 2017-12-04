@@ -46,6 +46,7 @@ The package provided comprised X programs listed here:
 -   haplo2kar.1.0.py (python3)
 -   haplo2karByChr.1.0.py (python3)
 -   haplo2Circos.1.0.py (python3)
+-   vcfFilter.1.0.py (python3)
 
 All X programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -863,4 +864,36 @@ run the following command line to have your new Figure : *circos -conf Circos\_A
 **\*\_housekeeping.conf**: a second file used by circos\
 **\*\.kar**: a third file also used by circos\
 **\*\.png**: the circos Figure
+<br><br>
+
+### vcfFilter.1.0.py
+
+This program filter a vcf file based on several criterias. This
+is a improved version of FILTER option of vcf2struct.1.0.py 
+
+*Options:*
+
+    --vcf: A standard vcf file
+    --names: A one column file containing accessions to treat.
+    --outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the
+	 output file.
+    --RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by ":"). 
+        Possible values: 
+            *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
+            *Other values: INDELS, SNP, AUTAPO (accession specific variant site).
+    --RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be
+	 passed and should be sepatated by ":"). Values: 1,2,3,...,n
+    --MinCov: Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to
+	 unknown for the concerned accession. [Default: 10]
+    --MaxCov: Maximal coverage by accession to keep genotype calling (integer). If the value is greater, genotype will be converted to
+	 unknown for the concerned accession. [Default: 1000]
+    --MinFreq: Minimal allele frequency to keep genotype calling (float). If the value is lower, genotype will be converted to unknown
+	 for the concerned accession. [Default: 0.05]
+    --MinAl: Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele,
+	 genotype will be converted to unknown for the concerned accession. [Default: 3]
+    --nMiss: Maximal number of missing genotype in a line to keep the line (integer). [Default: 0]
+    --prefix: The prefix for output files. [Default: WorkOnVcf]
+
+*Output:*\
+ **\*\_filt.vcf:** a filtered vcf file based on passed options.
 
