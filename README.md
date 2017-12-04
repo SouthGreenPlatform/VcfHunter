@@ -913,7 +913,7 @@ along chromosomes.
 	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
 	--acc: Accession to work with,
 	--ploidy: Accession ploidy (integer),
-	--all: Allele should be present in all accessions to identify a group,
+	--all: Allele should be present in all accessions to attribute to a group,
 	--prefix: Prefix for output files. [Default: AlleleOrigin]
 
 *Output:*\
@@ -925,6 +925,26 @@ chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and a
  **\*\_stats.tab:** a tabulated file repporting various statistics on the alleles of the accession.
 <br><br>
 
+### vcf2allPropAndCovByChr.py
+
+This program perform two things based on a vcf. 1) It plots for a chromosome of all accessions in a vcf,
+the allele coverage alongs its chromosomes. 2) It identify,based on known ancestral accessions in the vcf,
+the alleles specific to each groups and plot the alleles proportion at a site along chromosomes for all
+accessions.
+
+*Options:*
+
+    --conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
+	--ploidy: Accession ploidy (integer). If not all accessions have the same ploidy, this is not a problem. This ploidy information
+	 is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
+	--all: Allele should be present in all accessions to attribute to a group,
+	--prefix: Prefix for output files. [Default: RatioAndCov]
+
+*Output:*\
+ **prefix\_chromosomeN\_X\_Cov.png:** X png files presenting SNP coverage along chromosomeN.\
+ **prefix\_chromosomeN\_X\_Ratio.png:** X png files presenting ancestral allele proportion at a site along chromosomeN.
+<br><br>
 
 
 
