@@ -47,6 +47,7 @@ The package provided comprised X programs listed here:
 -   haplo2karByChr.1.0.py (python3)
 -   haplo2Circos.1.0.py (python3)
 -   vcfFilter.1.0.py (python3)
+-   vcf2allPropAndCov.py (python3)
 
 All X programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -869,7 +870,7 @@ run the following command line to have your new Figure : *circos -conf Circos\_A
 ### vcfFilter.1.0.py
 
 This program filter a vcf file based on several criterias. This
-is a improved version of FILTER option of vcf2struct.1.0.py 
+is a improved version of FILTER option of vcf2struct.1.0.py
 
 *Options:*
 
@@ -896,4 +897,17 @@ is a improved version of FILTER option of vcf2struct.1.0.py
 
 *Output:*\
  **\*\_filt.vcf:** a filtered vcf file based on passed options.
+<br><br>
+ 
+### vcf2allPropAndCov.py
+
+This program perform two things based on a vcf. 1) It plots for an
+accession, the allele coverage alongs its chromosomes. 2) It identify,
+based on known ancestral accessions in the vcf, the alleles specific to
+each groups and plot the alleles proportion at a site in the accession
+along chromosomes.
+
+*Options:*
+
+    --conf: Conf file containing vcf location (one per chromosome). [Default: none]
 
