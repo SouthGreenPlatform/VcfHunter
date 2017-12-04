@@ -30,6 +30,8 @@
 <li>haplo2kar.1.0.py (python3)</li>
 <li>haplo2karByChr.1.0.py (python3)</li>
 <li>haplo2Circos.1.0.py (python3)</li>
+<li>vcfFilter.1.0.py (python3)</li>
+<li>vcf2allPropAndCov.py (python3)</li>
 </ul>
 <p>All X programs run using the following command: <sub>~</sub> python program-name &lt;--options-name value&gt; <sub>~</sub> <br><br><br></p>
 <h2 id="programs">Programs</h2>
@@ -453,4 +455,38 @@ estimate the expected number of alleles based on admixed accessions representati
 --dg: Groups to draw, separated by &quot;:&quot;. Groups not passed here will be replaced by grey.
 --centro: A tabulated file locating pericentromeric regions. In column 1: chromosome name, column 2: start, column 3: end.
 --prefix: Prefix for output files. [Default: All_acc]</code></pre>
-<p><em>Output:</em><br /> <strong>*.conf</strong>: the configuration file used by circos. I choose to keep this file so that it can be edited to change aspect of the Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : <em>circos -conf Circos_All_Admix.conf -noparanoid</em><br /><strong>*_housekeeping.conf</strong>: a second file used by circos<br /><strong>*.kar</strong>: a third file also used by circos<br /><strong>*.png</strong>: the circos Figure</p>
+<p><em>Output:</em><br /> <strong>*.conf</strong>: the configuration file used by circos. I choose to keep this file so that it can be edited to change aspect of the Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : <em>circos -conf Circos_All_Admix.conf -noparanoid</em><br /><strong>*_housekeeping.conf</strong>: a second file used by circos<br /><strong>*.kar</strong>: a third file also used by circos<br /><strong>*.png</strong>: the circos Figure <br><br></p>
+<h3 id="vcffilter.1.0.py">vcfFilter.1.0.py</h3>
+<p>This program filter a vcf file based on several criterias. This is a improved version of FILTER option of vcf2struct.1.0.py</p>
+<p><em>Options:</em></p>
+<pre><code>--vcf: A standard vcf file
+--names: A one column file containing accessions to treat.
+--outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the
+ output file.
+--RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by &quot;:&quot;). 
+    Possible values: 
+        *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
+        *Other values: INDELS, SNP, AUTAPO (accession specific variant site).
+--RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be
+ passed and should be sepatated by &quot;:&quot;). Values: 1,2,3,...,n
+--MinCov: Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to
+ unknown for the concerned accession. [Default: 10]
+--MaxCov: Maximal coverage by accession to keep genotype calling (integer). If the value is greater, genotype will be converted to
+ unknown for the concerned accession. [Default: 1000]
+--MinFreq: Minimal allele frequency to keep genotype calling (float). If the value is lower, genotype will be converted to unknown
+ for the concerned accession. [Default: 0.05]
+--MinAl: Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele,
+ genotype will be converted to unknown for the concerned accession. [Default: 3]
+--nMiss: Maximal number of missing genotype in a line to keep the line (integer). [Default: 0]
+--prefix: The prefix for output files. [Default: WorkOnVcf]</code></pre>
+<p><em>Output:</em><br /> <strong>*_filt.vcf:</strong> a filtered vcf file based on passed options. <br><br></p>
+<h3 id="vcf2allpropandcov.py">vcf2allPropAndCov.py</h3>
+<p>This program perform two things based on a vcf. 1) It plots for an accession, the allele coverage alongs its chromosomes. 2) It identify, based on known ancestral accessions in the vcf, the alleles specific to each groups and plot the alleles proportion at a site in the accession along chromosomes.</p>
+<p><em>Options:</em></p>
+<pre><code>--conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+--origin: A 2 column file containing accession name (col1), origin/group (Col2),
+--acc: Accession to work with,
+--ploidy: Accession ploidy (integer),
+--all: Allele should be present in all accessions to identify a group,
+--prefix: Prefix for output files. [Default: AlleleOrigin]</code></pre>
+<p><em>Output:</em><br /> <strong>*.png:</strong> a png file presenting SNP coverage along the chromosomes.<br /> <strong>*.png:</strong> a png file presenting ancestral allele proportion at a site along the chromosomes.<br /> <strong>*_AlleleOriginAndRatio.tab:</strong> a tabulated file repporting for each sites were an ancestral allele has been attributed, its origin and the proportion of reads supporting this allele. This files contains chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).<br /> <strong>*_stats.tab:</strong> a tabulated file repporting various statistics on the alleles of the accession. <br><br></p>

@@ -909,5 +909,26 @@ along chromosomes.
 
 *Options:*
 
-    --conf: Conf file containing vcf location (one per chromosome). [Default: none]
+    --conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
+	--acc: Accession to work with,
+	--ploidy: Accession ploidy (integer),
+	--all: Allele should be present in all accessions to identify a group,
+	--prefix: Prefix for output files. [Default: AlleleOrigin]
+
+*Output:*\
+ **\*\Cov.png:** a png file presenting SNP coverage along the chromosomes.\
+ **\*\Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.\
+ **\*\_AlleleOriginAndRatio.tab:** a tabulated file repporting for each sites were an ancestral allele
+has been attributed, its origin and the proportion of reads supporting this allele. This files contains
+chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).\
+ **\*\_stats.tab:** a tabulated file repporting various statistics on the alleles of the accession.
+<br><br>
+
+
+
+
+
+
+
 
