@@ -3,8 +3,9 @@ Purpose of VcfHunter
 
 VcfExplorer regroups several programs which principale aims are to map
 RNAseq data onto reference genome sequence, perform variant calling,
-manipulate vcf files and perform chromosome painting of accessions based
-on the contribution of ancestral groups.
+manipulate vcf files, perform chromosome painting of accessions based
+on the contribution of ancestral groups and select marker for genetic
+map analysis.
 <br><br><br>
 
 Installation
@@ -48,6 +49,7 @@ The package provided comprised X programs listed here:
 -   haplo2Circos.1.0.py (python3)
 -   vcfFilter.1.0.py (python3)
 -   vcf2allPropAndCov.py (python3)
+-   vcf2pop.1.0.py (python3)
 
 All X programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -944,6 +946,87 @@ accessions.
 *Output:*\
  **prefix\_chromosomeN\_X\_Cov.png:** X png files presenting SNP coverage along chromosomeN.\
  **prefix\_chromosomeN\_X\_Ratio.png:** X png files presenting ancestral allele proportion at a site along chromosomeN.
+<br><br>
+
+
+### vcf2pop.1.0.py
+
+This program will select from a marker for genetical mapping
+analysis from a vcf file based on several criterias. It will
+outpout coded markers for two genetical mapping software
+(onemap and joinmap).
+
+*Options:*
+
+    --vcf: The vcf file
+	--MinCov: Minimal read coverage for a marker in an accession (interger). If a lower value is
+	 found data point is converted to missing. [Default: 10]
+	--MaxCov: Maximal read coverage for a marker in an accession (interger). If a greater value is
+	 found data point is converted to missing. [Default: 1000]
+	--WinFreq: Window for minority allele coverage frequency to be insufficient to call a
+	 heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if
+	 minority allele is in ]0.05:0.1] calling will become missing for this data point.
+	--MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and
+	 infinity). [Default: 1]
+	--miss: Maximal missing data proportion in the progeny (Excluding parents) (between 0 and 1).
+	 greater missing proportion will result in removing the marker. [Default: 0.2]
+	--pValue: P-value threshold to keep marker (between 0 and 1). This p-value is calculated to
+	 based on a Khi2 test comparing the marker segregation to expected segregation. [Default: 0.0001]
+	--pop: Population type (Possible values: SELFPOL, SELF, BiP). [Default: BiP]
+		Possible values:
+			BiP: bi-parental cross. Expected segregation tested: 0.5/0.5 (parental markers) and 0.25/0.5/0.25 (bridge markers).
+			SELF: selfing population. Expected segregation tested: 0.25/0.5/0.25 (bridge markers).
+	--prefix: Prefix for output files. [Default: Pop]
+	--addcov: A tabulated file containing genotype of all markers passing filter is outputed.
+	 If this option is passed, in addition to genotypes, alleles coverage information is also filled.
+		Possible values:
+			y: add this information
+			n: do not add this information
+		[default: n]
+	--drawplot: Draw statistic plot (y or n).
+		Possible values:
+			y: add this information
+			n: do not add this information
+		[Default: n]
+	--parent: (optional) Names of the parents of the population (separated by ":"). If passed,
+	 these names will be used to parse marker depending of there segregation and heterozygosity
+	 in the parents.
+	--NoUsed: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 filtration (based on missing data and p-value) but which will be kept in final files.
+	--exclude: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 analysis and the files.
+	--ref: (optional) The reference fasta file. If passed, a tag associated to the marker will be
+	 outpouted in a fasta file. This tag will contained 125 bases before the marker and 125 bases
+	 after.
+	--remove: (optional) For some programs, marker name length is limited. This option helps you to reduce marker
+	 names. By default marker name is "chromosome name"+"M"+"site position". A string can be passed
+	 that will be searched and removed from all marker name. This is not neccessary if your chromosome
+	 name is not to long.
+
+*Outputs:*\
+ **\*\_JM\_Bridge.loc:** A .loc file that can be passed to joinmap that contained bridge markers.\
+ **\*\_JM\_*Parent*.loc:** Two .loc file that can be passed to joinmap that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.\
+ **\*\_JM\_unknown.loc:** A .loc file that can be passed to joinmap that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.\
+ **\*\_onemap\_Bridge.tab:** A .tab file that can be passed to onemap that contained bridge markers.\
+ **\*\_onemap\_*Parent*.tab:** Two .tab file that can be passed to onemap that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.\
+ **\*\_onemap\_unknown.tab:** A .tab file that can be passed to onemap that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.\
+ **\*\_tab\_Bridge.tab:** A .tab file correponding to a simplified joinmap format that contained bridge markers.\
+ **\*\_tab\_*Parent*.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.\
+ **\*\_tab\_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.\
+ **\*\_report.tab:** A file report.\
+ **\*\_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers
+(no filtering applied in this vcf).\
+ **\*\.tab:** A file containing for aech selected marker, the genotype of each accessions based on filter applied.
+Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
+ **\*\.pdf:** A pdf file containing various statistics on the vcf filtrations. Only if --drawplot=y.\
+ **\*\_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
+Only if --ref option is filled.
 <br><br>
 
 
