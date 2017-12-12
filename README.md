@@ -50,6 +50,7 @@ The package provided comprised X programs listed here:
 -   vcfFilter.1.0.py (python3)
 -   vcf2allPropAndCov.py (python3)
 -   vcf2pop.1.0.py (python3)
+-   vcf2popNew.1.0.py (python3)
 
 All X programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -951,7 +952,7 @@ accessions.
 
 ### vcf2pop.1.0.py
 
-This program will select from a marker for genetical mapping
+This program will select markers for genetical mapping
 analysis from a vcf file based on several criterias. It will
 outpout coded markers for two genetical mapping software
 (onemap and joinmap).
@@ -1030,6 +1031,63 @@ Only if --ref option is filled.
 <br><br>
 
 
+### vcf2popNew.1.0.py
+
+This program will select markers for genetical mapping
+analysis from a vcf file based on several criterias including segregation
+ ratio. It will outpout coded markers as requested by the user.
+
+*Options:*
+
+    --vcf: The vcf file
+	--seg: Segregation tested. Several segregations can be passed and should be separated by "/".
+	 A segregation should look like as follows: Name:Parents:MarkerCoding:MarkerSegregation:PvalueForTest.
+	 With a real example: SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-5/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-5
+	 (Ho for homozygous, He for heterozygous)
+	--MinCov: Minimal read coverage for a marker in an accession (interger). If a lower value is
+	 found data point is converted to missing. [Default: 10]
+	--MaxCov: Maximal read coverage for a marker in an accession (interger). If a greater value is
+	 found data point is converted to missing. [Default: 1000]
+	--WinFreq: Window for minority allele coverage frequency to be insufficient to call a
+	 heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if
+	 minority allele is in ]0.05:0.1] calling will become missing for this data point.
+	--MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and
+	 infinity). [Default: 1]
+	--miss: Maximal missing data proportion in the progeny (Excluding parents) (between 0 and 1).
+	 greater missing proportion will result in removing the marker. [Default: 0.2]
+	--prefix: Prefix for output files. [Default: Pop]
+	--addcov: A tabulated file containing genotype of all markers passing filter is outputed.
+	 If this option is passed, in addition to genotypes, alleles coverage information is also filled.
+		Possible values:
+			y: add this information
+			n: do not add this information
+		[default: n]
+	--NoUsed: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 filtration (based on missing data and p-value) but which will be kept in final files.
+	--exclude: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 analysis and the files.
+	--ref: (optional) The reference fasta file. If passed, a tag associated to the marker will be
+	 outpouted in a fasta file. This tag will contained 125 bases before the marker and 125 bases
+	 after.
+	--remove: (optional) For some programs, marker name length is limited. This option helps you to reduce marker
+	 names. By default marker name is "chromosome name"+"M"+"site position". A string can be passed
+	 that will be searched and removed from all marker name. This is not neccessary if your chromosome
+	 name is not to long.
+
+*Outputs:*\
+ **\*\_tab\_Bridge.tab:** A .tab file correponding to a simplified joinmap format that contained bridge markers.\
+ **\*\_tab\_*SegregationName*\_*Parent*.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.\
+ **\*\_tab\_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.\
+ **\*\_report.tab:** A file report.\
+ **\*\_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers
+(no filtering applied in this vcf).\
+ **\*\.tab:** A file containing for aech selected marker, the genotype of each accessions based on filter applied.
+Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
+ **\*\_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
+Only if --ref option is filled.
+<br><br>
 
 
 

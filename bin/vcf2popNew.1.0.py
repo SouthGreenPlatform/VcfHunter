@@ -321,7 +321,11 @@ def KhiSquare(LISTE, ACCESSION_HEADER, DICO_ACC, DICOSEGREGATION):
 					del ListeHomo[0]
 				else:
 					sys.exit('There is a bug in marker coding. Please review information passed to -S parameter: '+' '.join(DICOSEGREGATION[i]['MarkerCoding'][0]))
+			FreqObs.append(homo2)
+			FreqTheor.append(0.0001*total)
+			# chi2, p, dof, ex = stats.chi2_contingency([FreqObs,FreqTheor])
 			chi2, p = stats.chisquare(FreqObs, f_exp=FreqTheor)
+			# chi2, p = stats.fisher_exact([FreqObs,FreqTheor])
 			if p >= pvalue:
 				pvalue = p
 				min_chi2 = chi2
@@ -342,7 +346,11 @@ def KhiSquare(LISTE, ACCESSION_HEADER, DICO_ACC, DICOSEGREGATION):
 					del ListeHomo[0]
 				else:
 					sys.exit('There is a bug in marker coding. Please review information passed to -S parameter: '+' '.join(DICOSEGREGATION[i]['MarkerCoding'][0]))
+			FreqObs.append(homo1)
+			FreqTheor.append(0.0001*total)
+			# chi2, p, dof, ex = stats.chi2_contingency([FreqObs,FreqTheor])
 			chi2, p = stats.chisquare(FreqObs, f_exp=FreqTheor)
+			# chi2, p = stats.fisher_exact([FreqObs,FreqTheor])
 			if p >= pvalue:
 				pvalue = p
 				min_chi2 = chi2
@@ -382,7 +390,9 @@ def KhiSquare(LISTE, ACCESSION_HEADER, DICO_ACC, DICOSEGREGATION):
 					del ListeHomo[0]
 				else:
 					sys.exit('There is a bug in marker coding. Please review information passed to -S parameter: '+' '.join(DICOSEGREGATION[i]['MarkerCoding'][0]))
+			# chi2, p, dof, ex = stats.chi2_contingency([FreqObs,FreqTheor])
 			chi2, p = stats.chisquare(FreqObs, f_exp=FreqTheor)
+			# chi2, p = stats.fisher_exact([FreqObs,FreqTheor])
 			
 			# Validating segregation
 			BestSegregation[0].append(name)
@@ -837,7 +847,7 @@ def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARE
 	# Recoding
 	liste2return = []
 	liste2return.append(MARKER_NAME)
-	liste2return.append('nn,np')
+	liste2return.append(','.join(DICOSEGREGATION[KHISTAT[2]]['MarkerCoding'][1]))
 	liste2return.append('0')
 	
 	ConvertedToMissing = 0
@@ -947,7 +957,7 @@ def __main__():
 	# parser.add_option( '-T', '--pop',		dest='pop',			default='BiP',		help='Population type (Possible values: SELFPOL, SELF, BiP). [Default: %default]')
 	parser.add_option( '-o', '--prefix',	dest='prefix',		default='Pop',		help='Prefix for output files. [Default: %default]')
 	parser.add_option( '-a', '--addcov',	dest='addcov',		default='n',		help='Add coverage information to each genotype determined (y or n). [Default: %default]')
-	parser.add_option( '-d', '--drawplot',	dest='drawplot',	default='n',		help='Draw statistic plot (y or n). [Default: %default]')
+	# parser.add_option( '-d', '--drawplot',	dest='drawplot',	default='n',		help='Draw statistic plot (y or n). [Default: %default]')
 	parser.add_option( '-r', '--remove',	dest='remove',		default=None,		help='String to remove from marker name (may be too long for JoinMap format). Bay default marker name is "chromosome name"+"M"+"site position"')
 	(options, args) = parser.parse_args()
 	
@@ -1156,6 +1166,8 @@ def __main__():
 							get_tags(sequence_dict, chrom, int(pos), options.prefix+'_tags.fasta', marker_name)
 						WORD2PRINT = recode2tab(Accession_header, liste[0], Khi_stat, DicoSegregation, dico_acc_to_genotype, id_parent[1], marker_name)
 						if (WORD2PRINT[1]/float(len(dico_acc))) + MISSING <= MAX_MISSING:
+							# if WORD2PRINT[1] != 0:
+								# print (marker_name, WORD2PRINT[1], WORD2PRINT[1]/float(len(dico_acc)))
 							DICO_FINAL_STAT[id_parent[0]] += 1
 							if id_parent[0] == 'unknown':
 								outfile_Un.write(WORD2PRINT[0]+'\n')
@@ -1275,7 +1287,7 @@ def __main__():
 	outfile_stat.write('\tMarker removed based on ChiSquare cutoff (--pValue argument): '+str(FLTR_PVAL)+' ('+str(FLTR_PVAL/float(FLTR_MISS+FLTR_PVAL+PASSED)*100)+'%)\n')
 	outfile_stat.write('\tSelected marker: '+str(PASSED)+' ('+str(PASSED/float(FLTR_MISS+FLTR_PVAL+PASSED)*100)+'%)\n')
 	for n in DICO_FINAL_STAT:
-		outfile_stat.write('Marker parsed in '+n+' file: '+str(DICO_FINAL_STAT[n])+'\n')
+		outfile_stat.write('Marker parsed in '+n+' file(s): '+str(DICO_FINAL_STAT[n])+'\n')
 	
 	# To draw plot
 	
