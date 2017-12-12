@@ -34,6 +34,7 @@
 <li>vcf2allPropAndCov.py (python3)</li>
 <li>vcf2pop.1.0.py (python3)</li>
 <li>vcf2popNew.1.0.py (python3)</li>
+<li>RecombCalculatorDDose.py (python3)</li>
 </ul>
 <p>All X programs run using the following command: <sub>~</sub> python program-name &lt;--options-name value&gt; <sub>~</sub> <br><br><br></p>
 <h2 id="programs">Programs</h2>
@@ -588,3 +589,18 @@ estimate the expected number of alleles based on admixed accessions representati
  that will be searched and removed from all marker name. This is not neccessary if your chromosome
  name is not to long.</code></pre>
 <p><em>Outputs:</em><br /> <strong>*_tab_Bridge.tab:</strong> A .tab file correponding to a simplified joinmap format that contained bridge markers.<br /> <strong>*_tab_<em>SegregationName</em>_<em>Parent</em>.tab:</strong> Two .tab filecorreponding to a simplified joinmap format that contained parent1 and parent2 markers respectively. Only if parent option is filled.<br /> <strong>*_tab_unknown.tab:</strong> A .tab file correponding to a simplified joinmap format that contained unknown parent markers (missing data for both parents). Only if parent option is filled.<br /> <strong>*_report.tab:</strong> A file report.<br /> <strong>*_sub.vcf:</strong> A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers (no filtering applied in this vcf).<br /> <strong>*.tab:</strong> A file containing for aech selected marker, the genotype of each accessions based on filter applied. Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.<br /> <strong>*_tags.fasta:</strong> A fasta file containing marker tags (to align against another reference genome for example). Only if --ref option is filled. <br><br></p>
+<h3 id="recombcalculatorddose.py">RecombCalculatorDDose.py</h3>
+<p>This program perform is designed to calculate frequencies of recombination observed between two pairs of markers. It can also calculate marker segregation distortion.</p>
+<p><em>Options:</em></p>
+<pre><code>--matrix: The marker file matrix (output of vcf2pop.1.0.py or vcf2popNew.1.0.py),
+--output: Prefix for output files,
+--phased: Are marker phased,
+    Possible values:
+        y: add this information
+        n: do not add this information
+    [default: n]
+--steps: Analysis to perform,
+    Possible values:
+        R: Calculate recombination rate
+        S: Calculate segregation distortions</code></pre>
+<p><em>Output:</em><br /> <strong>_REC.tab:</strong> A tabulated file of pairwise marker recombination rate (--setp R).<br /> <strong>_SegDist.tab:</strong> A tabulated file of marker segragtion distortions (--setp S). <br><br></p>
