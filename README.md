@@ -51,6 +51,7 @@ The package provided comprised X programs listed here:
 -   vcf2allPropAndCov.py (python3)
 -   vcf2pop.1.0.py (python3)
 -   vcf2popNew.1.0.py (python3)
+-   RecombCalculatorDDose.py (python3)
 
 All X programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -1087,6 +1088,31 @@ markers (missing data for both parents). Only if parent option is filled.\
 Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
  **\*\_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
 Only if --ref option is filled.
+<br><br>
+
+
+### RecombCalculatorDDose.py
+
+This program perform is designed to calculate frequencies of recombination observed between two pairs of markers.
+It can also calculate marker segregation distortion.
+
+*Options:*
+
+    --matrix: The marker file matrix (output of vcf2pop.1.0.py or vcf2popNew.1.0.py),
+	--output: Prefix for output files,
+	--phased: Are marker phased,
+		Possible values:
+			y: add this information
+			n: do not add this information
+		[default: n]
+	--steps: Analysis to perform,
+		Possible values:
+			R: Calculate recombination rate
+			S: Calculate segregation distortions
+
+*Output:*\
+ **\_REC.tab:** A tabulated file of pairwise marker recombination rate (--setp R).\
+ **\_SegDist.tab:** A tabulated file of marker segragtion distortions (--setp S).
 <br><br>
 
 
