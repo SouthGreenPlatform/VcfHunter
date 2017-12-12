@@ -847,6 +847,7 @@ def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARE
 	# Recoding
 	liste2return = []
 	liste2return.append(MARKER_NAME)
+	liste2return.append(','.join(list(map(str, DICOSEGREGATION[KHISTAT[2]]['MarkerSegregation']))))
 	liste2return.append(','.join(DICOSEGREGATION[KHISTAT[2]]['MarkerCoding'][1]))
 	liste2return.append('0')
 	
@@ -1109,7 +1110,7 @@ def __main__():
 				# outfile_JM.close()
 			
 			# Creating tabulated output files
-			entete = ['Marker', 'coding', 'rephased']
+			entete = ['Marker', 'coding', 'ratio', 'rephased']
 			for acc in Accession_header:
 				if acc in dico_acc_to_genotype:
 					entete.append(acc)
