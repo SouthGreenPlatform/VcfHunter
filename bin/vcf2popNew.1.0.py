@@ -847,8 +847,8 @@ def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARE
 	# Recoding
 	liste2return = []
 	liste2return.append(MARKER_NAME)
-	liste2return.append(','.join(list(map(str, DICOSEGREGATION[KHISTAT[2]]['MarkerSegregation']))))
 	liste2return.append(','.join(DICOSEGREGATION[KHISTAT[2]]['MarkerCoding'][1]))
+	liste2return.append(','.join(list(map(str, DICOSEGREGATION[KHISTAT[2]]['MarkerSegregation']))))
 	liste2return.append('0')
 	
 	ConvertedToMissing = 0
