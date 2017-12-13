@@ -1136,7 +1136,8 @@ This program draw a dotplot based on marker pairwise recombination file obtained
 	--output: Name of output file. Extension (.png, .svg, .pdf) of the outpout is autaomatically identified by the script.
 
 *Output:*\
- A dotplot file representing marker linkage named according to --outpout option.\
+ A dotplot file representing pairwise marker linkage named according to --outpout option.\
+ A heatmap file representing pairwise statistic coding named according to --outpout option.
 <br><br>
 
 

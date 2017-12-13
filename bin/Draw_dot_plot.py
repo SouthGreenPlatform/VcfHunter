@@ -365,22 +365,26 @@ def __main__():
 	(options, args) = parser.parse_args()
 	V = os.getpid()
 	
-	# fig = plt.figure(figsize=(15,15))
-	# fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-	# ax = plt.subplot2grid((30,30),(1,1), colspan=28, rowspan=28)
-	# ax.set_xlim(0, 1000)
-	# ax.set_ylim(0, 1)
-	# for i in range(1000):
-		# ax.add_patch(mpatches.Rectangle((i,0) , 1, 1, fc=couleur(i/1000), ec='black', linewidth=0))
-	
-	# fig.savefig('color_map')
-	# plt.close(fig)
-	# sys.exit()
-	
 	if options.matrix == None:
 		sys.exit('Please provide a pairwise matrix file to --matrix argument')
 	if options.loc == None:
 		sys.exit('Please provide a loci location file to --loc argument')
+	
+	if not ('.' in options.output):
+		sys.exit('Please provide an extension to --output argument. ex: toto.png or toto.svg or toto.pdf')
+	
+	# 0- Plotting heatmap color legend
+	fig = plt.figure(figsize=(15,5))
+	fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+	ax = plt.subplot2grid((30,30),(1,1), colspan=28, rowspan=28)
+	ax.set_xlim(0, 0.5)
+	ax.set_ylim(0, 1)
+	ax.axes.get_yaxis().set_visible(False) # remove y ticks
+	for i in range(500):
+		ax.add_patch(mpatches.Rectangle((i/1000,0) , 1/1000, 1, fc=couleur(i/1000), ec='black', linewidth=0))
+	
+	fig.savefig('.'.join(options.output.split('.')[0:-1])+'_heatmap.'+options.output.split('.')[-1])
+	plt.close(fig)
 	
 	# 1- Recording chromosomes and loci to draw
 	dico_loci = {}
@@ -405,9 +409,7 @@ def __main__():
 	fill_the_matrix(options.matrix, dico_ordered_loci, mat)
 	
 	# 4- It's time to plot the matrix
-	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output.replace('.','-'), options.stat)
-	
-	
+	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output, options.stat)
 	
 	toto = os.system("pmap %s | grep total" % V)
 
