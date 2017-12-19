@@ -1282,9 +1282,10 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 		data = line.split()
 		if data:
 			if data[0][0:8] == "##contig" and PrintFilter:
-				outfile.write('##FILTER=<ID=TAGs, Description="'+' '.join(exclude)+' variant are removed">\n')
-				outfile.write('##FILTER=<ID=COVERAGE, Description="Genotype having less than '+str(MINCOV)+' x coverage and less than '+str(MINAL)+' x coverage for each allele are converted to missing">\n')
-				outfile.write('##FILTER=<ID=MISSING, Description="SNP with more than '+str(NMISS)+' genotype missing are removed">\n')
+				if exclude:
+					outfile.write('##Additionnal.filter=<ID=TAGRemoval,Date='+str(datetime.datetime.now())+',Description="Variant'+' '.join(exclude)+' are removed">\n')
+				outfile.write('##Additionnal.filter=<ID=CoverageFiltration,Date='+str(datetime.datetime.now())+',Description="Genotype having less than '+str(MINCOV)+' x coverage and less than '+str(MINAL)+' x coverage for each allele are converted to missing">\n')
+				outfile.write('##Additionnal.filter=<ID=MissingDataFiltration,Date='+str(datetime.datetime.now())+',Description="SNP with more than '+str(NMISS)+' genotype missing are removed">\n')
 				PrintFilter = 0
 			# Recording header
 			if data[0] == '#CHROM':
