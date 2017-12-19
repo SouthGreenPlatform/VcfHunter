@@ -21,11 +21,11 @@ def couleur(VALUE):
 	
 	from scipy.stats import norm
 	
-	v03 = norm(0.04, 0.022)
-	v06 = norm(0.09, 0.027)
+	v03 = norm(0.05, 0.03)
+	v06 = norm(0.09, 0.03)
 	v1 = norm(0.16, 0.03)
 	
-	rouge = min(1, v03.pdf(VALUE)/v03.pdf(0.04))
+	rouge = min(1, v03.pdf(VALUE)/v03.pdf(0.05))
 	verte = min(1, v06.pdf(VALUE)/v06.pdf(0.09))
 	bleu = min(1, v1.pdf(VALUE)/v1.pdf(0.16))
 	
