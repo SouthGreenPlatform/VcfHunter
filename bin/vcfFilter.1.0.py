@@ -93,7 +93,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	if RMTYPE == None:
 		exclude = []
 	else:
-		exclude = RMTYPE.split('=')
+		exclude = RMTYPE.split(',')
 	
 	# recording variant alternatives to exclude
 	if  RMALALT == None:
@@ -353,7 +353,7 @@ def __main__():
 	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
 	parser.add_option( '',	'--outgroup',		dest='outgroup',	default=None,			help='Path to a one column file containing accession names not to consider for filtering but to print in the output [Default: %default]')	
-	parser.add_option( '',	'--RmType',			dest='RmType',		default=None,			help='Variant status to filter out (several values can be passed in this case they should be separated by =). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
+	parser.add_option( '',	'--RmType',			dest='RmType',		default=None,			help='Variant status to filter out (several values can be passed, in this case they should be separated by ","). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
 	parser.add_option( '',	'--RmAlAlt',		dest='RmAlAlt',		default=None,			help='Number of alleles at the site to remove the variant site (several values can be passed and should be sepatated by :). Values: 1,2,3,...,n [Default: %default]')
 	parser.add_option( '',	'--MinCov',			dest='MinCov',		default='10',			help='Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to unknown for the concerned accession. [Default: %default]')
 	parser.add_option( '',	'--MaxCov',			dest='MaxCov',		default='1000',			help='Maximal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to unknown for the concerned accession. [Default: %default]')

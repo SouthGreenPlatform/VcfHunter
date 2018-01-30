@@ -883,7 +883,7 @@ is a improved version of FILTER option of vcf2struct.1.0.py
     --names: A one column file containing accessions to treat.
     --outgroup: (optional) A one column file containing accession names that will not be used for filtering but will remain in the
 	 output file.
-    --RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by ":"). 
+    --RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by ","). 
         Possible values: 
             *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
             *Other values: INDELS, SNP, AUTAPO (accession specific variant site).
