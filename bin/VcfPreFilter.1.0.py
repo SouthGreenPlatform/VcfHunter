@@ -330,7 +330,7 @@ def __main__():
 	if options.outgzip == 'n':
 		outvcf = open(options.out,'w')
 	elif options.outgzip == 'y':
-		outvcf = gzip.open(options.out+'.gz','w')
+		outvcf = gzip.open(options.out+'.gz','wb')
 	else:
 		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
@@ -353,7 +353,10 @@ def __main__():
 	
 	# Working line by line
 	PrintFilter = 1
-	file = open(options.vcf)
+	if options.vcf[-3:] == '.gz':
+		file = gzip.open(options.vcf,'rb')
+	else:
+		file = open(options.vcf)
 	for line in file:
 		data = line.split()
 		if data[0][0:8] == "##contig" and PrintFilter:

@@ -1462,7 +1462,7 @@ def merge_vcf(PREFIX, DICO_CHR):
 	outfile.close()
 	return 0
 
-def merge_sub_vcf(PREFIX, CHR, LIST):
+def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	
 	# recording VCF headers
 	dico_header = {}
@@ -1499,7 +1499,13 @@ def merge_sub_vcf(PREFIX, CHR, LIST):
 			chromosome_order.append(data[0].split(',')[0].split('=')[2])
 	
 	# Printing the final VCF
-	outfile = open(PREFIX+'_'+CHR+'_all_allele_count.vcf','w')
+	if GZIP == 'n':
+		outfile = open(PREFIX+'_'+CHR+'_all_allele_count.vcf','w')
+	elif GZIP == 'y':
+		outfile = gzip.open(PREFIX+'_'+CHR+'_all_allele_count.vcf'+'.gz','wb')
+	else:
+		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
+	
 	outfile.write(''.join(dico_header['header']))
 	outfile.write('\t'.join(['#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT']+accessions)+'\n')
 	for pos in LIST:

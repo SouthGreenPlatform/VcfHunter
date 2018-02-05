@@ -90,7 +90,7 @@ def main_combine(job):
 def main_merging_sub_vcf(job):
 
 	try:
-		rslt = utils.merge_sub_vcf(job[0],job[1],job[2])
+		rslt = utils.merge_sub_vcf(job[0],job[1],job[2], job[3])
 	except Exception as e:
 		print e
 		rslt = 1
@@ -113,6 +113,7 @@ def __main__():
 	parser.add_option( '-t', '--thread', dest='thread', default='1', help='Max number of accessions treated at the same time (integer), [default: %default]')
 	parser.add_option( '-q', '--queue', dest='queue', default=None, help='Queue to use if SGE is installed on your machine. Do not fill otherwise, [default: %default]')
 	parser.add_option( '-p', '--prefix', dest='prefix', default='All_lib', help='Prefix for output bam and vcf containing all libraries. [default: %default]')
+	parser.add_option( '-g', '--outgzip',	dest='outgzip',		default='n',		help='Output files in gzip format. [Default: %default]')
 	parser.add_option( '-s', '--steps', dest='steps', default=None, help='A string containing steps to perform:\t\t\t\t'
 	'a: Indexing reference for first mapping step\t\t\t'
 	'b: Merging fastq and first mapping step to generate splicing sites\t\t\t\t\t\t'
@@ -285,7 +286,7 @@ def __main__():
 		# Merging files by chromosomes
 		listJobs = []
 		for chr in dicoWindow:
-			listJobs.append([options.prefix, chr, dicoWindow[chr]])
+			listJobs.append([options.prefix, chr, dicoWindow[chr], options.outgzip])
 		pool = mp.Pool(processes=nbProcs)
 		results = pool.map(main_merging_sub_vcf, listJobs)
 		
