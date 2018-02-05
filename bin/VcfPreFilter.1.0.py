@@ -25,6 +25,7 @@ import optparse
 import sys
 import time
 import math
+import gzip
 
 def combin(n, k):
 	"""Nombre de combinaisons de n objets pris k a k"""
@@ -42,7 +43,6 @@ def combin(n, k):
 def binom(k,n,p):
 	x = combin(n,k)*(p**k)*((1-p)**(n-k))
 	return x
-
 
 def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
 	
@@ -320,13 +320,19 @@ def __main__():
 	parser.add_option( '-f', '--minFreq',	dest='minFreq',		default='0.05',		help='Minimal allele frequency in an accession to keep the allele for calling in the row. [Default: %default]')
 	parser.add_option( '-c', '--MinAlCov',	dest='MinAlCov',	default='3',		help='Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: %default]')
 	parser.add_option( '-o', '--out',		dest='out',			default='Pop',		help='Prefix for output files. [Default: %default]')
+	parser.add_option( '-g', '--outgzip',	dest='outgzip',		default='n',		help='Output files in gzip format. [Default: %default]')
 	(options, args) = parser.parse_args()
 	
 	if options.vcf == None:
 		sys.exit('Please provide a vcf file to -v options')
 	
 	# Creating filtered output file
-	outvcf = open(options.out,'w')
+	if options.outgzip == 'n':
+		outvcf = open(options.out,'w')
+	elif options.outgzip == 'y':
+		outvcf = gzip.open(options.out+'.gz','w')
+	else:
+		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
 	
 	# GLOBAL VARIABLES
