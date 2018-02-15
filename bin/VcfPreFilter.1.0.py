@@ -330,7 +330,7 @@ def __main__():
 	if options.outgzip == 'n':
 		outvcf = open(options.out,'w')
 	elif options.outgzip == 'y':
-		outvcf = gzip.open(options.out+'.gz','wb')
+		outvcf = gzip.open(options.out,'wb')
 	else:
 		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	

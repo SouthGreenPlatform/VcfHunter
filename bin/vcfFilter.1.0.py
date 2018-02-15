@@ -24,11 +24,12 @@ sys.stdout.write('loading modules\n')
 import optparse
 import os
 import datetime
+import gzip
 
 sys.stdout.write('modules loaded\n')
 
 
-def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALALT, MAXCOV, MINFREQ):
+def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALALT, MAXCOV, MINFREQ, OUTGZIP):
 	
 	"""
 		Filter vcf file and output a filtered vcf
@@ -57,6 +58,8 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 		:type MAXCOV: int
 		:param MINFREQ: Maximal coverage to keep a genotype
 		:type MINFREQ: float
+		:param MINFREQ: Deciding if output should be gziped
+		:type MINFREQ: str
 	"""
 	nb_remove = 0
 	nb_kept = 0
@@ -102,11 +105,21 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 		exclude_al = [int(i) for i in RMALALT.split(':')]
 	
 	# Creating output file
-	outfile = open(PREFIX+'_filt.vcf','w')
+	if OUTGZIP == 'n':
+		outfile = open(PREFIX+'_filt.vcf','w')
+	elif OUTGZIP == 'y':
+		outfile = gzip.open(PREFIX+'_filt.vcf.gz','wt')
+	else:
+		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
 	# Reading vcf file
 	PrintFilter = 1
-	file = open(VCF)
+	
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
+	
 	for line in file:
 		data = line.split()
 		if data:
@@ -361,6 +374,7 @@ def __main__():
 	parser.add_option( '',	'--MinAl',			dest='MinAl',		default='3',			help='Minimal allele coverage by accession to keep genotype calling (integer). If the value is lower for at least one allele, genotype will be converted to unknown for the concerned accession. [Default: %default]')
 	parser.add_option( '',	'--nMiss',			dest='nMiss',		default='0',			help='Maximal number of missing genotype in a line to keep the line (integer). [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='WorkOnVcf', 	help='The prefix for output files. [Default: %default]')
+	parser.add_option( '-g', '--outgzip',		dest='outgzip',		default='n',			help='Output files in gzip format. [Default: %default]')
 	
 	(options, args) = parser.parse_args()
 	
@@ -369,6 +383,6 @@ def __main__():
 		sys.exit('Please provide a vcf file to --vcf argument')
 	if options.names == None:
 		sys.exit('Please provide a name file to --names argument')
-	filter_vcf(options.vcf, options.names, options.outgroup, options.prefix, options.RmType, int(options.MinCov), int(options.MinAl), int(options.nMiss), options.RmAlAlt, int(options.MaxCov),float(options.MinFreq))
+	filter_vcf(options.vcf, options.names, options.outgroup, options.prefix, options.RmType, int(options.MinCov), int(options.MinAl), int(options.nMiss), options.RmAlAlt, int(options.MaxCov),float(options.MinFreq), options.outgzip)
 		
 if __name__ == "__main__": __main__()
