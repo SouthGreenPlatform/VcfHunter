@@ -176,8 +176,8 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 								# Coding heterozygous based on winfreq
 								if min_freq >= winfreq[1] and min(coverage_value) >= MINALCOV:
 									code = '/'.join(liste_allele)
-								elif min_freq < winfreq[0] and min(coverage_value) < MINALCOV:
-									code = '/'.join(liste_allele)
+								elif min_freq < winfreq[0]:
+									code = '/'.join([liste_allele[coverage_value.index(max(coverage_value))]]*2)
 								# Coding ambiguous based on winfreq and or MINALCOV
 								else:
 									no_freq += 1

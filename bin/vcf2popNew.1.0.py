@@ -25,6 +25,7 @@ import optparse
 import sys
 import time
 import math
+import gzip
 from scipy import stats
 import numpy as np
 import matplotlib
@@ -105,7 +106,6 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 			##### End of looking for "real variant allele"
 			
 		# print (setnot2return)
-			
 		for ipos in range(len(DATA)):
 			acc = DATA[ipos]
 			data = acc.split(':')
@@ -124,7 +124,7 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 						# additional step to identify between false and true multiallelic variant sites
 						allele_cov_info = list(map(int, data[FORMAT.index('AD')].split(',')))
 						liste_allele = []
-						# Checking for cases where the coverage is due to non A,T,G,C bases
+						# Checking for cases where the coverage is due to non A,T,G,C,* bases
 						if sum(allele_cov_info) > 0:
 							for n in range(len(allele_cov_info)):
 								if n in setnot2return:
@@ -153,7 +153,7 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 							else:
 								no_read += 1
 								
-						# The genotype is di-allelique
+						# The genotype can be di-allelique
 						elif len(liste_allele) == 2:
 							# Cheking if the variant is too much covered
 							coverage_value = []
@@ -168,7 +168,7 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 							if DP_tag > MAXCOV:
 								too_cov += 1
 							
-							# Cheking if the variant is sufficiantly covered
+							# Checking if the variant is sufficiently covered
 							elif DP_tag >= MINCOV:
 								min_freq = min(coverage_value)/float(sum(coverage_value))
 								if acc_id in DICO_ACC_TO_TREAT:
@@ -176,8 +176,10 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 								# Coding heterozygous based on winfreq
 								if min_freq >= winfreq[1] and min(coverage_value) >= MINALCOV:
 									code = '/'.join(liste_allele)
-								elif min_freq < winfreq[0] and min(coverage_value) < MINALCOV:
-									code = '/'.join(liste_allele)
+								# Coding homozygous based on winfreq
+								# elif min_freq < winfreq[0] and min(coverage_value) < MINALCOV:
+								elif min_freq < winfreq[0]:
+									code = '/'.join([liste_allele[coverage_value.index(max(coverage_value))]]*2)
 								# Coding ambiguous based on winfreq and or MINALCOV
 								else:
 									no_freq += 1
@@ -954,11 +956,8 @@ def __main__():
 	parser.add_option( '-f', '--WinFreq',	dest='WinFreq',		default='0.05:0.1',	help='Window for minority allele coverage frequency to be insufficient to call a heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if minority allele is in ]0.05:0.1] calling will become "./."')
 	parser.add_option( '-c', '--MinAlCov',	dest='MinAlCov',	default='1',		help='Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: %default]')
 	parser.add_option( '-s', '--miss',		dest='miss',		default='0.2',		help='Maximal missing data proportion in the progeny (Excluding parents) (between 0 and 1). [Default: %default]')
-	# parser.add_option( '-p', '--pValue',	dest='pValue',		default='0.0001',	help='P-value threshold to keep marker (between 0 and 1). [Default: %default]')
-	# parser.add_option( '-T', '--pop',		dest='pop',			default='BiP',		help='Population type (Possible values: SELFPOL, SELF, BiP). [Default: %default]')
 	parser.add_option( '-o', '--prefix',	dest='prefix',		default='Pop',		help='Prefix for output files. [Default: %default]')
 	parser.add_option( '-a', '--addcov',	dest='addcov',		default='n',		help='Add coverage information to each genotype determined (y or n). [Default: %default]')
-	# parser.add_option( '-d', '--drawplot',	dest='drawplot',	default='n',		help='Draw statistic plot (y or n). [Default: %default]')
 	parser.add_option( '-r', '--remove',	dest='remove',		default=None,		help='String to remove from marker name (may be too long for JoinMap format). Bay default marker name is "chromosome name"+"M"+"site position"')
 	(options, args) = parser.parse_args()
 	
@@ -985,7 +984,12 @@ def __main__():
 	DUPLICATED_markers = set()
 	
 	# identification of duplicated position
-	file = open(options.vcf)
+	VCF = options.vcf
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
+	
 	all_positions = set()
 	for line in file:
 		data = line.split()
@@ -1064,7 +1068,12 @@ def __main__():
 	outvcf = open(options.prefix+'_sub.vcf','w')
 	
 	# Working line by line
-	file = open(options.vcf)
+	VCF = options.vcf
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
+	
 	for line in file:
 		data = line.split()
 		if data[0] == "#CHROM":
@@ -1080,7 +1089,7 @@ def __main__():
 			for n in Accession_header:
 				if not(n in TO_EXCLUDE) and not (n in NO_USED) and not (n in PARENT):
 					dico_acc.add(n)
-				if not(n in TO_EXCLUDE) and not (n in PARENT):
+				if not(n in TO_EXCLUDE):
 					dico_acc_to_genotype.add(n)
 				if not(n in TO_EXCLUDE) and not (n in NO_USED):
 					dico_acc_to_treat.add(n)
@@ -1094,20 +1103,6 @@ def __main__():
 			mot.append('P-value')
 			mot.append('ChiSquare\n')
 			outfile1.write('\t'.join(mot))
-			
-			# Creating onemap output files $$$$$
-			# outfile_onemapUn = open(options.prefix+'_onemap_unknown.tab', 'w')
-			# outfile_onemapBridge = open(options.prefix+'_onemap_Bridge.tab', 'w')
-			# for PID in PARENT:
-				# outfile_onemap = open(options.prefix+'_onemap_'+PID+'.tab', 'w')
-				# outfile_onemap.close()
-			
-			# Creating Joinmap output files $$$$$
-			# outfile_JMUn = open(options.prefix+'_JM_unknown.loc', 'w')
-			# outfile_JMBridge = open(options.prefix+'_JM_Bridge.loc', 'w')
-			# for PID in PARENT:
-				# outfile_JM = open(options.prefix+'_JM_'+PID+'.loc', 'w')
-				# outfile_JM.close()
 			
 			# Creating tabulated output files
 			entete = ['Marker', 'coding', 'ratio', 'rephased']
@@ -1167,8 +1162,6 @@ def __main__():
 							get_tags(sequence_dict, chrom, int(pos), options.prefix+'_tags.fasta', marker_name)
 						WORD2PRINT = recode2tab(Accession_header, liste[0], Khi_stat, DicoSegregation, dico_acc_to_genotype, id_parent[1], marker_name)
 						if (WORD2PRINT[1]/float(len(dico_acc))) + MISSING <= MAX_MISSING:
-							# if WORD2PRINT[1] != 0:
-								# print (marker_name, WORD2PRINT[1], WORD2PRINT[1]/float(len(dico_acc)))
 							DICO_FINAL_STAT[id_parent[0]] += 1
 							if id_parent[0] == 'unknown':
 								outfile_Un.write(WORD2PRINT[0]+'\n')
@@ -1185,28 +1178,6 @@ def __main__():
 							outfile1.write('\t'.join([chrom+'M'+pos, chrom, pos]+genotype+list(map(str, Khi_stat[0:2])))+'\n')
 						else:
 							sys.stdout.write('Marker removed because '+str(WORD2PRINT[1])+' missing data were found du to marker passed to missing based on segregation\n')
-							
-						
-						# if id_parent[0] == 'unknown':
-							# outfile_onemapUn.write(recode2onemap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-							# outfile_JMUn.write(recode2JoinMap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name, str(DICO_FINAL_STAT[id_parent[0]]))+'\n')
-							# outfile_Un.write(recode2tab(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-						# elif id_parent[0] == 'Bridge':
-							# outfile_onemapBridge.write(recode2onemap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-							# outfile_JMBridge.write(recode2JoinMap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name, str(DICO_FINAL_STAT[id_parent[0]]))+'\n')
-							# outfile_Bridge.write(recode2tab(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-						# else:
-							# outfile_onemap = open(options.prefix+'_onemap_'+id_parent[0]+'.tab', 'a')
-							# outfile_onemap.write(recode2onemap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-							# outfile_onemap.close()
-							
-							# outfile_JM = open(options.prefix+'_JM_'+id_parent[0]+'.loc', 'a')
-							# outfile_JM.write(recode2JoinMap(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name, str(DICO_FINAL_STAT[id_parent[0]]))+'\n')
-							# outfile_JM.close()
-							
-							# outfile = open(options.prefix+'_tab_'+id_parent[0]+'.tab', 'a')
-							# outfile.write(recode2tab(Accession_header, liste[0], Khi_stat[2], POP_TYPE, dico_acc_to_genotype, id_parent[1], marker_name)+'\n')
-							# outfile.close()
 				else:
 					FLTR_PVAL += 1
 			else:
@@ -1214,44 +1185,7 @@ def __main__():
 		else:
 			outvcf.write(line)
 	file.close()
-	# outfile_onemapUn.close()
-	# outfile_JMUn.close()
 	outfile_Un.close()
-	# outfile_onemapBridge.close()
-	# outfile_JMBridge.close()
-	# outfile_Bridge.close()
-	
-	# Adding end lines to Joimap files
-	# for n in DICO_FINAL_STAT:
-		# outfile = open(options.prefix+'_JM_'+n+'.loc','a')
-		# outfile.write('\nindividual names:\n')
-		# for acc in Accession_header:
-			# if acc in dico_acc_to_genotype:
-				# outfile.write(acc+'\n')
-		# outfile.close()
-	
-	# Adding header in onemap files
-	# for n in DICO_FINAL_STAT:
-		# to_add = str(len(dico_acc)) + ' ' + str(DICO_FINAL_STAT[n]) + '\n'
-		# outfile = open(options.prefix+'_onemap_'+n+'.tab','r')
-		# total = to_add + outfile.read()
-		# outfile.close()
-		
-		# outfile = open(options.prefix+'_onemap_'+n+'.tab','w')
-		# outfile.write(total)
-		# outfile.close()
-	
-	# Adding header to Joimap files
-	# for n in DICO_FINAL_STAT:
-		# to_add = time.strftime(';Any %m %d %H:%M:%S CET %y', time.localtime())+'\n\nname= '+options.prefix+'\npopt= CP\nnloc= '+str(DICO_FINAL_STAT[n])+'\nnind= '+str(len(dico_acc_to_genotype))+'\n\n'
-		# outfile = open(options.prefix+'_JM_'+n+'.loc','r')
-		# total = to_add + outfile.read()
-		# outfile.close()
-		
-		# outfile = open(options.prefix+'_JM_'+n+'.loc','w')
-		# outfile.write(total)
-		# outfile.close()
-		
 	
 	# Writting global statistics
 	outfile_stat = open(options.prefix+'_report.tab', 'w')
@@ -1289,15 +1223,6 @@ def __main__():
 	outfile_stat.write('\tSelected marker: '+str(PASSED)+' ('+str(PASSED/float(FLTR_MISS+FLTR_PVAL+PASSED)*100)+'%)\n')
 	for n in DICO_FINAL_STAT:
 		outfile_stat.write('Marker parsed in '+n+' file(s): '+str(DICO_FINAL_STAT[n])+'\n')
-	
-	# To draw plot
-	
-	# if options.drawplot == 'y':
-		# GLOB_allele_ratio = np.array(GLOB_allele_ratio)
-		# GLOB_coverage = np.array(GLOB_coverage)
-		# GLOB_missing_per_marker = np.array(GLOB_missing_per_marker)
-		# GLOB_Khi2 = np.array(GLOB_Khi2)
-		# draw_statistics_plot(options.prefix+'.pdf', GLOB_allele_ratio, GLOB_coverage, GLOB_missing_per_marker, GLOB_Khi2, options.WinFreq, PVALUE, MAX_MISSING, int(options.MinCov))
 
 		
 		

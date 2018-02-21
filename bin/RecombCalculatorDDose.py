@@ -269,6 +269,76 @@ def printSegDist(MATRIX, OUT):
 			outfile.write('\n')
 	outfile.close()
 
+def marker_decode(MARKER_CODING, RATIO, MARKER, CODE, REVERSE, INDI_NUMBER):
+	
+	if REVERSE:
+		liste = [MARKER,','.join(MARKER_CODING), RATIO,'1']
+		MARKER_CODING.reverse()
+		for n in range(INDI_NUMBER):
+			if str(CODE[n*2]) == 'nan' and str(CODE[n*2+1]) == 'nan':
+				liste.append('--')
+			elif str(CODE[n*2]) == 'nan':
+				liste.append(MARKER_CODING[int(CODE[n*2+1])])
+			else:
+				liste.append(MARKER_CODING[int(CODE[n*2])+int(CODE[n*2+1])])
+				
+	else:
+		liste = [MARKER, ','.join(MARKER_CODING), '0']
+		for n in range(INDI_NUMBER):
+			if str(CODE[n*2]) == 'nan' and str(CODE[n*2+1]) == 'nan':
+				liste.append('--')
+			elif str(CODE[n*2]) == 'nan':
+				liste.append(MARKER_CODING[int(CODE[n*2+1])])
+			else:
+				liste.append(MARKER_CODING[int(CODE[n*2])+int(CODE[n*2+1])])
+	return '\t'.join(liste)
+
+def PhaseMarker(MATRIX, OUT):
+	
+	outfile = open(OUT+'_phased.tab','w')
+	
+	file = open(MATRIX)
+	header = file.readline().split()
+	if 'ratio' in header:
+		indi_number = len(header[4:])
+	else:
+		indi_number = len(header[3:])
+	outfile.write('\t'.join(header))
+	outfile.write('\n')
+	prec_coded_marker = ""
+	for line in file:
+		data = line.split()
+		if data:
+			if prec_coded_marker == "":
+				coded = recode_matrix(line,'ratio' in header)
+				prec_coded_marker = numpy.array(coded[1])
+				prec_phase = 0
+				outfile.write(line)
+			else:
+				coded = recode_matrix(line,'ratio' in header)
+				coded_marker = numpy.array(coded[1])
+				invert_coded_marker = invert_code(coded[2], coded_marker)
+				ValuePhase0 = numpy.nanmean(abs(prec_coded_marker-coded_marker))
+				ValuePhase1 = numpy.nanmean(abs(prec_coded_marker-invert_coded_marker))
+				if ValuePhase0 <= ValuePhase1:
+					if prec_phase == 0:
+						outfile.write(line)
+						prec_phase = 0
+					else:
+						outfile.write(marker_decode(coded[2], data[header.index('ratio')], data[0], coded_marker, True, indi_number))
+						outfile.write('\n')
+						prec_phase = 1
+				else:
+					if prec_phase == 0:
+						outfile.write(marker_decode(coded[2], data[header.index('ratio')], data[0], coded_marker, True, indi_number))
+						outfile.write('\n')
+						prec_phase = 1
+					else:
+						outfile.write(line)
+						prec_phase = 0
+				prec_coded_marker = coded_marker
+	outfile.close()
+
 def __main__():
 	#Parse Command Line
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
@@ -279,7 +349,8 @@ def __main__():
 	parser.add_option( '-p', '--phased', dest='phased', default='n', help='The matrix has been phased (y or n), [default: %default]')
 	parser.add_option( '-s', '--steps', dest='steps', default=None, help='Analysis to perform\t\t\t\t\t\t'
 	'R: Calculate recombination rate\t\t\t\t\t'
-	'S: Calculate segregation distortions\t\t\t\t')
+	'S: Calculate segregation distortions\t\t\t\t'
+	'P: Phase markers based on their order\t\t\t\t')
 	
 	(options, args) = parser.parse_args()
 	
@@ -333,5 +404,8 @@ def __main__():
 	
 	if 'S' in options.steps:
 		printSegDist(options.matrix, options.output)
+	
+	if 'P' in options.steps:
+		PhaseMarker(options.matrix, options.output)
 		
 if __name__ == "__main__": __main__()
