@@ -270,7 +270,7 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV
 		# Not enough coverage
 		if dp_cov < MINCOV:
 			convert_to_missing = True
-		if dp_cov > MAXCOV:
+		elif dp_cov > MAXCOV:
 			convert_to_missing = True
 		# Enough coverage
 		else:
