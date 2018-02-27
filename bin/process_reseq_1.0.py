@@ -46,7 +46,7 @@ import utilsSR.utilsSR as utils
 sys.stdout.write("module loaded\n")
 sys.stdout.flush()
 
-def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_CHR, QUEUE, PATHNAME):
+def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_CHR, QUEUE, PATHNAME, PARSEUNMAPPED):
 
 	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
 	
@@ -66,7 +66,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	if 'a' in OPTIONS.steps:
 		#1 Mapping
 		#2 Merging
-		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE)
+		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED)
 	
 	if 'b' in OPTIONS.steps:
 		#3 removing duplicates
@@ -91,7 +91,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 def main_run_analysis(job):
 
 	try:
-		rslt = run_analysis(job[0],job[1],job[2],job[3],job[4],job[5], job[6], job[7], job[8])
+		rslt = run_analysis(job[0],job[1],job[2],job[3],job[4],job[5], job[6], job[7], job[8], job[9])
 	except Exception as e:
 		print e
 		rslt = 1
@@ -133,6 +133,7 @@ def __main__():
 	parser.add_option( '-q', '--queue',		dest='queue',		default=None,		help='Queue to use if SGE is installed on your machine. Do not fill otherwise, [default: %default]')
 	parser.add_option( '-p', '--prefix',	dest='prefix',		default='All_lib',	help='Prefix for output bam and vcf containing all libraries. [default: %default]')
 	parser.add_option( '-g', '--outgzip',	dest='outgzip',		default='n',		help='Output files in gzip format. [Default: %default]')
+	parser.add_option( '-k', '--keepUn',	dest='keepUn',		default='n',		help='Keep unmapped reads in a file. [Default: %default]')
 	parser.add_option( '-s', '--steps',		dest='steps',		default=None,		help='A string containing steps to perform:\t\t\t\t'
 	'a: Aligning libraries\t\t\t\t\t'
 	'b: Removing duplicates\t\t\t\t\t\t\t'
@@ -169,6 +170,9 @@ def __main__():
 	python = loca_programs.get('Programs','python')
 	vcfConcat = loca_programs.get('Programs','vcfconcat')
 	
+	# Checking options
+	if options.keepUn != 'y' and options.keepUn != 'n':
+		sys.exit('Please enter either "y" or "n" to --keepUn options\n')
 	
 	# Getting accessions to work with
 	dico_lib = {}
@@ -238,7 +242,7 @@ def __main__():
 		listJobs = []
 		for n in dico_lib:
 			sys.stdout.flush()
-			listJobs.append([dico_lib[n], n, dico_ploidy[n], options, loca_programs, config, dico_chr, options.queue, pathname])
+			listJobs.append([dico_lib[n], n, dico_ploidy[n], options, loca_programs, config, dico_chr, options.queue, pathname, options.keepUn])
 		
 		pool = mp.Pool(processes=nbProcs)
 		results = pool.map(main_run_analysis, listJobs)

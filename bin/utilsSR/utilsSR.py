@@ -654,7 +654,7 @@ def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
 ##############################################
 
 
-def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE):
+def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED):
 
 	sys.stdout.write('Working on '+ACC_ID+' accession\n')
 	
@@ -768,6 +768,22 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if not(os.path.isfile(ACC_ID+'/'+ACC_ID+'_merged.bam')):
 		return 'An error was encountered in step a during merging step. The program exited without finishing on '+ACC_ID+'\n'
 	
+	#############
+	#3 Parsing unmapped read if requested
+	if PARSEUNMAPPED == 'y':
+		sys.stdout.write('Initiating unmapped removal.\n')
+		to_filter = []
+		for n in LIB_DIC:
+			unMapkeep = '%s view -bS -uf 4 %s > %s' % (SAMTOOLS, ACC_ID+'/'+TMP+n+'.sam', ACC_ID+'/'+n+'Unmapped.bam')
+			to_filter.append(unMapkeep)
+		
+		if QUEUE == None:
+			for comd in to_filter:
+				run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools):\n')
+		else:
+			run_qsub(QUEUE, to_filter, 2, 'filter-'+ACC_ID, "12G", PREFIX)
+		sys.stdout.write('done\n')
+		
 	# Removing intermediate files
 	for n in LIB_DIC:
 		os.remove(ACC_ID+'/'+TMP+n+'.sam')
