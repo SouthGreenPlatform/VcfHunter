@@ -1440,7 +1440,7 @@ def __main__():
 	parser.add_option( '-A',	'--Ambiguous',		dest='Ambiguous',		default=None,			help='A 2 column file containing accession names used to simulate populations and their group. In this file we only'
 	' pass admixed representative of a group not represented in nameH. These accessions will be used to infer expected allele of a group at the observed position. This inference is calculated as followed: a probability'
 	' to have an allele of this group in an accession of this group is of 1 an allele of the group is found in the passed accession. Accessions passed to this option are not used for noise inference. [Default: %default]')
-	parser.add_option( '-c',	'--chr',			dest='chr',				default=None, 			help='Chromosome names to exclude from analysis. Each chromosomes should be separated by ":". [Default: %default]')
+	parser.add_option( '-c',	'--chr',			dest='chr',				default=None, 			help='Chromosome names to work with in the analysis. Each chromosomes should be separated by ":". [Default: %default]')
 	parser.add_option( '-w',	'--win',			dest='win',				default='25', 			help='Half window size around a variant site to evaluate the structure at the site. [Default: %default]')
 	parser.add_option( '-g',	'--gcol',			dest='gcol',			default=None, 			help='Group color. [Default: %default]')
 	parser.add_option( '-P',	'--ploidy',			dest='ploidy',			default='2', 			help='Ploidy level (integer). [Default: %default]')
