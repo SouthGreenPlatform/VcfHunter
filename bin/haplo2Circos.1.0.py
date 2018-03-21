@@ -114,11 +114,29 @@ def convert2tile(FILE, OUT):
 	
 	file = open(FILE)
 	outfile = open(OUT,'a')
+	PrecPos = 1
+	list2print = []
 	for line in file:
 		data = line.split()
 		if data:
-			outfile.write('\t'.join(data[1:4]+['color='+data[4]]))
-			outfile.write('\n')
+			NewPos = int(data[2])
+			if NewPos - PrecPos > 1:
+				if list2print[-1][3] == 'color=un':
+					list2print[-1][2] = str(NewPos-1)
+					list2print.append(data[1:4]+['color='+data[4]])
+				elif data[4] == 'un':
+					list2print.append([data[1]]+[str(PrecPos+1)]+[data[3]]+['color='+data[4]])
+				else:
+					list2print.append([data[1]]+[str(PrecPos+1)]+[str(NewPos-1)]+['color=un'])
+					list2print.append(data[1:4]+['color='+data[4]])
+			else:
+				list2print.append(data[1:4]+['color='+data[4]])
+			PrecPos = int(data[3])
+	file.close()
+	for n in list2print:
+		outfile.write('\t'.join(n))
+		outfile.write('\n')
+				
 	outfile.close()
 
 def createKar(PREFIX, liste_chr, dico_centro, dico_haplotype):
@@ -270,7 +288,7 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PREFIX):
 	outfile.write('<<include etc/colors_fonts_patterns.conf>>\n')
 	outfile.write('<colors>\n')
 	outfile.write('<<include etc/colors.conf>>\n')
-	outfile.write('un = 0,0,0,0.75\n')
+	outfile.write('un = 180,180,180,1\n')
 	for col in dico_color:
 		outfile.write(' = '.join([col]+[','.join(list(map(str,map(int,dico_color[col]))))]))
 		outfile.write('\n')
