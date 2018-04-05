@@ -821,7 +821,7 @@ def recode2JoinMap(ACCESSION_HEADER, LISTE, KHISTAT, POP_TYPE, DICO_ACC, PARENT_
 			sys.exit('bug')
 		return ' '.join(liste2return)+'\n'
 
-def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARENT_STATUS, MARKER_NAME):
+def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARENT_STATUS, MARKER_NAME, DICO_ACC_TO_TREAT):
 	"""
 		recode marker for Joinmap
 		
@@ -839,6 +839,8 @@ def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARE
 		type PARENT_STATUS: value
 		param MARKER_NAME: Marker name
 		type MARKER_NAME: str
+		param DICO_ACC_TO_TREAT: Accessions used for filtering
+		type DICO_ACC_TO_TREAT: set
 		return: str
 	"""
 	
@@ -860,7 +862,8 @@ def recode2tab(ACCESSION_HEADER, LISTE, KHISTAT, DICOSEGREGATION, DICO_ACC, PARE
 				liste2return.append('--')
 			elif not (LISTE[n] in KHISTAT[3]):
 				liste2return.append('--')
-				ConvertedToMissing += 1
+				if ACCESSION_HEADER[n] in DICO_ACC_TO_TREAT:
+					ConvertedToMissing += 1
 			else:
 				liste2return.append(DICOSEGREGATION[KHISTAT[2]]['MarkerCoding'][1][KHISTAT[3].index(LISTE[n])])
 	return ['\t'.join(liste2return), ConvertedToMissing]
@@ -1160,7 +1163,7 @@ def __main__():
 					if not (marker_name in DUPLICATED_markers):
 						if not(options.ref == None):
 							get_tags(sequence_dict, chrom, int(pos), options.prefix+'_tags.fasta', marker_name)
-						WORD2PRINT = recode2tab(Accession_header, liste[0], Khi_stat, DicoSegregation, dico_acc_to_genotype, id_parent[1], marker_name)
+						WORD2PRINT = recode2tab(Accession_header, liste[0], Khi_stat, DicoSegregation, dico_acc_to_genotype, id_parent[1], marker_name, dico_acc_to_treat)
 						if (WORD2PRINT[1]/float(len(dico_acc))) + MISSING <= MAX_MISSING:
 							DICO_FINAL_STAT[id_parent[0]] += 1
 							if id_parent[0] == 'unknown':
