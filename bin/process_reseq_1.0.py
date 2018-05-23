@@ -134,6 +134,7 @@ def __main__():
 	parser.add_option( '-p', '--prefix',	dest='prefix',		default='All_lib',	help='Prefix for output bam and vcf containing all libraries. [default: %default]')
 	parser.add_option( '-g', '--outgzip',	dest='outgzip',		default='n',		help='Output files in gzip format. [Default: %default]')
 	parser.add_option( '-k', '--keepUn',	dest='keepUn',		default='n',		help='Keep unmapped reads in a file. [Default: %default]')
+	parser.add_option( '-C', '--chrom',	dest='chrom',		default='all',		help='Chromosomes to work with (only for step f). If "all", all chromosomes will be used for calling. Either: a list of chromosome names separated by ":" [Default: %default]')
 	parser.add_option( '-s', '--steps',		dest='steps',		default=None,		help='A string containing steps to perform:\t\t\t\t'
 	'a: Aligning libraries\t\t\t\t\t'
 	'b: Removing duplicates\t\t\t\t\t\t\t'
@@ -257,14 +258,23 @@ def __main__():
 		# getting accession list
 		liste_accessions = dico_lib.keys()
 		
+		# Selecting chromosomes
+		if options.chrom == 'all':
+			ChrList = list(dico_chr.keys())
+		else:
+			ChrList = options.chrom.split(':')
+		
 		# Optimizing window size
 		totalSize = 0
-		for chr in dico_chr:
+		for chr in ChrList:
+			if not chr in dico_chr:
+				sys.exit('This is ambarassing... chromosome: '+chr+' has not been found in the reference fasta file...\n')
 			totalSize += dico_chr[chr]
+		
 		# window = int(totalSize/float(nbProcs))
 		window = 1000000
 		dicoWindow = {}
-		for chr in dico_chr:
+		for chr in ChrList:
 			dicoWindow[chr] = []
 			start = 0
 			while start < dico_chr[chr]:

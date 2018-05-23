@@ -1254,7 +1254,8 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 		outfile.write("##contig=<ID="+n+",length="+str(DICO_CHR[n])+">\n")
 	liste2print = ["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"]
 	for acc in LIST_ACC:
-		liste2print.append(acc)
+		ACC = acc.split('/')[-1]
+		liste2print.append(ACC)
 	outfile.write('\t'.join(liste2print))
 	outfile.write('\n')
 	
@@ -1264,7 +1265,8 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 	dico_accession_infile[CHR] = {}
 	# sys.stdout.write(CHR+'\n')
 	for acc in LIST_ACC:
-		dico_accession_infile[CHR][acc] = gzip.open(acc+'/'+acc+'_allele_count_'+CHR+'.gz', 'rb')
+		ACC = acc.split('/')[-1]
+		dico_accession_infile[CHR][acc] = gzip.open(acc+'/'+ACC+'_allele_count_'+CHR+'.gz', 'rb')
 
 	#3- Initiating variables
 	dico_accession_positions = {}

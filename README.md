@@ -177,6 +177,7 @@ variant allele supported by at least one read.
     --thread: Max number of accessions treated at the same time. Do not exceed the number of processors available! [default: 1] 
     --queue: If you are using SGE sheduler: the queue name for the job to perform parallelisation. If not do not fill.
     --prefix: Prefix for vcf file and statistics folders.
+	--chrom: Chromosomes to work with (only for step f). If "all" : all chromosomes will be used for calling. Otherwise : a list of chromosome names separated by ":" [Default:all]
     --steps: A string containing steps to perform:
         a: Aligning libraries
         b: Removing duplicates
