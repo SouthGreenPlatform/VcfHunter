@@ -2,7 +2,7 @@ Purpose of VcfHunter
 ====================
 
 VcfExplorer regroups several programs which principale aims are to map
-RNAseq data onto reference genome sequence, perform variant calling,
+DNAseq data onto reference genome sequence, perform variant calling,
 manipulate vcf files, perform chromosome painting of accessions based
 on the contribution of ancestral groups and select marker for genetic
 map analysis.
