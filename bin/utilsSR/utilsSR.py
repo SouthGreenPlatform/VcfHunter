@@ -49,7 +49,6 @@ def stop_err( msg ):
 	sys.exit()
 
 def run_job (frameinfo, cmd_line, ERROR):
-	print cmd_line
 	try:
 		tmp = tempfile.NamedTemporaryFile().name
 		error = open(tmp, 'w')
@@ -685,7 +684,7 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	if QUEUE == None:
 		for comd in to_mapp:
-			sys.stdout.write(comd)
+			sys.stdout.write(comd+'\n')
 			run_job(getframeinfo(currentframe()), comd, 'Error in step A (bwa-mem):\n')
 	else:
 		run_qsub(QUEUE, to_mapp, 4, 'mapp-'+ACC_ID, "4G", PREFIX)
@@ -707,8 +706,8 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	if QUEUE == None:
 		for comd in mapping_stat:
-			sys.stdout.write(comd)
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (bwa-mem):\n')
+			sys.stdout.write(comd+'\n')
+			run_job(getframeinfo(currentframe()), comd, 'Error in step A (Map Stat):\n')
 	else:
 		run_qsub(QUEUE, mapping_stat, 1, 'stats-'+ACC_ID, "4G", PREFIX)
 	
@@ -721,8 +720,8 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	if QUEUE == None:
 		for comd in mapping_stat:
-			sys.stdout.write(comd)
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (bwa-mem):\n')
+			sys.stdout.write(comd+'\n')
+			run_job(getframeinfo(currentframe()), comd, 'Error in step A (Plot stat):\n')
 	else:
 		run_qsub(QUEUE, mapping_stat, 1, 'stats-'+ACC_ID, "4G", PREFIX)
 		
@@ -739,6 +738,7 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	if QUEUE == None:
 		for comd in to_filter:
+			sys.stdout.write(comd+'\n')
 			run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools):\n')
 	else:
 		run_qsub(QUEUE, to_filter, 2, 'filter-'+ACC_ID, "12G", PREFIX)
@@ -759,6 +759,7 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	if QUEUE == None:
 		for comd in to_merge:
+			sys.stdout.write(comd+'\n')
 			run_job(getframeinfo(currentframe()), comd, 'Error in step A (picard tools):\n')
 	else:
 		run_qsub(QUEUE, to_merge, 1, 'merge-'+ACC_ID, "12G", PREFIX)
@@ -779,6 +780,7 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 		
 		if QUEUE == None:
 			for comd in to_filter:
+				sys.stdout.write(comd+'\n')
 				run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools):\n')
 		else:
 			run_qsub(QUEUE, to_filter, 2, 'filter-'+ACC_ID, "12G", PREFIX)
