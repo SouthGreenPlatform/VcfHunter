@@ -26,6 +26,7 @@ import os
 import csv
 import math
 import time
+import gzip
 import shutil
 import random
 import datetime
@@ -1012,7 +1013,10 @@ def stat_on_vcf(VCF, PREFIX, NAMES, GFF3):
 		dico_acc[n]['autapo'] = 0
 	
 	# Reading and recording informations
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -1054,44 +1058,6 @@ def stat_on_vcf(VCF, PREFIX, NAMES, GFF3):
 				else:
 					dico_general_stat['status'][status] += 1
 				
-				# identifying SNP and indel
-				dic_snp = set(alt_allele)
-				dic_snp.add(ref_allele)
-				if IsIndel(dic_snp):
-					dico_general_stat['type']['indel'] += 1
-				else:
-					dico_general_stat['type']['SNP'] += 1
-				
-				# calculating transition - transversion (for SNP sites only)
-				if IsSNP(dic_snp):
-					for alt in alt_allele:
-						if alt == 'A' and ref_allele == 'T':
-							dico_general_stat['transition_transversion']['A vs T'] += 1
-						elif ref_allele == 'A' and alt == 'T':
-							dico_general_stat['transition_transversion']['A vs T'] += 1
-						elif alt == 'C' and ref_allele == 'G':
-							dico_general_stat['transition_transversion']['C vs G'] += 1
-						elif ref_allele == 'C' and alt == 'G':
-							dico_general_stat['transition_transversion']['C vs G'] += 1
-						elif alt == 'A' and ref_allele == 'C':
-							dico_general_stat['transition_transversion']['A vs C'] += 1
-						elif ref_allele == 'A' and alt == 'C':
-							dico_general_stat['transition_transversion']['A vs C'] += 1
-						elif alt == 'A' and ref_allele == 'G':
-							dico_general_stat['transition_transversion']['A vs G'] += 1
-						elif ref_allele == 'A' and alt == 'G':
-							dico_general_stat['transition_transversion']['A vs G'] += 1
-						elif alt == 'C' and ref_allele == 'T':
-							dico_general_stat['transition_transversion']['T vs C'] += 1
-						elif ref_allele == 'C' and alt == 'T':
-							dico_general_stat['transition_transversion']['T vs C'] += 1
-						elif alt == 'T' and ref_allele == 'G':
-							dico_general_stat['transition_transversion']['T vs G'] += 1
-						elif ref_allele == 'T' and alt == 'G':
-							dico_general_stat['transition_transversion']['T vs G'] += 1
-						else:
-							sys.stdout.write('bug in transition transversion identification '+alt+' '+ref_allele+'\n'+line)
-				
 				###### working by accessions ######
 				total_alleles = set()
 				for n in DICO_NAME:
@@ -1122,8 +1088,48 @@ def stat_on_vcf(VCF, PREFIX, NAMES, GFF3):
 						else:
 							dico_acc[n]['nb_homo_alt'] += 1
 				
-				# calculating variant number
+				###### Calculating  global statistics ######
 				total_alleles.discard("NA")
+				
+				# identifying SNP and indel
+				if IsIndel(total_alleles):
+					dico_general_stat['type']['indel'] += 1
+				else:
+					dico_general_stat['type']['SNP'] += 1
+				
+				# calculating transition - transversion (for SNP sites only)
+				for alt in alt_allele:
+					if len(alt) == 1:
+						if alt in total_alleles:
+							if alt != "*":
+								if alt == 'A' and ref_allele == 'T':
+									dico_general_stat['transition_transversion']['A vs T'] += 1
+								elif ref_allele == 'A' and alt == 'T':
+									dico_general_stat['transition_transversion']['A vs T'] += 1
+								elif alt == 'C' and ref_allele == 'G':
+									dico_general_stat['transition_transversion']['C vs G'] += 1
+								elif ref_allele == 'C' and alt == 'G':
+									dico_general_stat['transition_transversion']['C vs G'] += 1
+								elif alt == 'A' and ref_allele == 'C':
+									dico_general_stat['transition_transversion']['A vs C'] += 1
+								elif ref_allele == 'A' and alt == 'C':
+									dico_general_stat['transition_transversion']['A vs C'] += 1
+								elif alt == 'A' and ref_allele == 'G':
+									dico_general_stat['transition_transversion']['A vs G'] += 1
+								elif ref_allele == 'A' and alt == 'G':
+									dico_general_stat['transition_transversion']['A vs G'] += 1
+								elif alt == 'C' and ref_allele == 'T':
+									dico_general_stat['transition_transversion']['T vs C'] += 1
+								elif ref_allele == 'C' and alt == 'T':
+									dico_general_stat['transition_transversion']['T vs C'] += 1
+								elif alt == 'T' and ref_allele == 'G':
+									dico_general_stat['transition_transversion']['T vs G'] += 1
+								elif ref_allele == 'T' and alt == 'G':
+									dico_general_stat['transition_transversion']['T vs G'] += 1
+								else:
+									sys.stdout.write('bug in transition transversion identification '+alt+' '+ref_allele+'\n'+line)
+				
+				# calculating variant number
 				if not(len(total_alleles) in dico_general_stat['nb_var']):
 					dico_general_stat['nb_var'][len(total_alleles)] = 1
 				else:
@@ -1359,7 +1365,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 						remove = 1
 						nb_SNP_remove += 1
 				if 'INDELS' in exclude:
-					# Validating if it is a SNP alone
+					# Validating if it is an indel
 					dic_snp = set(alt_allele)
 					dic_snp.add(ref_allele)
 					if IsIndel(dic_snp):
@@ -1486,7 +1492,10 @@ def IsIndel(DICO):
 		max_size = max(len(n),max_size)
 	
 	if max_size == 1:
-		return False
+		if '*' in DICO:
+			return True
+		else:
+			return False
 	else:
 		return True
 
