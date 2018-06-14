@@ -168,6 +168,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 				nb_missing = 0
 				ref_allele = data[REFpos]
 				alt_allele = data[ALTpos].split(',')
+				AlleleList = [ref_allele]+alt_allele
 				flag_format = data[FLAGformat].split(':')
 				if 'AD' in flag_format and 'DP' in flag_format and 'GT' in flag_format:
 					GTpos = flag_format.index('GT')
@@ -190,6 +191,10 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 						# working on outgroup (not taken in acount for variant filtering)
 						elif accession in DICO_OUTGROUP:
 							list_to_print_in_output.append(filter_accession(accession, data, header, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)[0])
+					# Recording allele
+					dic_snp = set()
+					for allele in nb_alt:
+						dic_snp.add(AlleleList[int(allele)])
 					# Validating there is not to much missing data
 					if nb_missing > NMISS:
 						remove = 1
@@ -201,15 +206,11 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 							nb_autapo_remove += 1
 					if 'SNP' in exclude:
 						# Validating if it is a SNP alone
-						dic_snp = set(alt_allele)
-						dic_snp.add(ref_allele)
 						if IsSNP(dic_snp):
 							remove = 1
 							nb_SNP_remove += 1
 					if 'INDELS' in exclude:
 						# Validating if it is a SNP alone
-						dic_snp = set(alt_allele)
-						dic_snp.add(ref_allele)
 						if IsIndel(dic_snp):
 							remove = 1
 							nb_INDEL_remove += 1
@@ -354,7 +355,10 @@ def IsIndel(DICO):
 		max_size = max(len(n),max_size)
 	
 	if max_size == 1:
-		return False
+		if '*' in DICO:
+			return True
+		else:
+			return False
 	else:
 		return True
 
