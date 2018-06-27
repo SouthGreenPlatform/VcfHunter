@@ -228,7 +228,8 @@ def __main__():
 	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 2 column file containing accession name (col1) origin/group (Col2). [Default: %default]')
 	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='Accession to work with. [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
-	parser.add_option( '',	'--all',			dest='all',			default='n',			help='Allele should be present in all accessions to identify a group. [Default: %default]')
+	parser.add_option( '',	'--NoMiss',			dest='NoMiss',		default='n',			help='No missing data are allowed in accessions used to group alleles. [Default: %default]')
+	parser.add_option( '',	'--all',			dest='all',			default='n',			help='Allele should be present in all accessions of the group. [Default: %default]')
 	(options, args) = parser.parse_args()
 	
 	if options.conf == None:
@@ -299,29 +300,78 @@ def __main__():
 					# to manage missing data in groups
 					Good = 1
 					for gp in dico_allele:
-						if options.all == 'n':
+						if options.NoMiss == 'n':
 							if '.' in dico_allele[gp] and len(dico_allele[gp]) == 1:
 								Good = 0
-						elif options.all == 'y':
+						elif options.NoMiss == 'y':
 							if '.' in dico_allele[gp]:
 								Good = 0
 						else:
-							sys.exit('Oups, their is a bug... either the vcf has a problem or I made a mistake in the programing')
+							sys.exit('Oups, their is a bug... either the vcf has a problem or I made a mistake in the programing\n')
 					if Good:
 						# recording accession 
-						ACCESSION = data[header.index(ACCESS)].split(':')
-						GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
-						COVERAGE = list(map(int, ACCESSION[FORMAT.index("AD")].split(',')))
 						add_cov = 0
 						if not ('.' in GENOTYPE):
 							total_unmissing_sites += 1
+						########################################################################################################################### Two distinct philosophy of work
+						if options.all == 'y': # to manage alleles specific to all accessions of a group
+							# looking for alleles specific of groups
+							dico_alleles_groups = {}
+							for gp in dico_allele:
+								for allele in dico_allele[gp]:
+									if allele != '.':
+										if not (allele in dico_alleles_groups):
+											dico_alleles_groups[allele] = set()
+										dico_alleles_groups[allele].add(gp)
+							
+							dico_allele_specific = {}
+							for allele in dico_alleles_groups:
+								if len(dico_alleles_groups[allele]) == 1: #It is an allele specific of a group because it has been found only in one group
+									GROUP = list(dico_alleles_groups[allele])[0]
+									if not(GROUP in dico_allele_specific):
+										dico_allele_specific[GROUP] = set(allele)
+							
+							
+							# Now we should verify that all accessions (excluding accessions with missing data) have this allele
+							DICO_ACC = {} # for counting the number of accession of a group without missing data
+							DICO_ALL_IN_ACC_COUNT = {} # for counting the number of accession of a group without missing data
+							for gp in dico_group:
+								DICO_ACC[gp] = 0
+								for ACC in dico_group[gp]:
+									ACCESSION = data[header.index(ACC)].split(':')
+									GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
+									if not('.' in  GENOTYPE):
+										DICO_ACC[gp] += 1
+										for geno in GENOTYPE:
+											if not(geno in DICO_ALL_IN_ACC_COUNT):
+												DICO_ALL_IN_ACC_COUNT[geno] = 0
+											DICO_ALL_IN_ACC_COUNT[geno] += 1
+							
+							# Selecting allele to work with
+							dico_allele = {}
+							for gp in dico_allele_specific:
+								dico_allele[gp] = set()
+								ExpectedGpNumber = DICO_ACC[gp]
+								for allele in dico_allele_specific[gp]:
+									if DICO_ALL_IN_ACC_COUNT[allele] == ExpectedGpNumber:
+										dico_allele[gp].add(allele)
+
+						###################################################################################################################
+						
+						elif options.all == 'n':
+							pass
+						else:
+							sys.exit('Oups, the program exited without finishing: please provide either "y" ot "n" to --all options\n')
+						
+						ACCESSION = data[header.index(ACCESS)].split(':')
+						GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
+						COVERAGE = list(map(int, ACCESSION[FORMAT.index("AD")].split(',')))
 						for geno in GENOTYPE:
 							if geno != '.':
 								group = []
 								for gp in dico_allele:
 									if geno in dico_allele[gp]:
 										group.append(gp)
-								# print('tutu', dico_allele, geno, group)
 								RATIO = COVERAGE[int(geno)]/float(sum(COVERAGE))
 								if len(group) == 1:
 									add_cov = 1
@@ -332,9 +382,11 @@ def __main__():
 									dico_draw[CHR][POS][group[0]] = RATIO
 									outfile.write('\t'.join([CHR, str(POS), VARIANT[int(geno)], group[0], str(RATIO)]))
 									outfile.write('\n')
+						
 						if add_cov:
 							dico_draw[CHR][POS]['cov'] = sum(COVERAGE)
 							total.append(sum(COVERAGE))
+						
 				elif data[0][0:9] == '##contig=':
 					chr_info = get_chr_size(data)
 					dico_chr[chr_info[0]] = chr_info[1]
