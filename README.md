@@ -919,8 +919,8 @@ along chromosomes.
 	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
 	--acc: Accession to work with,
 	--ploidy: Accession ploidy (integer),
-	--all: Allele should be present in all accessions to attribute to a group,
-	--prefix: Prefix for output files. [Default: AlleleOrigin]
+	--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+	--all: Allele should be present in all accessions of the group.
 
 *Output:*\
  **\*\Cov.png:** a png file presenting SNP coverage along the chromosomes.\
@@ -944,7 +944,8 @@ accessions.
 	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
 	--ploidy: Accession ploidy (integer). If not all accessions have the same ploidy, this is not a problem. This ploidy information
 	 is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
-	--all: Allele should be present in all accessions to attribute to a group,
+	--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+	--all: Allele should be present in all accessions of the group,
 	--prefix: Prefix for output files. [Default: RatioAndCov]
 
 *Output:*\

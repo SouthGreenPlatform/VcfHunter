@@ -492,8 +492,8 @@ estimate the expected number of alleles based on admixed accessions representati
 --origin: A 2 column file containing accession name (col1), origin/group (Col2),
 --acc: Accession to work with,
 --ploidy: Accession ploidy (integer),
---all: Allele should be present in all accessions to attribute to a group,
---prefix: Prefix for output files. [Default: AlleleOrigin]</code></pre>
+--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+--all: Allele should be present in all accessions of the group.</code></pre>
 <p><em>Output:</em><br /> <strong>*.png:</strong> a png file presenting SNP coverage along the chromosomes.<br /> <strong>*.png:</strong> a png file presenting ancestral allele proportion at a site along the chromosomes.<br /> <strong>*_AlleleOriginAndRatio.tab:</strong> a tabulated file repporting for each sites were an ancestral allele has been attributed, its origin and the proportion of reads supporting this allele. This files contains chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).<br /> <strong>*_stats.tab:</strong> a tabulated file repporting various statistics on the alleles of the accession. <br><br></p>
 <h3 id="vcf2allpropandcovbychr.py">vcf2allPropAndCovByChr.py</h3>
 <p>This program perform two things based on a vcf. 1) It plots for a chromosome of all accessions in a vcf, the allele coverage alongs its chromosomes. 2) It identify,based on known ancestral accessions in the vcf, the alleles specific to each groups and plot the alleles proportion at a site along chromosomes for all accessions.</p>
@@ -502,7 +502,8 @@ estimate the expected number of alleles based on admixed accessions representati
 --origin: A 2 column file containing accession name (col1), origin/group (Col2),
 --ploidy: Accession ploidy (integer). If not all accessions have the same ploidy, this is not a problem. This ploidy information
  is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
---all: Allele should be present in all accessions to attribute to a group,
+--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+--all: Allele should be present in all accessions of the group,
 --prefix: Prefix for output files. [Default: RatioAndCov]</code></pre>
 <p><em>Output:</em><br /> <strong>prefix_chromosomeN_X_Cov.png:</strong> X png files presenting SNP coverage along chromosomeN.<br /> <strong>prefix_chromosomeN_X_Ratio.png:</strong> X png files presenting ancestral allele proportion at a site along chromosomeN. <br><br></p>
 <h3 id="vcf2pop.1.0.py">vcf2pop.1.0.py</h3>
