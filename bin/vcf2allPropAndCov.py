@@ -31,6 +31,7 @@ import fileinput
 import time
 import random
 import math
+import gzip
 import datetime
 import traceback
 import multiprocessing as mp
@@ -273,7 +274,10 @@ def __main__():
 	dico_chr = {}
 	total = []
 	for vcf in dico_vcf:
-		file = open(vcf)
+		if vcf[-3:] == '.gz':
+			file = gzip.open(vcf,'rt')
+		else:
+			file = open(vcf)
 		for line in file:
 			data = line.split()
 			if data:
