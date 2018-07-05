@@ -31,6 +31,7 @@ import fileinput
 import time
 import random
 import math
+import gzip
 import datetime
 import traceback
 import multiprocessing as mp
@@ -83,11 +84,11 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 	# On fait la figure
 	POSSPAN = 0
 	fig = plt.figure(figsize=(10.5, 14.85))
-	fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
+	fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 
 	
 	for i, acc in enumerate(DICO_INFO.keys()):
-		#print i, acc
+		# print (i, acc)
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 1.05)
 		ax.set_xlim(0, MAXI)
@@ -97,7 +98,6 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 		ax.axhline(y=0.33, linewidth=0.1, color = (0.5,0.5,0.5))
 		ax.axhline(y=0.66, linewidth=0.1, color = (0.5,0.5,0.5))
 		for gp  in group:
-			#print "coucou for gp  in group"
 			# Getting position
 			if not (acc in DICO_INFO):
 				value = [0]
@@ -138,24 +138,25 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 
 			POSSPAN = 0
 			fig = plt.figure(figsize=(10.5, 14.85))
-			fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
+			fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 		j=i	
 
-	print (j)
-	fig.savefig(OUT+'_'+CHROM+'_'+str(int(j/15)+1)+'_Ratio.png')
-	plt.close(fig)	
+	# print (j)
+	if (i+1)%15 != 0:
+		fig.savefig(OUT+'_'+CHROM+'_'+str(int(j/15)+1)+'_Ratio.png')
+		plt.close(fig)	
 
 	######Drawing coverage######
 	
 	# On fait la figure
 	POSSPAN = 0
 	fig = plt.figure(figsize=(10.5, 14.85))
-	fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
+	fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 
 	
 	for i, acc in enumerate(DICO_INFO.keys()):
 		MEAN_COV = sum(DICO_INFO[acc]['total'])/float(len(DICO_INFO[acc]['total']))
-		#print i, acc
+		#print (i, acc)
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 2*MEAN_COV)
 		ax.set_xlim(0, MAXI)
@@ -194,7 +195,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 		ax = plt.subplot2grid((NB,15),(POSSPAN,0), colspan=1, rowspan=1)
 		ax.axis('off')	
 		ax.axis([0, 1, 0, 1])
-		ax.text(0, 0.5, acc, size=12, va='center', fontweight='bold')
+		ax.text(0, 0.5, acc, size=12, va='center' ,fontweight='bold')
 
 		POSSPAN += 1	
 		if (i+1)%15==0:   
@@ -204,12 +205,13 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 
 			POSSPAN = 0
 			fig = plt.figure(figsize=(10.5, 14.85))
-			fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
+			fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 		j=i	
 
 	print (j)
-	fig.savefig(OUT+'_'+CHROM+'_'+str(int(j/15)+1)+'_Cov.png')
-	plt.close(fig)	
+	if (i+1)%15 != 0:
+		fig.savefig(OUT+'_'+CHROM+'_'+str(int(j/15)+1)+'_Cov.png')
+		plt.close(fig)
 
 def get_chr_size(LINE):
 	
@@ -280,7 +282,10 @@ def __main__():
 	#pour chaque ligne:
 
 	for vcf in dico_vcf:
-		file = open(vcf)
+		if vcf[-3:] == '.gz':
+			file = gzip.open(vcf,'rt')
+		else:
+			file = open(vcf)
 		for line in file:
 			data = line.split()
 			if data:
