@@ -946,6 +946,7 @@ accessions.
 	 is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
 	--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
 	--all: Allele should be present in all accessions of the group,
+	--acc: Accession to work with. If ignored, all accessions in the vcf will be used. Else accessions should be separated by ",",
 	--prefix: Prefix for output files. [Default: RatioAndCov]
 
 *Output:*\

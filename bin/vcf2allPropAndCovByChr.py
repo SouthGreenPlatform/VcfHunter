@@ -50,7 +50,7 @@ from scipy.interpolate import spline
 from textwrap import wrap
 
 
-def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
+def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY, ACC_order):
 	
 	# Color definition
 	color = ((0,0.8,0), (1,0,0),(0,0,1))
@@ -87,7 +87,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 	fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 
 	
-	for i, acc in enumerate(DICO_INFO.keys()):
+	for i, acc in enumerate(ACC_order):
 		# print (i, acc)
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 1.05)
@@ -154,7 +154,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, CHROM, PLOIDY):
 	fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 
 	
-	for i, acc in enumerate(DICO_INFO.keys()):
+	for i, acc in enumerate(ACC_order):
 		MEAN_COV = sum(DICO_INFO[acc]['total'])/float(len(DICO_INFO[acc]['total']))
 		#print (i, acc)
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
@@ -243,6 +243,7 @@ def __main__():
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
 	parser.add_option( '',	'--NoMiss',			dest='NoMiss',		default='n',			help='No missing data are allowed in accessions used to group alleles. [Default: %default]')
 	parser.add_option( '',	'--all',			dest='all',			default='n',			help='Allele should be present in all accessions of the group. [Default: %default]')
+	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='Accession to work with. If ignored, all accessions in the vcf will be used. Else accessions should be separated by ",". [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='RatioAndCov',	help='Prefix for output file name. [Default: %default]')
 	(options, args) = parser.parse_args()
 
@@ -296,7 +297,10 @@ def __main__():
 				#si ligne #CHROM : stocker header (liste des accessions)
 				elif data[0] == "#CHROM":
 					header = data
-					acc_list=header[header.index("FORMAT")+1:]
+					if options.acc == None:
+						acc_list=header[header.index("FORMAT")+1:]
+					else:
+						acc_list = options.acc.split(',')
 				elif data[0][0] != "#":
 					FORMAT = data[header.index("FORMAT")].split(':')
 					CHR = data[header.index("#CHROM")]
@@ -412,7 +416,7 @@ def __main__():
 		file.close()
 	
 	for chr in recorded_chr:
-		draw_chr(dico_acc, dico_chr, dico_group, options.prefix, chr, int(options.ploidy))
+		draw_chr(dico_acc, dico_chr, dico_group, options.prefix, chr, int(options.ploidy), acc_list)
 
 if __name__ == "__main__": __main__()
 
