@@ -405,7 +405,15 @@ def NewKmean(FILE, MAT, AXES, K, AP, ITER, THREAD, OUT):
 	pool = mp.Pool(processes=THREAD)
 	result = pool.map(main, list_job)
 	CentroidsIterPos = []
-	if 'error' in result:
+	
+	# Checking step
+	AnErrorOccurred = False
+	for n in result:
+		if type(n) == str:
+			if n == 'error':
+				AnErrorOccurred = True
+	
+	if AnErrorOccurred:
 		raise ErrorValue ('Bug in kMean calculation.')
 	else:
 		for n in result:
@@ -2850,7 +2858,15 @@ def kMean_clust(VARCOORD, DAXES, NGROUP, MAT, PREFIX, THREAD, ITER):
 	if list_job:
 		pool = mp.Pool(processes=THREAD)
 		result = pool.map(main, list_job)
-		if 'error' in result:
+		
+		# Checking if all goes well
+		AnErrorOccurred = False
+		for n in result:
+			if type(n) == str:
+				if n == 'error':
+					AnErrorOccurred = True
+		
+		if AnErrorOccurred:
 			raise ErrorValue ('Bug in kMean calculation.')
 		else:
 			for n in result:
