@@ -1,6 +1,6 @@
-
+#!/usr/bin/env python
 #
-#  Copyright 2018 CIRAD
+#  Copyright 2014 CIRAD
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1280,7 +1280,7 @@ def __main__():
 	
 	# Adding header in onemap files
 	for n in DICO_FINAL_STAT:
-		to_add = str(len(dico_acc)) + ' ' + str(DICO_FINAL_STAT[n]) + '\n'
+		to_add = str(len(dico_acc_to_genotype)) + ' ' + str(DICO_FINAL_STAT[n]) + '\n'
 		outfile = open(options.prefix+'_onemap_'+n+'.tab','r')
 		total = to_add + outfile.read()
 		outfile.close()
