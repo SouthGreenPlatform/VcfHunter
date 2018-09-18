@@ -284,7 +284,7 @@ exon covered by the library.
 
 -   prefix\_all\_allele\_count.vcf file
 
-***All the steps can be lauched in one command line. First remove the
+***All the steps can be launched in one command line. First remove the
 generated files:***
 
     rm -rf sample71 sample72 sample73 sample74 sample75 sample76 sample77 sample78 sample79 sample80
@@ -379,7 +379,7 @@ which we dont have enough confidence (--MinCov and MinAl options) and we
 will remove also tri-allelic sites. To perform the filter, run the
 following command line:
 
-    python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 50 --RmAlAlt 1:3 --prefix DNA_RNAseq_prefiltered
+    python3 ../bin/vcfFilter.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --MinCov 10 --MinAl 3 --nMiss 50 --RmAlAlt 1:3 --prefix DNA_RNAseq_prefiltered
 
 The output is a filtered vcf file (prefix+"\_filt.vcf") in which all
 mono- or tri- allelic lines are removed. In addition, all datapoints
@@ -405,7 +405,7 @@ with the following command line:
 
 And to perform the filter, run the following command line:
 
-    python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered_filt.vcf --names DNAseq_names.tab --outgroup RNAseq_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 0 --RmAlAlt 1:3 --prefix DNA_RNAseq_final
+    python3 ../bin/vcfFilter.1.0.py --vcf DNA_RNAseq_prefiltered_filt.vcf --names DNAseq_names.tab --outgroup RNAseq_names.tab --MinCov 10 --MinAl 3 --nMiss 0 --RmAlAlt 1:3 --prefix DNA_RNAseq_final
 
 The output is a filtered vcf file (prefix+"\_filt.vcf") in which there
 is no missing datas for the DNAseq accession but it remains missing data

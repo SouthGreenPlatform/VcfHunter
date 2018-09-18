@@ -151,7 +151,7 @@
 <ul>
 <li>prefix_all_allele_count.vcf file</li>
 </ul>
-<p><strong><em>All the steps can be lauched in one command line. First remove the generated files:</em></strong></p>
+<p><strong><em>All the steps can be launched in one command line. First remove the generated files:</em></strong></p>
 <pre><code>rm -rf sample71 sample72 sample73 sample74 sample75 sample76 sample77 sample78 sample79 sample80</code></pre>
 <p>Run the pipeline again</p>
 <pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p DNAseq -s abcdefghijklm</code></pre>
@@ -184,14 +184,14 @@
 <li>filtering the vcf removing monoallelic variant. This is the solution we will choose in this tutorial.</li>
 </ul>
 <p>In this same filtering step, we will also identify variant sites in which we dont have enough confidence (--MinCov and MinAl options) and we will remove also tri-allelic sites. To perform the filter, run the following command line:</p>
-<pre><code>python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 50 --RmAlAlt 1:3 --prefix DNA_RNAseq_prefiltered</code></pre>
+<pre><code>python3 ../bin/vcfFilter.1.0.py --vcf DNA_RNAseq_prefiltered.vcf --names all_names.tab --MinCov 10 --MinAl 3 --nMiss 50 --RmAlAlt 1:3 --prefix DNA_RNAseq_prefiltered</code></pre>
 <p>The output is a filtered vcf file (prefix+&quot;_filt.vcf&quot;) in which all mono- or tri- allelic lines are removed. In addition, all datapoints which have a coverage lower than 10 reads or a minor allele frequency lower than 3 reads are converted to missing data.</p>
 <p>We will perform a final filter on the vcf file because the analysis that perform the chromosome painting does not support the missing data. Because the vcf is a mix of DNA and RNAseq, the accession genotyped with the RNAseq will have more missing data. In this context we will filter the DNAseq accession for no missing data. This is not clear why we do that only on the DNAseq but it will become clearer and clearer along the process why we do that.</p>
 <p>So to filter the vcf on DNAseq data only we should generate 2 files. A file which regroup accession names to use for filtering (DNAseq accession) and accessions we do not want to use for filtering but which we want to keep in the vcf anyway (RNAseq accessions). This can be done with the following command line:</p>
 <pre><code>grep Lib ../data/config/DNAseq.conf | cut -f 3 &gt; DNAseq_names.tab
 grep Lib ../data/config/RNAseq.conf | cut -f 3 &gt; RNAseq_names.tab</code></pre>
 <p>And to perform the filter, run the following command line:</p>
-<pre><code>python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_prefiltered_filt.vcf --names DNAseq_names.tab --outgroup RNAseq_names.tab --type FILTER --MinCov 10 --MinAl 3 --nMiss 0 --RmAlAlt 1:3 --prefix DNA_RNAseq_final</code></pre>
+<pre><code>python3 ../bin/vcfFilter.1.0.py --vcf DNA_RNAseq_prefiltered_filt.vcf --names DNAseq_names.tab --outgroup RNAseq_names.tab --MinCov 10 --MinAl 3 --nMiss 0 --RmAlAlt 1:3 --prefix DNA_RNAseq_final</code></pre>
 <p>The output is a filtered vcf file (prefix+&quot;_filt.vcf&quot;) in which there is no missing datas for the DNAseq accession but it remains missing data for RNAseq data. You can calculate statistics if you want:</p>
 <pre><code>python3 ../bin/vcf2struct.1.0.py --vcf DNA_RNAseq_final_filt.vcf --names all_names.tab --type STAT --prefix DNA_RNAseq_final_filt</code></pre>
 <h2 id="d---pca-analysis">D - PCA analysis</h2>
