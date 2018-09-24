@@ -1984,7 +1984,10 @@ def FormatForPCA(VCF, NAMES, PREFIX, GROUP, AXIS, MULTYPE, DGROUP, MAT):
 	
 	# reading file
 	color_2_create = set()
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	outfile = open(PREFIX+'_matrix_4_PCA.tab','w')
 	outfile.write('\tGROUP')
 	nb_variant = 0
