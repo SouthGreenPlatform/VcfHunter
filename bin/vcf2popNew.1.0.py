@@ -53,9 +53,9 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 		type MINALCOV: int
 		param WINFREQ: ]0.01:0.1[
 		type WINFREQ: str
-		param GLOB_allele_ratio: Global variables directely filled
+		param GLOB_allele_ratio: Global variables directely filled # Not used Because of memory error in on big files (Comment ##1)
 		type GLOB_allele_ratio: list
-		param GLOB_coverage: Global variables directely filled
+		param GLOB_coverage: Global variables directely filled # Not used Because of memory error in on big files (Comment ##1)
 		type GLOB_coverage: list
 		param TO_EXCLUDE: Accessions to exclude
 		type TO_EXCLUDE: set
@@ -74,8 +74,8 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 	
 	genotype_set = set()
 	
-	global_cov = []
-	global_allele_ratio = []
+	# global_cov = []			##1
+	# global_allele_ratio = []	##1
 	
 	# Cheking if Flags are present in the FORMAT tag
 	if 'AD' in FORMAT and 'DP' in FORMAT and 'GT' in FORMAT:
@@ -135,17 +135,17 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 							# Cheking if the variant is too much covered
 							coverage_value = [allele_cov_info[int(liste_allele[0])]]
 							DP_tag = sum(coverage_value)
-							if DP_tag > 0:
-								if DP_tag <= MAXCOV:
-									if acc_id in DICO_ACC_TO_TREAT:
-										global_cov.append(DP_tag)
+							# if DP_tag > 0:							##1
+								# if DP_tag <= MAXCOV:					##1
+									# if acc_id in DICO_ACC_TO_TREAT:	##1
+										# global_cov.append(DP_tag)		##1
 							if DP_tag > MAXCOV:
 								too_cov += 1
 							
 							# Cheking if the variant is sufficiantly covered
 							elif DP_tag >= MINCOV:
-								if acc_id in DICO_ACC_TO_TREAT:
-									global_allele_ratio.append(0)
+								# if acc_id in DICO_ACC_TO_TREAT:		##1
+									# global_allele_ratio.append(0)		##1
 								code = '/'.join(liste_allele*2)
 							# The variant site is not sufficiently covered
 							elif DP_tag != 0:
@@ -160,10 +160,10 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 							for n in liste_allele:
 								coverage_value.append(allele_cov_info[int(n)])
 							DP_tag = sum(coverage_value)
-							if DP_tag > 0:
-								if DP_tag <= MAXCOV:
-									if acc_id in DICO_ACC_TO_TREAT:
-										global_cov.append(DP_tag)
+							# if DP_tag > 0:							##1
+								# if DP_tag <= MAXCOV:					##1
+									# if acc_id in DICO_ACC_TO_TREAT:	##1
+										# global_cov.append(DP_tag)		##1
 							
 							if DP_tag > MAXCOV:
 								too_cov += 1
@@ -171,8 +171,8 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 							# Checking if the variant is sufficiently covered
 							elif DP_tag >= MINCOV:
 								min_freq = min(coverage_value)/float(sum(coverage_value))
-								if acc_id in DICO_ACC_TO_TREAT:
-									global_allele_ratio.append(min_freq)
+								# if acc_id in DICO_ACC_TO_TREAT:				##1
+									# global_allele_ratio.append(min_freq)		##1
 								# Coding heterozygous based on winfreq
 								if min_freq >= winfreq[1] and min(coverage_value) >= MINALCOV:
 									code = '/'.join(liste_allele)
@@ -220,11 +220,11 @@ def filter_on_read_cov(DATA, FORMAT, MINCOV, MAXCOV, MINALCOV, WINFREQ, GLOB_all
 					else:
 						code.append(str(listenot2return.index(allele)))
 				liste2return.append('/'.join(code))
-			for n in global_cov:
-				GLOB_coverage.append(n)
-			for n in global_allele_ratio:
-				if n != 0:
-					GLOB_allele_ratio.append(n)
+			# for n in global_cov:					##1
+				# GLOB_coverage.append(n)			##1
+			# for n in global_allele_ratio:			##1
+				# if n != 0:						##1
+					# GLOB_allele_ratio.append(n)	##1
 		else:
 			more_than_dimorphous = 1
 			# print 'more_than_dimorphous'

@@ -238,7 +238,8 @@ def __main__():
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr, Marion Dupouy : marion.dupouy@cirad.fr, Franc-Christophe Baurens: baurens@cirad.fr\n This program count allele ratio based on two origins")
 
 	# Wrapper options. 
-	parser.add_option( '',	'--conf',			dest='conf',		default=None,			help='Conf file containing vcf location (one per chromosome). [Default: %default]')
+	parser.add_option( '',	'--conf',			dest='conf',		default=None,			help='Conf file containing vcf(s) location(s)')
+	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='Path to uniq vcf file. (--conf and --vcf are mutually exclusive). If --vcf option is passed, --conf will be omited')
 	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 2 column file containing accession name (col1) origin/group (Col2). [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
 	parser.add_option( '',	'--NoMiss',			dest='NoMiss',		default='n',			help='No missing data are allowed in accessions used to group alleles. [Default: %default]')
@@ -247,8 +248,8 @@ def __main__():
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='RatioAndCov',	help='Prefix for output file name. [Default: %default]')
 	(options, args) = parser.parse_args()
 
-	if options.conf == None:
-		sys.exit('Please provide a conf file to --conf argument')
+	if options.conf == None and options.vcf == None:
+		sys.exit('Please provide either a conf file to --conf argument or a vcf path to --vcf argument')
 	if options.origin == None:
 		sys.exit('Please provide a origin file to --origin argument')
 	if options.ploidy == None:
@@ -266,13 +267,16 @@ def __main__():
 	file.close()
 
 	# recording vcf file to work with
-	file = open(options.conf)
 	dico_vcf = set()
-	for line in file:
-		data = line.split()
-		if data:
-			dico_vcf.add(data[0])
-	file.close()
+	if options.conf == None:
+		dico_vcf.add(options.vcf)
+	else:
+		file = open(options.conf)
+		for line in file:
+			data = line.split()
+			if data:
+				dico_vcf.add(data[0])
+		file.close()
 
 
 	dico_chr = {}	#information from ##contig lines
@@ -298,7 +302,7 @@ def __main__():
 				elif data[0] == "#CHROM":
 					header = data
 					if options.acc == None:
-						acc_list=header[header.index("FORMAT")+1:]
+						acc_list=list(sorted(header[header.index("FORMAT")+1:]))
 					else:
 						acc_list = options.acc.split(',')
 				elif data[0][0] != "#":
