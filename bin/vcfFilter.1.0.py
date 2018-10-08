@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #
-#  Copyright 2018 CIRAD
+#  Copyright 2014 CIRAD
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -69,6 +70,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	nb_tag_remove = 0
 	nb_INDEL_remove = 0
 	nb_SNP_remove = 0
+	nb_BadFormat = 0
 	
 	# Recording accession to treate
 	file = open(NAMES)
@@ -141,6 +143,11 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 					if (n in DICO_OUTGROUP) or (n in DICO_NAME):
 						list_to_print_in_output.append(n)
 				outfile.write('\t'.join(list_to_print_in_output)+'\n')
+				FILTERpos = header.index('FILTER')
+				REFpos = header.index('REF')
+				ALTpos = header.index('ALT')
+				FLAGformat = header.index('FORMAT')
+				Accession_start = header.index('FORMAT')+1
 			# Printing headers
 			elif data[0][0] == '#':
 				outfile.write(line)
@@ -149,73 +156,78 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 				nb_alt = set()
 				remove = 0
 				# Identification we should remove the variant based on the FILTER tag
-				filter_tag = data[header.index('FILTER')].split(';')
+				filter_tag = data[FILTERpos].split(';')
 				for n in filter_tag:
 					if n in exclude:
 						remove = 1
 				if remove == 1:
 					nb_tag_remove += 1
 				# Initialisation of the corrected line
-				list_to_print_in_output = []
-				for n in header:
-					list_to_print_in_output.append(data[header.index(n)])
-					if n == 'FORMAT':
-						break
-				# Identification genotype to convert to missing du to MINCOV and MINAL parameters
+				list_to_print_in_output = data[0:Accession_start]
+				# Identification genotype to convert to missing due to MINCOV and MINAL parameters
 				nb_missing = 0
-				ref_allele = data[header.index('REF')]
-				alt_allele = data[header.index('ALT')].split(',')
-				flag_format = data[header.index('FORMAT')].split(':')
-				dico_autapo = {}
-				for accession in header:
-					# working on accession to treat
-					if accession in DICO_NAME:
-						filtered_accession = filter_accession(accession, data, header, flag_format, MINCOV, MINAL, MAXCOV, MINFREQ)
-						nb_alt.update(filtered_accession[2])
-						list_to_print_in_output.append(filtered_accession[0])
-						if filtered_accession[1]:
-							nb_missing += 1
-						for z in filtered_accession[2]:
-							if z in dico_autapo:
-								dico_autapo[z] += 1
-							else:
-								dico_autapo[z] = 1
-					# working on outgroup (not taken in acount for variant filtering)
-					elif accession in DICO_OUTGROUP:
-						list_to_print_in_output.append(filter_accession(accession, data, header, flag_format, MINCOV, MINAL, MAXCOV, MINFREQ)[0])
-				# Validating there is not to much missing data
-				if nb_missing > NMISS:
-					remove = 1
-					nb_missing_remove += 1
-				if 'AUTAPO' in exclude:
-					# Validating if it is an autapomorphy
-					if cherche_autapo(dico_autapo):
+				ref_allele = data[REFpos]
+				alt_allele = data[ALTpos].split(',')
+				AlleleList = [ref_allele]+alt_allele
+				flag_format = data[FLAGformat].split(':')
+				if 'AD' in flag_format and 'DP' in flag_format and 'GT' in flag_format:
+					GTpos = flag_format.index('GT')
+					DPpos = flag_format.index('DP')
+					ADpos = flag_format.index('AD')
+					dico_autapo = {}
+					for accession in header:
+						# working on accession to treat
+						if accession in DICO_NAME:
+							filtered_accession = filter_accession(accession, data, header, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)
+							nb_alt.update(filtered_accession[2])
+							list_to_print_in_output.append(filtered_accession[0])
+							if filtered_accession[1]:
+								nb_missing += 1
+							for z in filtered_accession[2]:
+								if z in dico_autapo:
+									dico_autapo[z] += 1
+								else:
+									dico_autapo[z] = 1
+						# working on outgroup (not taken in acount for variant filtering)
+						elif accession in DICO_OUTGROUP:
+							list_to_print_in_output.append(filter_accession(accession, data, header, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)[0])
+					# Recording allele
+					dic_snp = set()
+					for allele in nb_alt:
+						dic_snp.add(AlleleList[int(allele)])
+					# Validating there is not to much missing data
+					if nb_missing > NMISS:
 						remove = 1
-						nb_autapo_remove += 1
-				if 'SNP' in exclude:
-					# Validating if it is a SNP alone
-					dic_snp = set(alt_allele)
-					dic_snp.add(ref_allele)
-					if IsSNP(dic_snp):
+						nb_missing_remove += 1
+					if 'AUTAPO' in exclude:
+						# Validating if it is an autapomorphy
+						if cherche_autapo(dico_autapo):
+							remove = 1
+							nb_autapo_remove += 1
+					if 'SNP' in exclude:
+						# Validating if it is a SNP alone
+						if IsSNP(dic_snp):
+							remove = 1
+							nb_SNP_remove += 1
+					if 'INDELS' in exclude:
+						# Validating if it is a SNP alone
+						if IsIndel(dic_snp):
+							remove = 1
+							nb_INDEL_remove += 1
+					nb_alt.discard('.')
+					if len(nb_alt) in exclude_al:
 						remove = 1
-						nb_SNP_remove += 1
-				if 'INDELS' in exclude:
-					# Validating if it is a SNP alone
-					dic_snp = set(alt_allele)
-					dic_snp.add(ref_allele)
-					if IsIndel(dic_snp):
-						remove = 1
-						nb_INDEL_remove += 1
-				nb_alt.discard('.')
-				if len(nb_alt) in exclude_al:
-					remove = 1
-					nb_allele_remove += 1
-				if remove:
-					nb_remove += 1
+						nb_allele_remove += 1
+					if remove:
+						nb_remove += 1
+					else:
+						nb_kept += 1
+						outfile.write('\t'.join(list_to_print_in_output)+'\n')
 				else:
-					nb_kept += 1
-					outfile.write('\t'.join(list_to_print_in_output)+'\n')
+					nb_BadFormat += 1
+					nb_remove += 1
 	sys.stdout.write('Removed variant: '+str(nb_remove)+'\n')
+	sys.stdout.write('\tRemoved variant (Bad format): '+str(nb_BadFormat)+'\n')
 	sys.stdout.write('\tRemoved variant (missing): '+str(nb_missing_remove)+'\n')
 	sys.stdout.write('\tRemoved variant (tag): '+str(nb_tag_remove)+'\n')
 	sys.stdout.write('\tRemoved variant (autapomorphy): '+str(nb_autapo_remove)+'\n')
@@ -224,7 +236,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	sys.stdout.write('\tRemoved variant (bad allele number): '+str(nb_allele_remove)+'\n')
 	sys.stdout.write('Kept variant: '+str(nb_kept)+'\n')
 
-def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV, MINFREQ):
+def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, GTPOS, DPPOS, ADPOS, MINCOV, MINAL, MAXCOV, MINFREQ):
 	
 	"""
 		Filter accession based on MINCOV and MINAL parameters
@@ -239,6 +251,14 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV
 		:type MINCOV: int
 		:param MINAL: Minimal allele coverage to keep a genotype.
 		:type MINAL: int
+		:param FLAG_FORMAT: FORMAT of the information of the accession.
+		:type FLAG_FORMAT: int
+		:param GTPOS: Position of the GT tag in the data information of the accession.
+		:type GTPOS: int
+		:param DPPOS: Position of the DP tag in the data information of the accession.
+		:type DPPOS: int
+		:param ADPOS: Position of the AD tag in the data information of the accession.
+		:type ADPOS: int
 		:return: A list with [0] --> gentype calling recalculated, [1] --> missing genotype (bolean), [2] --> set listing alleles found in the genotype
 		:rtype: list
 		:param MAXCOV: Maximal coverage to keep a genotype
@@ -247,26 +267,26 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV
 		:type MINFREQ: float
 	"""
 	
+	ACCinfo = DATA[HEADER.index(ACCESSION)]
+	
 	missing = False
 	to_print = ''
-	accession_var = DATA[HEADER.index(ACCESSION)].split(':')
+	accession_var = ACCinfo.split(':')
 	# Looking if a genotype has been called
-	geno = accession_var[FLAG_FORMAT.index('GT')].replace('/','|').split('|')
+	geno = accession_var[GTPOS].replace('/','|').split('|')
 	if '.' in geno:
 		missing = True
-		to_print = DATA[HEADER.index(ACCESSION)]
+		to_print = ACCinfo
 		forautapo = set()
 	else:
 		# Looking if site coverage is sufficient
 		convert_to_missing = False
-		if not('DP' in FLAG_FORMAT):
+		if DPPOS >= len(accession_var):
 			dp_cov = -1
-		elif FLAG_FORMAT.index('DP') >= len(accession_var):
-			dp_cov = -1
-		elif accession_var[FLAG_FORMAT.index('DP')] == '.':
+		elif accession_var[DPPOS] == '.':
 			dp_cov = -1
 		else:
-			dp_cov = int(accession_var[FLAG_FORMAT.index('DP')])
+			dp_cov = int(accession_var[DPPOS])
 		# Not enough coverage
 		if dp_cov < MINCOV:
 			convert_to_missing = True
@@ -274,7 +294,7 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV
 			convert_to_missing = True
 		# Enough coverage
 		else:
-			ad_cov = accession_var[FLAG_FORMAT.index('AD')].split(',')
+			ad_cov = accession_var[ADPOS].split(',')
 			for n in geno:
 				if int(ad_cov[int(n)]) < MINAL:
 					convert_to_missing = True
@@ -286,11 +306,11 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, MINCOV, MINAL, MAXCOV
 			missing_geno = []
 			for n in geno:
 				missing_geno.append('.')
-			accession_var[FLAG_FORMAT.index('GT')] = '/'.join(missing_geno)
+			accession_var[GTPOS] = '/'.join(missing_geno)
 			to_print = ':'.join(accession_var)
 			forautapo = set()
 		else:
-			to_print = DATA[HEADER.index(ACCESSION)]
+			to_print = ACCinfo
 			# Recording alleles found for autapomorphy search
 			forautapo = set(geno)
 	
@@ -335,7 +355,10 @@ def IsIndel(DICO):
 		max_size = max(len(n),max_size)
 	
 	if max_size == 1:
-		return False
+		if '*' in DICO:
+			return True
+		else:
+			return False
 	else:
 		return True
 

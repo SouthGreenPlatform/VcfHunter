@@ -1,6 +1,6 @@
-
+#!/usr/bin/env python
 #
-#  Copyright 2018 CIRAD
+#  Copyright 2017 CIRAD
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
 	else:
 		return best_genotype, best_value/second_best
 
-def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCESSION_START):
+def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, ACCESSION_START, CHRpos, POSpos, REFpos, ALTpos, FORMATpos):
 	"""
 		Convert VCF calling to a list of recoded variant
 
@@ -214,26 +214,32 @@ def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCE
 		param MINALCOV: Minimum allele coverage threshold
 		type MINALCOV: int
 		param MINFREQ: minimal allele frequency
-		type MINFREQ: str
-		param VCF_HEADER: VCF header
-		type VCF_HEADER: list
+		type MINFREQ: float
 		param ACCESSION_START: Position of accession start
 		type ACCESSION_START: int
+		param CHRpos: Position of chromosome name in DATA
+		type CHRpos: int
+		param POSpos: Position of chromosome position in DATA
+		type POSpos: int
+		param REFpos: Position of reference allele in DATA
+		type REFpos: int
+		param ALTpos: Position of alternate alleles in DATA
+		type ALTpos: int
+		param FORMATpos: Position of FORMAT tags in DATA
+		type FORMATpos: int
+		
 		return: list
 	"""
 	
-	minfreq = float(MINFREQ)
-	
-	line_status = 0
-	# 0 : OK
-	# 1 : bad FORMAT tag
-	
 	# Getting line information
-	CHR = DATA[VCF_HEADER.index("#CHROM")]
-	POS = DATA[VCF_HEADER.index("POS")]
-	REF = DATA[VCF_HEADER.index("REF")]
-	ALT = DATA[VCF_HEADER.index("ALT")].split(",")
-	FORMAT = DATA[VCF_HEADER.index("FORMAT")].split(":")
+	CHR = DATA[CHRpos]
+	POS = DATA[POSpos]
+	REF = DATA[REFpos]
+	ALT = DATA[ALTpos].split(",")
+	FORMAT = DATA[FORMATpos].split(":")
+	DPPOS = FORMAT.index('DP')
+	ADPOS = FORMAT.index('AD')
+	GTPOS = FORMAT.index('GT')
 	
 	dico_allele = set()
 	dico_acc = set()
@@ -244,34 +250,29 @@ def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCE
 		# Identification if the line pass coverages and minimum allele frequency ratio (MINFREQ and min_all_cov)
 		for acc in range(len(DATA)):
 			if acc >= ACCESSION_START:
-				data_point_status = 0
-				# 0 : OK
-				# 1 : bad format
-				# 2 : no coverage
 				data = DATA[acc].split(':')
 				# Cheking if the accession is in the same format of the FORMAT tag
 				if len(FORMAT) == len(data):
 					# Cheking if there is information in the DP and AD tag
-					if '.' in data[FORMAT.index('DP')] or '.' in data[FORMAT.index('AD')]:
-						data_point_status = 2
-					elif int(data[FORMAT.index('DP')]) < MINCOV:
-						data_point_status = 2
-					elif int(data[FORMAT.index('DP')]) > MAXCOV:
-						data_point_status = 2
+					if '.' in data[DPPOS] or '.' in data[ADPOS]:
+						pass
+					elif int(data[DPPOS]) < MINCOV:
+						pass
+					elif int(data[DPPOS]) > MAXCOV:
+						pass
 					else:
 						# additional step to identify between false and true multiallelic variant sites
-						allele_cov_info = list(map(int, data[FORMAT.index('AD')].split(',')))
-						# Checking for cases where the coverage is due to non A,T,G,C bases
+						allele_cov_info = list(map(int, data[ADPOS].split(',')))
+						# Checking for cases where the coverage is due to non A,T,G,C,* bases
 						if sum(allele_cov_info) > 0:
 							for n in range(len(allele_cov_info)):
-								if allele_cov_info[n]/float(sum(allele_cov_info)) >= minfreq and allele_cov_info[n] >= MINALCOV:
+								if allele_cov_info[n]/float(sum(allele_cov_info)) >= MINFREQ and allele_cov_info[n] >= MINALCOV:
 									dico_allele.add(n)
 									dico_acc.add(acc)
 				else:
-					data_point_status = 1
+					pass
 		# Now we are going to work on line with at least 1 variant site different from the reference
 		if len(dico_allele) > 1 or (not(0 in dico_allele) and len(dico_allele) == 1):
-			# print (dico_allele, allele_cov_info, DATA)
 			list_allele = list(dico_allele)
 			list_allele.sort()
 			# determination of allele to work with and print as alternative
@@ -286,8 +287,8 @@ def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCE
 				if acc >= ACCESSION_START:
 					code = []
 					data = DATA[acc].split(':')
-					ploidy = len(data[FORMAT.index('GT')].split('/'))
-					allele_cov_info = list(map(int, data[FORMAT.index('AD')].split(',')))
+					ploidy = len(data[GTPOS].split('/'))
+					allele_cov_info = list(map(int, data[ADPOS].split(',')))
 					# determination of allele to print coverage
 					coverage2print = []
 					if not (0 in list_allele):
@@ -304,7 +305,6 @@ def filter_on_read_cov(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, VCF_HEADER, ACCE
 					
 					genotype_coding.append(code)
 			list2print = [CHR, POS, '.', REF, ','.join(allele2print), '.', '.', '.', ':'.join(FORMAT+['GC'])] + genotype_coding
-			# print (list2print)
 			return list2print
 		else:
 			return 0
@@ -334,23 +334,6 @@ def __main__():
 	else:
 		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
-	
-	# GLOBAL VARIABLES
-	GLOB_allele_ratio = []
-	GLOB_coverage = []
-	
-	
-	TO_EXCLUDE = set()
-	NO_READ, NO_COV, TOO_COV, NO_FREQ, NO_COV_PLUS, TRONCATED_FORMAT = 0, 0, 0, 0, 0, 0
-	FLTR_MISS = 0
-	FLTR_PVAL = 0
-	PASSED = 0
-	TO_MUCH_ALLELE = 0
-	
-	MORE_THAN_DI_ALLELE, ALL_MISSING, MONOMORPHOUS, DIMORPHOUS_SITES, MORE_THAN_DIMORPHOUS = 0, 0, 0, 0, 0
-	
-	
-	
 	# Working line by line
 	PrintFilter = 1
 	if options.vcf[-3:] == '.gz':
@@ -366,16 +349,16 @@ def __main__():
 			outvcf.write(line)
 			header = data
 			Accession_start = header.index('FORMAT')+1
-			Accession_header = header[Accession_start:]
+			# Accession_header = header[Accession_start:]
+			CHRpos = header.index("#CHROM")
+			POSpos = header.index("POS")
+			REFpos = header.index("REF")
+			ALTpos = header.index("ALT")
+			FORMATpos = header.index("FORMAT")
 			
 		elif data[0][0] != "#":
-			alleles = [data[header.index('REF')]]
-			alleles = alleles + data[header.index('ALT')].split(',')
-			chrom = data[header.index('#CHROM')]
-			pos = data[header.index('POS')]
-			format = data[header.index('FORMAT')].split(':')
 			# Filtering on coverage and allele frequency
-			liste = filter_on_read_cov(data, int(options.MinCov), int(options.MaxCov), int(options.MinAlCov), options.minFreq, header, Accession_start)
+			liste = filter_on_read_cov(data, int(options.MinCov), int(options.MaxCov), int(options.MinAlCov), float(options.minFreq), Accession_start, CHRpos, POSpos, REFpos, ALTpos, FORMATpos)
 			if liste:
 				outvcf.write('\t'.join(liste))
 				outvcf.write('\n')
