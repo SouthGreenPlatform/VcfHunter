@@ -10,7 +10,7 @@
 <p>Because different mapping tools are needed to perfom the mapping depending on the type of data (RNA or DNA), two different pipeline shoold be use for read mapping and post mapping processing.</p>
 <h3 id="dna-seq-variant-calling">DNA seq variant calling</h3>
 <p>a - Mapping of the DNA reads: In this step, reads are aligned against the reference sequence using BWA mem algorithm</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a</code></pre>
 <p>40 folders have been created containing each:</p>
 <ul>
 <li>*.sam.stat files with mapping statistics</li>
@@ -19,7 +19,7 @@
 <li>STAT folder containing a .html file summarising statistics on libraries.</li>
 </ul>
 <p>b - Removing duplicates reads: In this step, read duplicates are removed</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b</code></pre>
 <p>3 new files have been added in each folders:</p>
 <ul>
 <li>*_rmdup.bam file containing non redundant reads resulting from PCR and optical duplicates</li>
@@ -27,14 +27,14 @@
 <li>*_duplicate file summarising read duplication statistics</li>
 </ul>
 <p>c - Removing duplicates reads: In this step, read are realigned around indels</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c</code></pre>
 <p>2 new files have been added in each folders:</p>
 <ul>
 <li>*_realigned.bam file reads realigned around indels</li>
 <li>*_realigned.bai file (index of the bam file)</li>
 </ul>
 <p>d - Base recalibration: In this step, reads base sequencing quality are recalculated. <strong>This step is recommended by GATK best practice but we do not recommend to use it if you use our pipeline.</strong></p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s d</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s d</code></pre>
 <p>5 new files have been added in each folders:</p>
 <ul>
 <li>*_real_recal.bam file reads bases recalibrated</li>
@@ -44,25 +44,25 @@
 <li>*_selected.vcf.idx file (index of the vcf file)</li>
 </ul>
 <p>e - Allele counting: In this step, reads are used to count for each covered sites the number of reads supporting each bases (A,T,G,C,N,*=deletion).</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s e</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s e</code></pre>
 <p>Several new files have been added in each folders:</p>
 <ul>
 <li>*.gz files recording, for each chromosomes/sequences in the fasta provided as reference, the count of the number of reads supporting each bases (A,T,G,C,N,*=deletion) at each covered site.</li>
 </ul>
 <p>f - Vcf generation: generate the vcf for all accessions in the configuration file</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f</code></pre>
 <p>Several new files in the current directory:</p>
 <ul>
 <li>prefix_*_all_allele_count.vcf file for each chromosomes/sequences in the fasta provided as reference.</li>
 </ul>
 <p>g - Vcf merging: generate a single vcf from all chromosome/sequences in the fasta provided as reference. This step is not needed here has only one sequence is passed but you can try the command line anyway ;-)</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s g</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s g</code></pre>
 <p>1 new file is created in the current directory:</p>
 <ul>
 <li>prefix_all_allele_count.vcf file</li>
 </ul>
 <p>h - Statistics: Compute mapping statistics</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h</code></pre>
 <p>Several new files in the current directory:</p>
 <ul>
 <li>*_lib.stats file containing mapping statistics per libraries</li>
@@ -71,19 +71,19 @@
 <p><strong><em>All the steps can be lauched in one command line. First remove the generated files:</em></strong></p>
 <pre><code>rm -rf *</code></pre>
 <p>Run the pipeline again (without step d)</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh</code></pre>
 <h3 id="rna-seq-variant-calling">RNA seq variant calling</h3>
 <p>a - Reference indexation: Create an index for STAR RNAseq mapping</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s a</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s a</code></pre>
 <p>1 folder is created in the current directory (name = prefix+<em>ref</em>star_1). This folder contains index constructed and used by STAR to align RNAseq reads</p>
 <p>b - Identification of splicing sites. During this step, all reads from all libraries are merged and aligned against the reference sequence which allowed STAR to identify splicing sites which will be used to build a new index (step c) taking in account the splicing site.</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s b</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s b</code></pre>
 <p>A file (prefix+&quot;<em>JUNC</em>ESTIMATION_SJ.out.tab&quot;) containing the splicing sites is generated</p>
 <p>c - Reference indexation: with the splicing site information</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s c</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s c</code></pre>
 <p>1 folder is created in the current directory (name = prefix+<em>ref</em>star_2). This folder contains index constructed and used by STAR to align RNAseq reads</p>
 <p>d - Read mapping: Reads are aligned against the reference sequence using STAR software</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s d</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s d</code></pre>
 <p>10 folders have been created containing each:</p>
 <ul>
 <li>*Aligned.out.sam files containing aligned reads (1 per libraries)</li>
@@ -92,14 +92,14 @@
 </ul>
 <p>1 additional folder was created and named as passed to -p option containing a file named prefix + &quot;_mapping.tab&quot; which summarise mapping statistics for all accessions.</p>
 <p>e - Read merging and ordering: Reads from different libraries but the same accessions are merged and sorted on coordinate.</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e</code></pre>
 <p>Several new files have been added in each folders:</p>
 <ul>
 <li>*_merged.bam files containing all aligned reads from all libraries of one accession.</li>
 <li>*_merged.bai files (index of the bam file)</li>
 </ul>
 <p>f - Removing duplicates reads: In this step, read duplicates are removed</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s f</code></pre>
 <p>2 new files have been added in each folders:</p>
 <ul>
 <li>*_rmdup.bam file containing non redundant reads resulting from PCR and optical duplicates</li>
@@ -107,59 +107,59 @@
 </ul>
 <p>An additional file was created in the folder named as passed to -p option. This file named prefix + &quot;<em>rmdup</em>stat.tab&quot; contained duplicates statistics for all accessions.</p>
 <p>g - Bam reordering: In this step, is necessary for subsequent steps</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s g</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s g</code></pre>
 <p>2 new files have been added in each folders:</p>
 <ul>
 <li>*_reorder.bam file containing reordered reads based on the order sequences are provided in the multifasta</li>
 <li>*_reorder.bai file (index of the bam file)</li>
 </ul>
 <p>h - Reads splitting: In this step, reads are splitted on splicing sites</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s h</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s h</code></pre>
 <p>2 new files have been added in each folders:</p>
 <ul>
 <li>*_trim.bam file containing splitted reads</li>
 <li>*_trim.bai file (index of the bam file)</li>
 </ul>
 <p>i - Indel realigment: In this step, reads realigned around indels. Countrary to <strong>process_reseq</strong> a vcf on known indel could not be provided. It will be implemented in futur...</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s i</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s i</code></pre>
 <p>2 new files have been added in each folders:</p>
 <ul>
 <li>*_realigned.bam file containing realigned reads</li>
 <li>*_realigned.bai file (index of the bam file)</li>
 </ul>
 <p>j - Allele counting: In this step, reads are used to count for each covered sites the number of reads supporting each bases (A,T,G,C,N,*=deletion).</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s j</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s j</code></pre>
 <p>Several new files have been added in each folders:</p>
 <ul>
 <li>*.gz files recording, for each chromosomes/sequences in the fasta provided as reference, the count of the number of reads supporting each bases (A,T,G,C,N,*=deletion) at each covered site.</li>
 </ul>
 <p>k - Vcf generation: generate the vcf for all accessions in the configuration file</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s k</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s k</code></pre>
 <p>Several new files in the current directory:</p>
 <ul>
 <li>prefix_*_all_allele_count.vcf file for each chromosomes/sequences in the fasta provided as reference.</li>
 </ul>
 <p>l - Vcf merging: generate a single vcf from all chromosome/sequences in the fasta provided as reference. This step is not needed here has only one sequence is passed but you can try the command line anyway ;-)</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s l</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s l</code></pre>
 <p>1 new file is created in the current directory:</p>
 <ul>
 <li>prefix_all_allele_count.vcf file</li>
 </ul>
 <p>m - Exon coverage: Calculate for each gene filled in the gff file passed in the configuration file and for each accessions, the proportion of the exon covered by the library.</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s m</code></pre>
-<p>1 new file is created in the current directory:</p>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s m</code></pre>
+<p>1 new file is created in the directory named RNAseq passed with -p options:</p>
 <ul>
-<li>prefix_all_allele_count.vcf file</li>
+<li>RNAseq_exon_coverage.cov file which contained information on exon coverage</li>
 </ul>
 <p><strong><em>All the steps can be launched in one command line. First remove the generated files:</em></strong></p>
 <pre><code>rm -rf sample71 sample72 sample73 sample74 sample75 sample76 sample77 sample78 sample79 sample80</code></pre>
 <p>Run the pipeline again</p>
-<pre><code>python2 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p DNAseq -s abcdefghijklm</code></pre>
+<pre><code>python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p DNAseq -s abcdefghijklm</code></pre>
 <p><strong><em>RNAseq and DNAseq bam can be used to generate a single vcf:</em></strong> At this stage we assume that RNAseq and DNAseq have been processed until step j and e for <strong>process_RNAseq</strong> and <strong>process_reseq respectively</strong>. To generate a single vcf a new configuration file should be created containing informations for RNAseq and DNAseq accession. This file is available in <em>data/config/DNA_RNAseq.conf</em>. To obtain the vcf run the following command line:</p>
-<pre><code>python2 ../bin/process_reseq_1.0.py -c ../data/config/DNA_RNAseq.conf -t 8 -p DNA_RNAseq -s fg</code></pre>
+<pre><code>python3 ../bin/process_reseq_1.0.py -c ../data/config/DNA_RNAseq.conf -t 8 -p DNA_RNAseq -s fg</code></pre>
 <h2 id="b---vcf-prefiltering">B - VCF prefiltering</h2>
 <p>Once the variant calling is performed, it is now time to filter the calling. This is a necessary step with this pipeline because all variant sites are reported (one read, on one accession supporting a variant). The phylosophie of <strong><em>process_RNAseq</em></strong> and <strong><em>process_reseq</em></strong> is to report all variant sites and then decide to filter the vcf (what is error and what is not) based on understandable and simple parametres using <strong><em>VcfPreFilter</em></strong> tool. For the following step we will work on the vcf file generated on both DNA and RNA seq data. VcfPreFilter can be launched as followed:</p>
-<pre><code>python2 ../bin/VcfPreFilter.1.0.py -v DNA_RNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNA_RNAseq_prefiltered.vcf</code></pre>
+<pre><code>python3 ../bin/VcfPreFilter.1.0.py -v DNA_RNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNA_RNAseq_prefiltered.vcf</code></pre>
 <p>The outpout is a vcf file (named as filled in -o option) in which the variant line are filtered as followed:</p>
 <ul>
 <li>1 - an accession of a variant line is considered only if its site coverage is comprised in [-m : -M] (in this example [10:10000]),</li>

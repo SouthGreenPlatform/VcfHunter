@@ -22,27 +22,16 @@
 
 # -*- coding: utf-8 -*-
 
-import ConfigParser
-import datetime
-import optparse
 import tempfile
 import sys
 import os
-import traceback
 import shutil
 import time
-import multiprocessing as mp
 import subprocess
-import threading
-import random
-import math
 import gzip
 from inspect import currentframe, getframeinfo
-from operator import itemgetter
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 
 def stop_err( msg ):
 	sys.stderr.write( "%s\n" % msg )
@@ -55,7 +44,7 @@ def run_job (frameinfo, cmd_line, ERROR):
 		proc = subprocess.Popen( args=cmd_line, shell=True, stderr=error)
 		returncode = proc.wait()
 		error.close()
-		error = open( tmp, 'rb' )
+		error = open( tmp, 'r' )
 		stderr = ''
 		buffsize = 1048576
 		try:
@@ -68,9 +57,11 @@ def run_job (frameinfo, cmd_line, ERROR):
 		error.close()
 		os.remove(tmp)
 		if returncode != 0:
-			raise Exception, stderr
-	except Exception, e:
-		stop_err( 'Line : '+str(frameinfo.lineno)+' - '+ERROR + str( e ) )
+			raise Exception
+		# elif stderr:
+			# raise Exception
+	except Exception:
+		stop_err( 'Line : '+str(frameinfo.lineno)+' - '+ERROR + str( stderr ) )
 
 def hold_job(ID_liste):
 	time.sleep(10)
@@ -334,7 +325,7 @@ def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUE
 						dico_sites[line_id][4] += int(data[7])
 						dico_sites[line_id][5] = max(int(data[7]), dico_sites[line_id][5])
 					else:
-						print data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2]
+						print (data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2])
 						sys.exit('An error was encountered in step b. The program exited without finishing during mapping step')
 				else:
 					dico_list_sites[data[0]].append(intermediate_list)
@@ -355,7 +346,7 @@ def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUE
 						dico_sites[line_id][4] += int(data[7])
 						dico_sites[line_id][5] = max(int(data[7]), dico_sites[line_id][5])
 					else:
-						print data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2]
+						print (data[0:3], data[3], dico_sites[line_id][0], data[4], dico_sites[line_id][1], data[5], dico_sites[line_id][2])
 						sys.exit('An error was encountered in step b. The program exited without finishing during mapping step')
 				else:
 					dico_list_sites[data[0]].append(intermediate_list)
@@ -534,7 +525,7 @@ def run_stat_step_F_RNAseq(PREFIX, DICO_LIB):
 			line = file.readline()
 		outfile.write(line)
 	outfile.close()
-	
+
 def run_step_G_RNAseq(JAVA, PICARD, ACC, REF, PREFIX, QUEUE):
 	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
 	reorder = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s ReorderSam INPUT=%s OUTPUT=%s REFERENCE=%s CREATE_INDEX=true TMP_DIR=%s' % (JAVA, PICARD, ACC+'/'+ACC+'_rmdup.bam',  ACC+'/'+ACC+'_reorder.bam', REF, ACC+'/'+TMP)
@@ -646,12 +637,9 @@ def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
 	for acc in list_bam_cov:
 		os.remove(acc)
 
-
-
 ##############################################
 #          Process ReSeq Only
 ##############################################
-
 
 def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED):
 
@@ -1028,11 +1016,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	
 	return 0
 
-
 ##############################################
 #          Common to Process
 ##############################################
-
 
 def run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME):
 
@@ -1225,7 +1211,7 @@ def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
 		elif best_value == dico_proba[genotype]:
 			best_genotype = '/'.join(['.']*int(PLOIDY))
 	return best_genotype
-	
+
 def get_min_acc_pos(DICO):
 	
 	min_pos = False
@@ -1268,7 +1254,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 	# sys.stdout.write(CHR+'\n')
 	for acc in LIST_ACC:
 		ACC = acc.split('/')[-1]
-		dico_accession_infile[CHR][acc] = gzip.open(acc+'/'+ACC+'_allele_count_'+CHR+'.gz', 'rb')
+		dico_accession_infile[CHR][acc] = gzip.open(acc+'/'+ACC+'_allele_count_'+CHR+'.gz', 'rt')
 
 	#3- Initiating variables
 	dico_accession_positions = {}
@@ -1625,7 +1611,7 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 				if not(chr == ""):
 					outfile.close()
 				chr = data[0]
-				outfile = gzip.open(OUT+'_'+chr+'.gz', 'wb')
+				outfile = gzip.open(OUT+'_'+chr+'.gz', 'wt')
 			# Recording information on the current line 
 			for n in data[4:]:
 				if n[0] != "=": # To remove the column begining with "=" which I don't know what it means...
@@ -1666,7 +1652,7 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 	
 	for n in dico_chr:
 		if not(os.path.isfile(OUT+'_'+n+'.gz')):
-			outfile = gzip.open(OUT+'_'+n+'.gz', 'wb')
+			outfile = gzip.open(OUT+'_'+n+'.gz', 'wt')
 			outfile.close()
 
 def Calc_stats(PREFIX, DICO_LIB):

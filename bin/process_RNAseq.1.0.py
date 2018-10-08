@@ -28,7 +28,7 @@ import subprocess
 import sys
 import tempfile
 import fileinput
-import ConfigParser
+import configparser
 import operator
 import time
 import random
@@ -73,7 +73,7 @@ def main_run_analysis(job):
 	try:
 		rslt = run_D_to_J(job[0],job[1],job[2],job[3],job[4],job[5],job[6],job[7],job[8],job[9],job[10],job[11],job[12],job[13],job[14],job[15], job[16], job[17], job[18])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -83,7 +83,7 @@ def main_combine(job):
 	try:
 		rslt = utils.create_pseudo_VCF(job[0],job[1],job[2],job[3],job[4],job[5],job[6],job[7])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -93,7 +93,7 @@ def main_merging_sub_vcf(job):
 	try:
 		rslt = utils.merge_sub_vcf(job[0],job[1],job[2], job[3])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -138,11 +138,11 @@ def __main__():
 	
 	#Loading the file locating programs
 	PATHNAME = os.path.dirname(sys.argv[0])
-	LOCA_PROGRAMS = ConfigParser.RawConfigParser()
+	LOCA_PROGRAMS = configparser.RawConfigParser()
 	LOCA_PROGRAMS.read(PATHNAME+'/loca_programs.conf')
 	
 	#Loading the configuration file
-	config = ConfigParser.RawConfigParser()
+	config = configparser.RawConfigParser()
 	config.read(options.conf)
 	
 	STAR = LOCA_PROGRAMS.get('Programs','star')
@@ -253,7 +253,7 @@ def __main__():
 	if 'k' in options.steps:
 		
 		# getting accession list
-		liste_accessions = dico_lib.keys()
+		liste_accessions = list(dico_lib.keys())
 		
 		# Optimizing window size
 		totalSize = 0
