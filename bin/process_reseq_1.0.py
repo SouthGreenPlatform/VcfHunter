@@ -21,7 +21,7 @@
 #
 
 # -*- coding: utf-8 -*-
-import ConfigParser
+import configparser
 import datetime
 import optparse
 import tempfile
@@ -93,7 +93,7 @@ def main_run_analysis(job):
 	try:
 		rslt = run_analysis(job[0],job[1],job[2],job[3],job[4],job[5], job[6], job[7], job[8], job[9])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -103,7 +103,7 @@ def main_combine(job):
 	try:
 		rslt = utils.create_pseudo_VCF(job[0],job[1],job[2],job[3],job[4],job[5],job[6],job[7])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -113,7 +113,7 @@ def main_merging_sub_vcf(job):
 	try:
 		rslt = utils.merge_sub_vcf(job[0],job[1],job[2],job[3])
 	except Exception as e:
-		print e
+		print (e)
 		rslt = 1
 	finally:
 		return rslt
@@ -155,11 +155,11 @@ def __main__():
 	
 	#Loading the file locating programs
 	pathname = os.path.dirname(sys.argv[0])
-	loca_programs = ConfigParser.RawConfigParser()
+	loca_programs = configparser.RawConfigParser()
 	loca_programs.read(pathname+'/loca_programs.conf')
 	
 	#Loading the configuration file
-	config = ConfigParser.RawConfigParser()
+	config = configparser.RawConfigParser()
 	config.read(options.conf)
 	
 	ref = config.get('Reference', 'genome')
@@ -256,7 +256,7 @@ def __main__():
 	if 'f' in options.steps:
 		
 		# getting accession list
-		liste_accessions = dico_lib.keys()
+		liste_accessions = list(dico_lib.keys())
 		
 		# Selecting chromosomes
 		if options.chrom == 'all':

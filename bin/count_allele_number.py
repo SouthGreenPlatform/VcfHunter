@@ -22,7 +22,7 @@
 
 # -*- coding: utf-8 -*-
 
-import ConfigParser
+import configparser
 import optparse
 import os
 import sys
@@ -39,7 +39,7 @@ def __main__():
 	
 	# locating loca_programs.conf file
 	pathname = os.path.dirname(sys.argv[0])
-	loca_programs = ConfigParser.RawConfigParser()
+	loca_programs = configparser.RawConfigParser()
 	loca_programs.read(pathname+'/loca_programs.conf')
 	bamreadcount = loca_programs.get('Programs','bamreadcount')
 	
