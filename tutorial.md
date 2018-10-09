@@ -44,7 +44,7 @@ shoold be use for read mapping and post mapping processing.
 a - Mapping of the DNA reads: In this step, reads are aligned against
 the reference sequence using BWA mem algorithm
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a
 
 40 folders have been created containing each:
 
@@ -56,7 +56,7 @@ the reference sequence using BWA mem algorithm
 
 b - Removing duplicates reads: In this step, read duplicates are removed
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b
 
 3 new files have been added in each folders:
 
@@ -68,7 +68,7 @@ b - Removing duplicates reads: In this step, read duplicates are removed
 c - Removing duplicates reads: In this step, read are realigned around
 indels
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c
 
 2 new files have been added in each folders:
 
@@ -79,7 +79,7 @@ d - Base recalibration: In this step, reads base sequencing quality are
 recalculated. **This step is recommended by GATK best practice but we do
 not recommend to use it if you use our pipeline.**
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s d
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s d
 
 5 new files have been added in each folders:
 
@@ -94,7 +94,7 @@ e - Allele counting: In this step, reads are used to count for each
 covered sites the number of reads supporting each bases
 (A,T,G,C,N,\*=deletion).
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s e
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s e
 
 Several new files have been added in each folders:
 
@@ -105,7 +105,7 @@ Several new files have been added in each folders:
 f - Vcf generation: generate the vcf for all accessions in the
 configuration file
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f
 
 Several new files in the current directory:
 
@@ -116,7 +116,7 @@ g - Vcf merging: generate a single vcf from all chromosome/sequences in
 the fasta provided as reference. This step is not needed here has only
 one sequence is passed but you can try the command line anyway ;-)
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s g
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s g
 
 1 new file is created in the current directory:
 
@@ -124,7 +124,7 @@ one sequence is passed but you can try the command line anyway ;-)
 
 h - Statistics: Compute mapping statistics
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h
 
 Several new files in the current directory:
 
@@ -138,7 +138,7 @@ generated files:***
 
 Run the pipeline again (without step d)
 
-    python2 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh
+    python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh
 
 
 B - VCF prefiltering
@@ -154,7 +154,7 @@ using ***VcfPreFilter*** tool. For the following step we will work on
 the vcf file generated on both DNA and RNA seq data. VcfPreFilter can be
 launched as followed:
 
-    python2 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf
+    python3 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf
 
 The outpout is a vcf file (named as filled in -o option) in which the
 variant line are filtered as followed:
