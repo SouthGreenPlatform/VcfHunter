@@ -34,6 +34,7 @@ Python3, Java and Biopython are also required.
 How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
+
 **Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
 
 or 
@@ -222,8 +223,8 @@ along chromosomes.
 	--all: Allele should be present in all accessions of the group.
 
 *Output:*\
- **\*\Cov.png:** a png file presenting SNP coverage along the chromosomes.\
- **\*\Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.\
+ **\*Cov.png:** a png file presenting SNP coverage along the chromosomes.\
+ **\*Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.\
  **\*\_AlleleOriginAndRatio.tab:** a tabulated file repporting for each sites were an ancestral allele
 has been attributed, its origin and the proportion of reads supporting this allele. This files contains
 chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).\
@@ -240,6 +241,7 @@ accessions.
 *Options:*
 
     --conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+	--vcf: Path to uniq vcf file. (--conf and --vcf are mutually exclusive). If --vcf option is passed, --conf will beomited
 	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
 	--ploidy: Accession ploidy (integer). If not all accessions have the same ploidy, this is not a problem. This ploidy information
 	 is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
