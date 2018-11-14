@@ -18,6 +18,8 @@ Available data:
 that contained genotyping on 188 individuals from a triploid mapping
 population (yes for the fun we will not use standard mapping pop)which
 will be used in this tutorial.
+*data/reference/Reference.agp* an agp file locating scaffold in
+chromosomes.
 
 A- Selecting segregating marker:
 --------------------------------
@@ -158,7 +160,7 @@ Once all these informations are calculated what we want to doo is to represent t
     paste toto1 toto2 > MarkerOrder.tab
 	rm toto1 toto2
 
-To draw the picture run the following command line (This can be long when there are lots of point to draw, here around 4 mins):
+To draw the picture run the following command line (This can be long when there are lots of point to draw, here around 3 mins):
 
     python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploNoPhys.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p n
 
@@ -170,11 +172,23 @@ This command line outputs two files:
 The following picture is the picture you should obtain. In this picture you can observe the marker linkage of marker ordered along chromosome 1, 2 and 3. As the ***-p n*** option as been passed, marker spacing equal between two contiguous markers. Another way to say it is that marker spacing is not the physical one. Each dot represent the marker linkage intensity between two markers. A warm color represent a strong linkage, a cold one represent a weak linkage. The segregation distortion calculated earlier is represented on the graph at the right of the picture.
 ![](http://banana-genome-http.cirad.fr/image/DrawDotPlot1.png)
 
+We can also draw the marker linkage with physical distance. To do so, run the following command line:
 
+    python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploPhys.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p y
 
+This command line outputs two files:
 
+-   **DiploPhys_heatmap.png** a png file showing color code relative to the linkage coding.
+-   **DiploPhys.png** a png file marker linkage ordered along chromosomes with physical distances as well as the marker segregation distortion calculated earlier.
 
+The following picture is the picture you should obtain. In this picture, with physical distances, we observe that there are large regions of the chromosome were there is no marker! This can be the consequence of large regions of homozygosity in the genome resulting in the absence of segregating markers.
+![](http://banana-genome-http.cirad.fr/image/DrawDotPlot2.png)
 
+Now, we know that there are large portions of the genome were markers are missing at start of chromosomes but also in the middle of chromosome 2 and 3 but because the program has no idea of the chromosome size, the figure ends at the last marker of each chromosome and we do not know if markers are also missing at the end of chromosomes. This information of chromosome size can be passed to the program through an agp file by running the following command line:
 
+    python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploPhysAgp.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p y -a ../data/reference/Reference.agp
+
+The resulting picture is the following one, in which we can observe that there is no marker at the end of chromosome 1 (that was not visible before). In this picture arrow boxes representing scaffold location along chromosome was also represented. These information were found by the program in the agp file.
+![](http://banana-genome-http.cirad.fr/image/DrawDotPlot3.png)
 
 
