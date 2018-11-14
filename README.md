@@ -28,18 +28,32 @@ Dependencies
 5.  bam-readcount, https://github.com/genome/bam-readcount
 6.  gnuplot, http://www.gnuplot.info/
 
-Python2, Python3, Java and Biopython are also required.
+Python3, Java and Biopython are also required.
 <br><br><br>
+
+How to cite
+-----------
+Depending on the tool you use (see ***Description*** section) please cite either:
+**Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
+
+or 
+
+**Baurens et al., 2018.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2018. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481
 
 Description
 -----------
 
 The package provided comprised X programs listed here:
 
--   process\_reseq.1.0.py (python3)
--   VcfPreFilter.1.0.py (python3)
--   vcfFilter.1.0.py (python3)
--   vcf2pop.1.0.py (python3)
+-   process\_reseq.1.0.py (Garsmeur et al., 2018)
+-   VcfPreFilter.1.0.py (Garsmeur et al., 2018)
+-   vcfFilter.1.0.py (Garsmeur et al., 2018)
+-   vcf2pop.1.0.py (Garsmeur et al., 2018)
+-   vcf2popNew.1.0.py (Baurens et al., 2018)
+-   vcf2allPropAndCov.py (Baurens et al., 2018)
+-   vcf2allPropAndCovByChr.py (Baurens et al., 2018)
+-   RecombCalculatorDDose.py (Baurens et al., 2018)
+-   Draw_dot_plot.py (Baurens et al., 2018)
 
 All X programs run using the following command: python program-name <--options-name value>
 <br><br><br>
@@ -189,7 +203,56 @@ is a improved version of FILTER option of vcf2struct.1.0.py
 *Output:*\
  **\*\_filt.vcf:** a filtered vcf file based on passed options.
 <br><br>
- 
+
+### vcf2allPropAndCov.py
+
+This program perform two things based on a vcf. 1) It plots for an
+accession, the allele coverage alongs its chromosomes. 2) It identify,
+based on known ancestral accessions in the vcf, the alleles specific to
+each groups and plot the alleles proportion at a site in the accession
+along chromosomes.
+
+*Options:*
+
+    --conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
+	--acc: Accession to work with,
+	--ploidy: Accession ploidy (integer),
+	--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+	--all: Allele should be present in all accessions of the group.
+
+*Output:*\
+ **\*\Cov.png:** a png file presenting SNP coverage along the chromosomes.\
+ **\*\Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.\
+ **\*\_AlleleOriginAndRatio.tab:** a tabulated file repporting for each sites were an ancestral allele
+has been attributed, its origin and the proportion of reads supporting this allele. This files contains
+chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).\
+ **\*\_stats.tab:** a tabulated file repporting various statistics on the alleles of the accession.
+<br><br>
+
+### vcf2allPropAndCovByChr.py
+
+This program perform two things based on a vcf. 1) It plots for a chromosome of all accessions in a vcf,
+the allele coverage alongs its chromosomes. 2) It identify,based on known ancestral accessions in the vcf,
+the alleles specific to each groups and plot the alleles proportion at a site along chromosomes for all
+accessions.
+
+*Options:*
+
+    --conf: Conf file containing vcf location (one per chromosome or a single vcf for all chromosomes),
+	--origin: A 2 column file containing accession name (col1), origin/group (Col2),
+	--ploidy: Accession ploidy (integer). If not all accessions have the same ploidy, this is not a problem. This ploidy information
+	 is only used to draw vertical lines in the coverage plot that help to identify ploidy change,
+	--NoMiss: No missing data are allowed in accessions used to attribute alleles to group,
+	--all: Allele should be present in all accessions of the group,
+	--acc: Accession to work with. If ignored, all accessions in the vcf will be used. Else accessions should be separated by ",",
+	--prefix: Prefix for output files. [Default: RatioAndCov]
+
+*Output:*\
+ **prefix\_chromosomeN\_X\_Cov.png:** X png files presenting SNP coverage along chromosomeN.\
+ **prefix\_chromosomeN\_X\_Ratio.png:** X png files presenting ancestral allele proportion at a site along chromosomeN.
+<br><br>
+
 ### vcf2pop.1.0.py
 
 This program will select markers for genetical mapping
@@ -268,4 +331,109 @@ Two additional values are added at the end of the file: the Khi-Square value and
  **\*\.pdf:** A pdf file containing various statistics on the vcf filtrations. Only if --drawplot=y.\
  **\*\_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
 Only if --ref option is filled.
+<br><br>
+
+### vcf2popNew.1.0.py
+
+This program will select markers for genetical mapping
+analysis from a vcf file based on several criterias including segregation
+ ratio. It will outpout coded markers as requested by the user.
+
+*Options:*
+
+    --vcf: The vcf file
+	--seg: Segregation tested. Several segregations can be passed and should be separated by "/".
+	 A segregation should look like as follows: Name:Parents:MarkerCoding:MarkerSegregation:PvalueForTest.
+	 With a real example: SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-5/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-5
+	 (Ho for homozygous, He for heterozygous)
+	--MinCov: Minimal read coverage for a marker in an accession (interger). If a lower value is
+	 found data point is converted to missing. [Default: 10]
+	--MaxCov: Maximal read coverage for a marker in an accession (interger). If a greater value is
+	 found data point is converted to missing. [Default: 1000]
+	--WinFreq: Window for minority allele coverage frequency to be insufficient to call a
+	 heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if
+	 minority allele is in ]0.05:0.1] calling will become missing for this data point.
+	--MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and
+	 infinity). [Default: 1]
+	--miss: Maximal missing data proportion in the progeny (Excluding parents) (between 0 and 1).
+	 greater missing proportion will result in removing the marker. [Default: 0.2]
+	--prefix: Prefix for output files. [Default: Pop]
+	--addcov: A tabulated file containing genotype of all markers passing filter is outputed.
+	 If this option is passed, in addition to genotypes, alleles coverage information is also filled.
+		Possible values:
+			y: add this information
+			n: do not add this information
+		[default: n]
+	--NoUsed: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 filtration (based on missing data and p-value) but which will be kept in final files.
+	--exclude: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	 analysis and the files.
+	--ref: (optional) The reference fasta file. If passed, a tag associated to the marker will be
+	 outpouted in a fasta file. This tag will contained 125 bases before the marker and 125 bases
+	 after.
+	--remove: (optional) For some programs, marker name length is limited. This option helps you to reduce marker
+	 names. By default marker name is "chromosome name"+"M"+"site position". A string can be passed
+	 that will be searched and removed from all marker name. This is not neccessary if your chromosome
+	 name is not to long.
+
+*Outputs:*\
+ **\*\_tab\_Bridge.tab:** A .tab file correponding to a simplified joinmap format that contained bridge markers.\
+ **\*\_tab\_*SegregationName*\_*Parent*.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.\
+ **\*\_tab\_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.\
+ **\*\_report.tab:** A file report.\
+ **\*\_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers
+(no filtering applied in this vcf).\
+ **\*\.tab:** A file containing for aech selected marker, the genotype of each accessions based on filter applied.
+Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
+ **\*\_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
+Only if --ref option is filled.
+<br><br>
+
+### RecombCalculatorDDose.py
+
+This program perform is designed to calculate frequencies of recombination observed between two pairs of markers.
+It can also calculate marker segregation distortion.
+
+*Options:*
+
+    --matrix: The marker file matrix (output of vcf2pop.1.0.py or vcf2popNew.1.0.py),
+	--output: Prefix for output files,
+	--phased: Are marker phased,
+		Possible values:
+			y: markers are phased
+			n: markers are not phased
+		[default: n]
+	--steps: Analysis to perform,
+		Possible values:
+			R: Calculate recombination rate
+			S: Calculate segregation distortions
+
+*Output:*\
+ **\_REC.tab:** A tabulated file of pairwise marker recombination rate (--setp R).\
+ **\_SegDist.tab:** A tabulated file of marker segragtion distortions (--setp S).
+<br><br>
+
+### Draw\_dot\_plot.py
+
+This program draw a dotplot based on marker pairwise recombination file obtained from ***RecombCalculatorDDose***.
+
+*Options:*
+
+    --matrix: The pairwise matrix marker file (generated by RecombCalculatorDDose.py),
+	--loc: Loci to plot with their locations (col1: marker name, col2: chromosome, col3: position),
+	--chr: (Optional) List of chromosomes to draw in this order (separated by ":"),
+	--agp: (Optional) Agp file locating scaffolds in the reference sequence,
+	--stat: (Optional) A two column file with column 1: marker name, column2: statistics,
+	--phys: A value specifying if the marker position should be defined based on physical position or not.
+		Possible
+			y: yes
+			n: no: markers are ordered along chromosomes with positions incremented by 1 
+		[default: y]
+	--output: Name of output file. Extension (.png, .svg, .pdf) of the outpout is autaomatically identified by the script.
+
+*Output:*\
+ A dotplot file representing pairwise marker linkage named according to --outpout option.\
+ A heatmap file representing pairwise statistic coding named according to --outpout option.
 <br><br>
