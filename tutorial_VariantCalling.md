@@ -7,7 +7,7 @@ to marker generation for genetic mapping.
 
 Go to the VcfHunter folder (Scripts can be run from any folder but the
 command lines in this tutorial assume you are in this folder and that
-you have python 2.7 and 3 versions).
+you have python 3 version).
 
 ### Available data:
 
@@ -147,11 +147,11 @@ B - VCF prefiltering
 Once the variant calling is performed, it is now time to filter the
 calling. This is a necessary step with this pipeline because all variant
 sites are reported (one read, on one accession supporting a variant).
-The phylosophie of ***process\_RNAseq*** and ***process\_reseq*** is to
+The phylosophie of ***process\_reseq*** is to
 report all variant sites and then decide to filter the vcf (what is
 error and what is not) based on understandable and simple parametres
 using ***VcfPreFilter*** tool. For the following step we will work on
-the vcf file generated on both DNA and RNA seq data. VcfPreFilter can be
+the vcf file generated on **Variant calling** section. VcfPreFilter can be
 launched as followed:
 
     python3 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf
@@ -173,6 +173,53 @@ The variant calling is recalculated **for each accessions** based on
 selected alleles (even accessions which are not enough covered according
 our parameters will have a genotype). An additional tag (GC) is added in
 the FORMAT column of the VCF. This tag is calculated as followed :
--log10(best genotype probability) + log10(second best genotype
-probability) and give an idea of the quality of the calling at the
-datapoint.
+(best genotype probability)/(second best genotype probability) and give an
+idea of the quality of the calling at the datapoint.
+
+C - VCF Filtering
+-----------------
+
+Sometime we want to filter the VCF to keep only calling for some accession,
+only diallelic sites, convert to unknown genotype data-point which are not
+sufficiently covered, remove variant sites with too much missing data, ...
+The purpose of the following script is to perform those filter. As there are
+several filtering options possible, we will show an example of filtering that
+can be applied but you can have a look at filtering options available in the
+README file or directly in with the program with the following command line:
+
+    python3 ../bin/vcfFilter.1.0.py -h
+
+In this tutorial we will use vcfFilter.1.0.py program to apply some filter to
+all accessions of the vcf. To do so, we first need to create a file in which
+we list accessions to perform filter on. This can be done with the following
+command line:
+
+    head -n 1000 DNAseq_prefiltered.vcf | grep "#CHROM" | sed 's/\t/\n/g' | tail -n +10 > all_names.tab
+
+When performing this filter, we only want to keep di-allelique sites. In other
+word we want to remove mono-allelic, tri-allelic, tetra-allelic sites. However
+as there are two other type of variant state possible with our pipeline: unknown
+base (N) or deletion relative to reference (*) penta and hexa allelic state can
+also be possible we also need to remove these state. This can be done with the
+following option: *--RmAlAlt 1:3:4:5:6*.
+We also want to convert to missing data, all data-points which are too much covered
+(probably resulting from repeat sequences and thus being multiloci) and those who
+are not enough covered (in which variant calling may be approximative). This can be
+done with the following options: *--MinCov 10 --MaxCov 300*.
+In addition, we want that each alleles of a genotype is covered by at least 3 reads.
+If not, this genotype is converted to missing data. This can be done with the
+following option: *--MinAl 3*.
+At last we do not want more than 1 missing data per variant line. This can be done
+with the following option: *--nMiss 1*.
+We want the new vcf to be generated in a file prefixed DNAseq_Filtered. This can be
+done with the following option: *--prefix DNAseq_Filtered*.
+At last we want to compress the final vcf to gain disc space. This can be done with
+the following command line: -g y.
+Now we run the analysis:
+ 
+    python3 ../bin/vcfFilter.1.0.py --vcf DNAseq_prefiltered.vcf --names all_names.tab --MinCov 10 --MaxCov 300 --MinAl 3 --nMiss 1 --RmAlAlt 1:3:4:5:6 --prefix DNAseq_Filtered -g y
+
+The outpout is a vcf file (named ***DNAseq_Filtered_filt.vcf.gz***) in which the
+variant line have been filtered.
+
+

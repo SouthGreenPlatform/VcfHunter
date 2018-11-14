@@ -8,7 +8,7 @@ introgressions.
 
 Go to the VcfHunter folder (Scripts can be run from any folder but the
 command lines in this tutorial assume you are in this folder and that
-you have and 3 versions).
+you have python 3 version).
 
 
 Chromosome painting using non admixed ancestral accessions

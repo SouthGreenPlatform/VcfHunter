@@ -27,6 +27,8 @@ Dependencies
 4.  Bamtools, https://github.com/pezmaster31/bamtools
 5.  bam-readcount, https://github.com/genome/bam-readcount
 6.  gnuplot, http://www.gnuplot.info/
+7.  bwa, http://bio-bwa.sourceforge.net/
+8.  vcftools https://vcftools.github.io/index.html
 
 Python3, Java and Biopython are also required.
 <br><br><br>
