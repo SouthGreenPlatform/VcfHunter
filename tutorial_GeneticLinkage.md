@@ -87,6 +87,7 @@ missing data, marker is attributed to a file containing marker of unknown
 origin.
 
 
+### Analysis:
 To run the analysis, run the following command line:
 
     python3 ../bin/vcf2popNew.1.0.py -v ../data/vcf/Carto.vcf.gz -S SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-10/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-10/DoubleDose:P1,P2:Ho,He@hh,k-:0.1667,0.8333:1e-7 -m 15 -M 300 -f 0.01:0.1 -c 3 -s 0.05 -o Pop
@@ -117,7 +118,7 @@ The ***-o*** option tells the program output files should be prefixed by ***Pop*
 
 This programs outpouts 4 files:
 
--   **Pop\_report.tab** a file reporting statistics on marker selection.
+-   **Pop_report.tab** a file reporting statistics on marker selection.
 -   **Pop_sub.vcf** is a sub vcf file of marker passing filters.
 -   **Pop.tab** is file showing genotype for selected markers, best Chi-square value and p-value.
 -   **Pop_tab_Bridge.tab**: is a marker coded file corresponding to selected marker identified as the ***Bridge*** segregation.
@@ -128,17 +129,46 @@ This programs outpouts 4 files:
 -   **Pop_tab_unknown.tab**: is a marker coded file corresponding to selected marker that cannot be attributed to one of the two parent.
 
 
+B- Calculating recombination rate and segregation distortion:
+-------------------------------------------------------------
+
+At this stage we thus have several file containing segregating markers in distinct dose for both parent. P2 is the diploid parent while P1 is the tetraploid one. For simplicity and to make this tutorial available as soon as possible we will work on SimpleDose markers from the diploid parent (***Pop_tab_SimpleDose_P2.tab*** file).
+
+The aims of this section is to calculate pairwise marker recombination rate and marker segregation distortion relative.
+Pairwise recombination rate can be calculated with the following command line:
+
+    python3 ../bin/RecombCalculatorDDose.py -m Pop_tab_SimpleDose_P2.tab -o Pop_tab_SimpleDose_P2 -p n -s R
+
+The output is a file named ***Pop_tab_SimpleDose_P2_REC.tab*** containing the matrix of pairwise marker correlation.
+
+Segregation distortion can be calculated with the following command line:
+
+    python3 ../bin/RecombCalculatorDDose.py -m Pop_tab_SimpleDose_P2.tab -o Pop_tab_SimpleDose_P2 -p n -s S
+
+The output is a file named ***Pop_tab_SimpleDose_P2_SegDist.tab*** containing for each marker its level of segregation distortion calculated as -log10(Chi-square test).
 
 
+C- Calculating recombination rate and segregation distortion:
+-------------------------------------------------------------
 
+Once all these informations are calculated what we want to doo is to represent these data. in a comprehensive way. To do so, an additional file locating markers along chromosome is required. Luckily, this information is contained in marker name! The required file should contain in column1 marker name, in column2 chromosome name and in column2 position on chromosome. With our data this file can be generated with the following command line:
 
+    cut -f 1 Pop_tab_SimpleDose_P2.tab | grep -v Marker > toto1
+    cut -f 1 Pop_tab_SimpleDose_P2.tab | grep -v Marker | sed 's/M/\t'/ > toto2
+    paste toto1 toto2 > MarkerOrder.tab
+	rm toto1 toto2
 
+To draw the picture run the following command line (This can be long when there are lots of point to draw, here around 4 mins):
 
+    python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploNoPhys.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p n
 
+This command line outputs two files:
 
+-   **DiploNoPhys_heatmap.png** a png file showing color code relative to the linkage coding.
+-   **DiploNoPhys.png** a png file marker linkage ordered along chromosomes as well as the marker segregation distortion calculated earlier.
 
-
-
+The following picture is the picture you should obtain. In this picture you can observe the marker linkage of marker ordered along chromosome 1, 2 and 3. As the ***-p n*** option as been passed, marker spacing equal between two contiguous markers. Another way to say it is that marker spacing is not the physical one. Each dot represent the marker linkage intensity between two markers. A warm color represent a strong linkage, a cold one represent a weak linkage. The segregation distortion calculated earlier is represented on the graph at the right of the picture.
+![](http://banana-genome-http.cirad.fr/image/DrawDotPlot1.png)
 
 
 
