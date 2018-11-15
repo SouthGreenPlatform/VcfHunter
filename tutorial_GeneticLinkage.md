@@ -7,18 +7,18 @@ tutorial goes from markers selections from vcf, marker coding,
 linkage calculation and marker linkage representations along
 chromosome/genetic map.
 
-Go to the VcfHunter folder (Scripts can be run from any folder but the
-command lines in this tutorial assume you are in this folder and that
-you have python 3 version).
+**Go to the VcfHunter/TestTools/ folder** (Scripts can be run from any
+folder but the command lines in this tutorial assume you are in this
+folder and that you have python 3 version).
 
 
 Available data:
 ---------------
-*data/vcf/* is a folder containing several vcf including Carto.vcf.gz
+*../data/vcf/* is a folder containing several vcf including Carto.vcf.gz
 that contained genotyping on 188 individuals from a triploid mapping
 population (yes for the fun we will not use standard mapping pop)which
 will be used in this tutorial.
-*data/reference/Reference.agp* an agp file locating scaffold in
+*../data/reference/Reference.agp* an agp file locating scaffold in
 chromosomes.
 
 A- Selecting segregating marker:
@@ -171,7 +171,7 @@ This command line outputs two files:
 -   **DiploNoPhys_heatmap.png** a png file showing color code relative to the linkage coding.
 -   **DiploNoPhys.png** a png file marker linkage ordered along chromosomes as well as the marker segregation distortion calculated earlier.
 
-The following picture is the picture you should obtain. In this picture you can observe the marker linkage of marker ordered along chromosome 1, 2 and 3. As the ***-p n*** option as been passed, marker spacing equal between two contiguous markers. Another way to say it is that marker spacing is not the physical one. Each dot represent the marker linkage intensity between two markers. A warm color represent a strong linkage, a cold one represent a weak linkage. The segregation distortion calculated earlier is represented on the graph at the right of the picture.
+The following picture is the picture you should obtain. In this picture you can observe the marker linkage of marker ordered along chromosome 1, 2 and 3. As the ***-p n*** option has been passed, marker spacing equal between two contiguous markers. Another way to say it is that marker spacing is not the physical one. Each dot represent the marker linkage intensity between two markers. A warm color represent a strong linkage, a cold one represent a weak linkage. The segregation distortion calculated earlier is represented on the graph at the right of the picture.
 ![](http://banana-genome-http.cirad.fr/image/DrawDotPlot1.png)
 
 We can also draw the marker linkage with physical distance. To do so, run the following command line:

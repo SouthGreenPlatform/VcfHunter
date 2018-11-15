@@ -6,9 +6,9 @@ of one accession or a group of accessions. This program will work if a set
 of ancestral accessions is available. These accessions should have no 
 introgressions.
 
-Go to the VcfHunter folder (Scripts can be run from any folder but the
-command lines in this tutorial assume you are in this folder and that
-you have python 3 version).
+**Go to the VcfHunter/TestTools/ folder** (Scripts can be run from any
+folder but the command lines in this tutorial assume you are in this
+folder and that you have python 3 version).
 
 
 Chromosome painting using non admixed ancestral accessions
@@ -16,12 +16,12 @@ Chromosome painting using non admixed ancestral accessions
 
 ### Available data:
 
-*data/config/Origin.tab* is a file which contained two column: a first
+*../data/config/Origin.tab* is a file which contained two column: a first
 column containing ancestral accession names and a second column containing
 their ancestral origin (this program can work until 8 distinct origins).
-*data/config/Vcf.conf* is a file which contained path to vcf files which
+*../data/config/Vcf.conf* is a file which contained path to vcf files which
 will be used for e-chromosome painting.
-*data/vcf/* is a folder containing the vcf for 5 chromosomes on 15 accessions
+*../data/vcf/* is a folder containing the vcf for 5 chromosomes on 15 accessions
 which will be used in this tutorial.
 
 ### Principle:
