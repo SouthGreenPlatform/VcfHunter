@@ -149,6 +149,8 @@ Segregation distortion can be calculated with the following command line:
 
 The output is a file named ***Pop_tab_SimpleDose_P2_SegDist.tab*** containing for each marker its level of segregation distortion calculated as -log10(Chi-square test).
 
+**Important remark: This program is designed to work on marker following JoinMap coding; (nn,np) for simple dose marker heretozygous in one parent, (hh, hk, kk) for simple dose heterozygous markers in both parents and (hh, k-) for multiple dose markers heterozygous markers in both parents.** So if you do not use ***vcf2popNew.1.0.py*** or ***vcf2pop.1.0.py*** tu generate the marker file, you should edit your file to match the standard required by ***RecombCalculatorDDose.py***.
+
 
 C- Calculating recombination rate and segregation distortion:
 -------------------------------------------------------------
@@ -186,9 +188,78 @@ The following picture is the picture you should obtain. In this picture, with ph
 
 Now, we know that there are large portions of the genome were markers are missing at start of chromosomes but also in the middle of chromosome 2 and 3 but because the program has no idea of the chromosome size, the figure ends at the last marker of each chromosome and we do not know if markers are also missing at the end of chromosomes. This information of chromosome size can be passed to the program through an agp file by running the following command line:
 
-    python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploPhysAgp.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p y -a ../data/reference/Reference.agp
+    python3 ../bin/Draw_dot_plot.py -m Pop_tab_SimpleDose_P2_REC.tab -l MarkerOrder.tab -o DiploPhysAgp.png -s Pop_tab_SimpleDose_P2_SegDist.tab -p y -a ../data/reference/CartoRef.agp
 
 The resulting picture is the following one, in which we can observe that there is no marker at the end of chromosome 1 (that was not visible before). In this picture arrow boxes representing scaffold location along chromosome was also represented. These information were found by the program in the agp file.
 ![](http://banana-genome-http.cirad.fr/image/DrawDotPlot3.png)
+
+D- To go further:
+-----------------
+
+In our data set we also had marker segregating from the tetraploid parent. However, plotting directly marker linkage for these marker is not so easy as each four haplotypes can segregate independently! In other words, markers specific from each haplotypes are not linked... resulting in a figure not easily interpretable. The best way is to analyze each haplotype independently. As in this tutorial, we analyze a subset of [Baurens et al., 2018!](https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481) paper, we know that the tetraploid analyzed is an hybrid with roughly three genomes of *Musa acuminata* origin and one genome of *Musa balbisiana*. We can thus easily separate segregating markers of the *Musa balbisiana* haplotype. Indeed, with [Baurens et al., 2018!](https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481), we have a set of markers originating from *Musa balbisina* and this set of *Musa balbisiana* specific marker can be used to select markers from this species. To do so we have generated a file in ../data/config/ named ***BMarkers.tab*** that will be used to select *Musa balbisina* haplotype specific markers from P1 parent.
+To do this, and has we will work on simple and double dose markers from parent P1 we first need to concatenate these files:
+
+    cat Pop_tab_DoubleDose_P1.tab Pop_tab_SimpleDose_P1.tab > P1AllMarkers.tab
+
+We must then select in the ***P1AllMarkers.tab*** marker file all segregating marker from *Musa balbisiana* haplotype(s). This can be done with few python command lines.
+(1) run python:
+
+    python
+
+(2) run the following command line:
+```{python}
+file = open("../data/config/BMarkers.tab")
+dico = set()
+for line in file:
+ data = line.split()
+ if data:
+  dico.add(data[0])
+
+file.close()
+
+outfile = open("P1AllMarkersFromB.tab",'w')
+file = open("P1AllMarkers.tab")
+outfile.write(file.readline())
+
+for line in file:
+ data = line.split()
+ if data:
+  if data[0] in dico:
+   print(data[0])
+   outfile.write(line)
+
+file.close()
+outfile.close()
+
+exit()
+```
+
+With these command line a file named P1AllMarkersFromB.tab has been generated in which we hav selected marker from *Musa balbisiana* haplotype(s).
+
+All that we need now is to perform **B** and **C** steps performed earlier to have a representation of the genetic linkage of markers from *Musa balbisiana* haplotype(s).
+
+(1) creating a file with marker positions:
+
+    cut -f 1 P1AllMarkersFromB.tab | grep -v Marker | sed 's/M/\t/' > MarkerPos.tab
+    cut -f 1 P1AllMarkersFromB.tab | grep -v Marker > MarkerNames.tab
+    paste MarkerNames.tab MarkerPos.tab | sort -k2,2 -k3n,3n > Marker_order.tab
+	rm MarkerNames.tab MarkerPos.tab
+
+(2) calculate marker genetic distance:
+
+    python3 ../bin/RecombCalculatorDDose.py -m P1AllMarkersFromB.tab -o P1AllMarkersFromB -p n -s R
+
+(3) calculate marker segregation distortion:
+
+    python3 ../bin/RecombCalculatorDDose.py -m P1AllMarkersFromB.tab -o P1AllMarkersFromB -p n -s S
+
+(4) draw the picture (This is a bit long as there is quite big number of markers, here around 6 mins):
+
+    python3 ../bin/Draw_dot_plot.py -m P1AllMarkersFromB_REC.tab -l Marker_order.tab -o AllBhaplotypes.png -s P1AllMarkersFromB_SegDist.tab -p y -a ../data/reference/CartoRef.agp
+
+The resulting figure is the following one, in which we can observe that there is a linkage between regions of chromosomes 01 and chromosome 03 which showed the reciprocal translocation present in *Musa balbisiana* of the tretraploid studied relative to *Musa acuminata* reference genome structure. We also observed one additional break at the begining of chromosome 03 and one at the and of chromosome 02. The break at the end of chromosome 02 can be explained by the fact that in chromosome 02 there is a shift in *Musa balbisiana* haplotype dose (two haplotype at the beginning, and only one at the end). The break at the beginning of chromosome 03 can be explained by the fact that the two fragment are not located on the same haplotype (*i.e.* a recombination has occurred between *Musa acuminata* and *Musa balbisiana* haplotypes). For more detail see [Baurens et al., 2018!](https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481)
+
+
+
 
 
