@@ -58,7 +58,7 @@ The package provided comprised X programs listed here:
 -   RecombCalculatorDDose.py (Baurens et al., 2018)
 -   Draw_dot_plot.py (Baurens et al., 2018)
 
-All X programs run using the following command: python program-name <--options-name value>
+All 9 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
 
 Programs

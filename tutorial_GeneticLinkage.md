@@ -259,6 +259,7 @@ All that we need now is to perform **B** and **C** steps performed earlier to ha
 
 The resulting figure is the following one, in which we can observe that there is a linkage between regions of chromosomes 01 and chromosome 03 which showed the reciprocal translocation present in *Musa balbisiana* of the tretraploid studied relative to *Musa acuminata* reference genome structure. We also observed one additional break at the begining of chromosome 03 and one at the and of chromosome 02. The break at the end of chromosome 02 can be explained by the fact that in chromosome 02 there is a shift in *Musa balbisiana* haplotype dose (two haplotype at the beginning, and only one at the end). The break at the beginning of chromosome 03 can be explained by the fact that the two fragment are not located on the same haplotype (*i.e.* a recombination has occurred between *Musa acuminata* and *Musa balbisiana* haplotypes). For more detail see [Baurens et al., 2018](https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481)
 
+![](http://banana-genome-http.cirad.fr/image/DrawDotPlot4.png)
 
 
 
