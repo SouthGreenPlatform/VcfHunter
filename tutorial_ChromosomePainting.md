@@ -120,7 +120,7 @@ chromosome 1 and the major part of chromosome 3.
 
 The following figure is the picture of allele ratio you should obtain and
 green and red bars represent the interpretation that can be made from this
-allele ratio and read coverage. "Problem in tetraploid red/green interpretation figure"
+allele ratio and read coverage.
 
 ![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig5.png)
 
