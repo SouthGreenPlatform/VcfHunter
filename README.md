@@ -74,9 +74,9 @@ variant allele supported by at least one read. **The genotypes found in
 the output vcf are indicative and may not reflect the correct genotype!
 For example, only two allele are authorized in one genotype to gain
 computation time. This program must be used in conjunction with** 
-*VcfPreFilter.1.0.py* ***which have been specifically designed to perform
+*VcfPreFilter.1.0.py* **which have been specifically designed to perform
 a variant calling on a selected set of polymorph markers based on user
-specification.***
+specification.**
 
 ![](http://banana-genome-http.cirad.fr/image/Process_ReSeq_Fig1.png)
 
