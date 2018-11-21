@@ -256,7 +256,7 @@ def __main__():
 	if 'f' in options.steps:
 		
 		# getting accession list
-		liste_accessions = list(dico_lib.keys())
+		liste_accessions = sorted(list(dico_lib.keys()))
 		
 		# Selecting chromosomes
 		if options.chrom == 'all':
