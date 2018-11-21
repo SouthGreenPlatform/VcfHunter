@@ -25,13 +25,13 @@ will be used for e-chromosome painting.
 which will be used in this tutorial.
 
 ### Principle:
-The programs described in this section performed two type of analysis: it
+The programs described in this section performed two types of analysis: it
 performs a chromosome painting along accessions according to ancestral
 accessions defined and it also perform a plot of read coverage along the
 chromosome to identify aneuploidy.
 
-These programs worked as follows: based on the vcf file provided and the
-accession origin each allele is attributed to an ancestor according to the
+These programs worked as follows: based on the vcf file provided and a file providing the names of ancestral
+accessions, the origin of each allele is attributed to an ancestral group according to the
 following rule (two distinct rules are available):
 
 rule1 - An allele is attributed to a group if it has been found only in this group.
@@ -39,7 +39,7 @@ or
 rule2 - An allele is attributed to a group if it has been found in all members of
 the group and absent from members of others groups.
 
-Hence, for each grouped alleles, and for the studied accession, the number of read
+Hence, for each allele of each group, and for the studied accession, the number of read
 having this allele is calculated and divided by the number of reads at the position
 in the studied accession. In this context, a diploid accession having two
 chromosomes of the same origin (ex. red) should have a red allele ratio near 1

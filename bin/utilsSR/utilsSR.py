@@ -22,13 +22,14 @@
 
 # -*- coding: utf-8 -*-
 
-import tempfile
-import sys
 import os
-import shutil
+import sys
 import time
-import subprocess
 import gzip
+import shutil
+import tempfile
+import itertools
+import subprocess
 from inspect import currentframe, getframeinfo
 from Bio.Seq import Seq
 from Bio import SeqIO
@@ -1069,9 +1070,10 @@ def binom(k,n,p):
 	x = combin(n,k)*(p**k)*((1-p)**(n-k))
 	return x
 
-def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
+def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY, LRT, ALLCOMB):
 	
 	# WARNING The statistics will not be accurate on low coverage
+	
 	
 	# To manage huge factorial
 	nb_tirage = sum(COVERAGE)
@@ -1081,136 +1083,68 @@ def genotype_accession(COVERAGE, ALLELE, ERROR, PLOIDY):
 		coverage = list(COVERAGE)
 	nb_tirage = sum(coverage)
 	
+	# Obtaining combinations
+	if ALLCOMB:
+		FinalComb = list(itertools.combinations_with_replacement(range(len(ALLELE)), int(PLOIDY)))
+	else:
+		ListCombPair = list(itertools.combinations_with_replacement(range(len(ALLELE)), 2))
+		FinalComb = set()
+		for n in ListCombPair:
+			N = set(n)
+			if len(N) == 2:
+				IntermList = list(itertools.combinations_with_replacement(n, int(PLOIDY)))
+				for k in IntermList:
+					FinalComb.add(k)
+	
 	dico_proba = {}
 	# calculating probabilities for homozygous state
 	p = 1-ERROR
-	for n in range(len(ALLELE)):
-		dico_proba['/'.join([str(n)]*int(PLOIDY))] = binom(coverage[n],nb_tirage,p)/binom(int(round(nb_tirage*p)),nb_tirage,p)
+	for n in FinalComb:
+		N = set(n)
+		Key = '/'.join(list(map(str, n)))
+		if len(N) == 1:
+			Value = N.pop()
+			Proba = binom(coverage[Value],nb_tirage,p)/binom(int(round(nb_tirage*p)),nb_tirage,p)
+		else:
+			Proba = 1
+			for k in N:
+				Ratio = n.count(k)/float(PLOIDY)
+				Proba = Proba*(binom(coverage[k], nb_tirage, Ratio)/binom(int(round(nb_tirage*Ratio)),nb_tirage,Ratio))
+		dico_proba[Key] = Proba
 	
-		if PLOIDY == '2':
-			# calculating probabilities for heterozygous state
-			set_done = set()
-			comb_done = []
-			for n in range(len(ALLELE)):
-				set_done.add(n)
-				for k in range(len(ALLELE)):
-					if not(k in set_done):
-						couple = sorted([n,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n),str(k)])] = (binom(coverage[n], nb_tirage, 0.5)*binom(coverage[k], nb_tirage, 0.5))/(binom(int(round(nb_tirage*0.5)),nb_tirage,0.5)*binom(int(round(nb_tirage*0.5)),nb_tirage,0.5))
-							comb_done.append(couple)
+	if LRT:
+		# getting best and second best probability
+		best_genotype = '/'.join(['.']*int(PLOIDY))
+		best_value = 0
+		second_best = 0
+		for genotype in dico_proba:
+			if best_value < dico_proba[genotype]:
+				if best_value != 0:
+					second_best = best_value
+				best_value = dico_proba[genotype]
+				best_genotype = genotype
+			elif best_value == dico_proba[genotype]:
+				best_genotype = '/'.join(['.']*int(PLOIDY))
+			elif second_best < dico_proba[genotype]:
+				second_best = dico_proba[genotype]
+		if best_value == 0:
+			return best_genotype, (1)
+		elif second_best == 0:
+			return best_genotype, (9999)
+		else:
+			return best_genotype, best_value/second_best
 	
-		if PLOIDY == '3':
-			# calculating probabilities for heterozygous state for triploids
-			set_done = set()
-			comb_done = []
-			for n in range(len(ALLELE)):
-				set_done.add(n)
-				for k in range(len(ALLELE)):
-					if not(k in set_done):
-						couple = sorted([n,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 2.0/3.0)*binom(coverage[n], nb_tirage, 1.0/3.0))/(binom(int(round(nb_tirage*(2.0/3.0))),nb_tirage,(2.0/3.0))*binom(int(round(nb_tirage*(1.0/3.0))),nb_tirage,(1.0/3.0)))
-							comb_done.append(couple)
-						couple = sorted([n,n,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(k)])] = (binom(coverage[n], nb_tirage, 2.0/3.0)*binom(coverage[k], nb_tirage, 1.0/3.0))/(binom(int(round(nb_tirage*(2.0/3.0))),nb_tirage,(2.0/3.0))*binom(int(round(nb_tirage*(1.0/3.0))),nb_tirage,(1.0/3.0)))
-							comb_done.append(couple)
-		
-		if PLOIDY == '4':
-			# calculating probabilities for heterozygous state for tetraploid
-			set_done = set()
-			comb_done = []
-			for n in range(len(ALLELE)):
-				set_done.add(n)
-				for k in range(len(ALLELE)):
-					if not(k in set_done):
-						couple = sorted([n,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 3.0/4.0)*binom(coverage[n], nb_tirage, 1.0/4.0))/(binom(int(round(nb_tirage*(3.0/4.0))),nb_tirage,(3.0/4.0))*binom(int(round(nb_tirage*(1.0/4.0))),nb_tirage,(1.0/4.0)))
-							comb_done.append(couple)
-						couple = sorted([n,n,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(k), str(k)])] = (binom(coverage[n], nb_tirage, 2.0/4.0)*binom(coverage[k], nb_tirage, 2.0/4.0))/(binom(int(round(nb_tirage*(2.0/4.0))),nb_tirage,(2.0/4.0))*binom(int(round(nb_tirage*(2.0/4.0))),nb_tirage,(2.0/4.0)))
-							comb_done.append(couple)
-						couple = sorted([n,n,n,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(k)])] = (binom(coverage[n], nb_tirage, 3.0/4.0)*binom(coverage[k], nb_tirage, 1.0/4.0))/(binom(int(round(nb_tirage*(3.0/4.0))),nb_tirage,(3.0/4.0))*binom(int(round(nb_tirage*(1.0/4.0))),nb_tirage,(1.0/4.0)))
-							comb_done.append(couple)
-		
-		if PLOIDY == '12':
-			# calculating probabilities for heterozygous state for tetraploid
-			set_done = set()
-			comb_done = []
-			for n in range(len(ALLELE)):
-				set_done.add(n)
-				for k in range(len(ALLELE)):
-					if not(k in set_done):
-						couple = sorted([n,k,k,k,k,k,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 11.0/12.0)*binom(coverage[n], nb_tirage, 1.0/12.0))/(binom(int(round(nb_tirage*(11.0/12.0))),nb_tirage,(11.0/12.0))*binom(int(round(nb_tirage*(1.0/12.0))),nb_tirage,(1.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,k,k,k,k,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 10.0/12.0)*binom(coverage[n], nb_tirage, 2.0/12.0))/(binom(int(round(nb_tirage*(10.0/12.0))),nb_tirage,(10.0/12.0))*binom(int(round(nb_tirage*(2.0/12.0))),nb_tirage,(2.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,k,k,k,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 9.0/12.0)*binom(coverage[n], nb_tirage, 3.0/12.0))/(binom(int(round(nb_tirage*(9.0/12.0))),nb_tirage,(9.0/12.0))*binom(int(round(nb_tirage*(3.0/12.0))),nb_tirage,(3.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,k,k,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(k), str(k), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 8.0/12.0)*binom(coverage[n], nb_tirage, 4.0/12.0))/(binom(int(round(nb_tirage*(8.0/12.0))),nb_tirage,(8.0/12.0))*binom(int(round(nb_tirage*(4.0/12.0))),nb_tirage,(4.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,k,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(k), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 7.0/12.0)*binom(coverage[n], nb_tirage, 5.0/12.0))/(binom(int(round(nb_tirage*(7.0/12.0))),nb_tirage,(7.0/12.0))*binom(int(round(nb_tirage*(5.0/12.0))),nb_tirage,(5.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,k,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(k), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[k], nb_tirage, 6.0/12.0)*binom(coverage[n], nb_tirage, 6.0/12.0))/(binom(int(round(nb_tirage*(6.0/12.0))),nb_tirage,(6.0/12.0))*binom(int(round(nb_tirage*(6.0/12.0))),nb_tirage,(6.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,n,k,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(k), str(k), str(k), str(k), str(k)])] = (binom(coverage[n], nb_tirage, 7.0/12.0)*binom(coverage[k], nb_tirage, 5.0/12.0))/(binom(int(round(nb_tirage*(7.0/12.0))),nb_tirage,(7.0/12.0))*binom(int(round(nb_tirage*(5.0/12.0))),nb_tirage,(5.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,n,n,k,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(k), str(k), str(k), str(k)])] = (binom(coverage[n], nb_tirage, 8.0/12.0)*binom(coverage[k], nb_tirage, 4.0/12.0))/(binom(int(round(nb_tirage*(8.0/12.0))),nb_tirage,(8.0/12.0))*binom(int(round(nb_tirage*(4.0/12.0))),nb_tirage,(4.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,n,n,n,k,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(k), str(k), str(k)])] = (binom(coverage[n], nb_tirage, 9.0/12.0)*binom(coverage[k], nb_tirage, 3.0/12.0))/(binom(int(round(nb_tirage*(9.0/12.0))),nb_tirage,(9.0/12.0))*binom(int(round(nb_tirage*(3.0/12.0))),nb_tirage,(3.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,n,n,n,n,k,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(k), str(k)])] = (binom(coverage[n], nb_tirage, 10.0/12.0)*binom(coverage[k], nb_tirage, 2.0/12.0))/(binom(int(round(nb_tirage*(10.0/12.0))),nb_tirage,(10.0/12.0))*binom(int(round(nb_tirage*(2.0/12.0))),nb_tirage,(2.0/12.0)))
-							comb_done.append(couple)
-							
-						couple = sorted([n,n,n,n,n,n,n,n,n,n,n,k])
-						if not(couple in comb_done):
-							dico_proba['/'.join([str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(n), str(k)])] = (binom(coverage[n], nb_tirage, 11.0/12.0)*binom(coverage[k], nb_tirage, 1.0/12.0))/(binom(int(round(nb_tirage*(11.0/12.0))),nb_tirage,(11.0/12.0))*binom(int(round(nb_tirage*(1.0/12.0))),nb_tirage,(1.0/12.0)))
-							comb_done.append(couple)
-		
-	# getting best probability
-	best_genotype = '/'.join(['.']*int(PLOIDY))
-	best_value = 0
-	for genotype in dico_proba:
-		if best_value < dico_proba[genotype]:
-			best_value = dico_proba[genotype]
-			best_genotype = genotype
-		elif best_value == dico_proba[genotype]:
-			best_genotype = '/'.join(['.']*int(PLOIDY))
-	return best_genotype
+	else:
+		# getting best probability
+		best_genotype = '/'.join(['.']*int(PLOIDY))
+		best_value = 0
+		for genotype in dico_proba:
+			if best_value < dico_proba[genotype]:
+				best_value = dico_proba[genotype]
+				best_genotype = genotype
+			elif best_value == dico_proba[genotype]:
+				best_genotype = '/'.join(['.']*int(PLOIDY))
+		return best_genotype
 
 def get_min_acc_pos(DICO):
 	
@@ -1305,7 +1239,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 		
 		#4ad- recording expected allele
 		allele_to_keep = [reference]
-		for allele in dico_allele_cov:
+		for allele in sorted(dico_allele_cov.keys()):
 			if allele != reference:
 				if dico_allele_cov[allele]:
 					allele_to_keep.append(allele)
@@ -1325,7 +1259,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 						liste_cov.append(str(allele_coverage))
 						liste_cov_int.append(allele_coverage)
 					depth = dico_accession_line[acc][3]
-					genotype = genotype_accession(liste_cov_int, allele_to_keep, 0.005, DICO_PLOIDY[acc])
+					genotype = genotype_accession(liste_cov_int, allele_to_keep, 0.005, DICO_PLOIDY[acc], False, False)
 				else:
 					for allele in allele_to_keep:
 						liste_cov.append('0')
@@ -1375,11 +1309,10 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 			
 			#4bd- recording expected allele
 			allele_to_keep = [reference]
-			for allele in dico_allele_cov:
+			for allele in sorted(dico_allele_cov.keys()):
 				if allele != reference:
 					if dico_allele_cov[allele]:
 						allele_to_keep.append(allele)
-			# print allele_to_keep
 			
 			#4be- printing results to output if necessary
 			if len(allele_to_keep) > 1:
@@ -1395,7 +1328,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 							liste_cov.append(str(allele_coverage))
 							liste_cov_int.append(allele_coverage)
 						depth = dico_accession_line[acc][3]
-						genotype = genotype_accession(liste_cov_int, allele_to_keep, 0.005, DICO_PLOIDY[acc])
+						genotype = genotype_accession(liste_cov_int, allele_to_keep, 0.005, DICO_PLOIDY[acc], False, False)
 					else:
 						for allele in allele_to_keep:
 							liste_cov.append('0')
