@@ -46,7 +46,7 @@ or
 Description
 -----------
 
-The package provided comprised X programs listed here:
+The package provided comprised 9 programs listed here:
 
 -   process\_reseq.1.0.py (Garsmeur et al., 2018)
 -   VcfPreFilter.1.0.py (Garsmeur et al., 2018)
@@ -70,7 +70,13 @@ Programs
 This program takes a reference DNA sequence multifasta file and several
 fastq files and returns a bam file for each accessions and a final VCF
 file containing alleles count at each variant site having at least one
-variant allele supported by at least one read.
+variant allele supported by at least one read. **The genotypes found in
+the output vcf are indicative and may not reflect the correct genotype!
+For example, only two allele are authorized in one genotype to gain
+computation time. This program must be used in conjunction with** 
+*VcfPreFilter.1.0.py* ***which have been specifically designed to perform
+a variant calling on a selected set of polymorph markers based on user
+specification.***
 
 ![](http://banana-genome-http.cirad.fr/image/Process_ReSeq_Fig1.png)
 
@@ -125,7 +131,8 @@ the output of the preceding one.
 -   **step c:** generates a bam (\*\_realigned.bam) and bai
     (\*\_realigned.bai) files realigned around indel for each
     accessions,
--   **step d:** generates a ,
+-   **step d:** generates a bam file where base quality has been reevaluated
+    according to GATK standard,
 -   **step e:** generates for each accessions and each chromosomes a
     file (Accession + "*allele*count\_"+ chromosome + ".gz") counting
     variant at each covered bases,
@@ -172,7 +179,9 @@ resulting from sequencing errors. Filter are applicated as followed:
     --MaxCov: Maximal read coverage for site. [Default: 1000]
     --minFreq: Minimal allele frequency in an accession to keep the allele for calling in the row
     --MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: 3]
+	--dial: Perform only a diallelic calling. i.e Only two allele are possible in a genotype if "y" is passed to this argument. Possible values "y" or "n". [Default: y]
     --out: Prefix for output files. [Default: Pop]
+	--outgzip: Output files in gzip format. [Default: n]
 <br><br>
 
 ### vcfFilter.1.0.py

@@ -103,7 +103,13 @@ Several new files have been added in each folders:
     each bases (A,T,G,C,N,\*=deletion) at each covered site.
 
 f - Vcf generation: generate the vcf for all accessions in the
-configuration file
+configuration file. **WARNING: The genotypes found in
+the output vcf are indicative and may not reflect the correct genotype!
+For example, only two allele are authorized in one genotype to gain
+computation time. This program must be used in conjunction with** 
+*VcfPreFilter.1.0.py* *** (see following section of this tutorial)
+which have been specifically designed to perform a variant calling
+on a selected set of polymorph markers based on user specification.***
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f
 
@@ -150,11 +156,12 @@ sites are reported (one read, on one accession supporting a variant).
 The phylosophie of ***process\_reseq*** is to
 report all variant sites and then decide to filter the vcf (what is
 error and what is not) based on understandable and simple parametres
-using ***VcfPreFilter*** tool. For the following step we will work on
+using ***VcfPreFilter*** tool which also performs a better calling
+with these selected sites. For the following step we will work on
 the vcf file generated on **Variant calling** section. VcfPreFilter can be
 launched as followed:
 
-    python3 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf
+    python3 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf -d y
 
 The outpout is a vcf file (named as filled in -o option) in which the
 variant line are filtered as followed:
@@ -175,6 +182,13 @@ our parameters will have a genotype). An additional tag (GC) is added in
 the FORMAT column of the VCF. This tag is calculated as followed :
 (best genotype probability)/(second best genotype probability) and give an
 idea of the quality of the calling at the datapoint.
+Two "types" of genotypes can be called: if the ***-d y*** option is passed (default),
+only two alleles are authorized in a genotype (*ie* a triploid accession cannot
+be 0/1/2). This gain computation time but genotype can be erroneous if divergent
+time between haplotypes is great. If ***-d n*** option is passed, all possible
+combinations of each alleles are tested and not only bi-allelic combination. In
+this case the computation time can be a lot more important if the ploidy level is
+high.
 
 C - VCF Filtering
 -----------------
