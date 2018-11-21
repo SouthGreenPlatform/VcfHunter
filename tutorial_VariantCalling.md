@@ -107,9 +107,9 @@ configuration file. **WARNING: The genotypes found in
 the output vcf are indicative and may not reflect the correct genotype!
 For example, only two allele are authorized in one genotype to gain
 computation time. This program must be used in conjunction with** 
-*VcfPreFilter.1.0.py* *** (see following section of this tutorial)
+*VcfPreFilter.1.0.py* **(see following section of this tutorial)
 which have been specifically designed to perform a variant calling
-on a selected set of polymorph markers based on user specification.***
+on a selected set of polymorph markers based on user specification.**
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s f
 
