@@ -244,14 +244,14 @@ def __main__():
 	if options.outgzip == 'n':
 		outvcf = open(options.out,'w')
 	elif options.outgzip == 'y':
-		outvcf = gzip.open(options.out,'wb')
+		outvcf = gzip.open(options.out,'wt')
 	else:
 		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
 	# Working line by line
 	PrintFilter = 1
 	if options.vcf[-3:] == '.gz':
-		file = gzip.open(options.vcf,'rb')
+		file = gzip.open(options.vcf,'rt')
 	else:
 		file = open(options.vcf)
 	for line in file:
