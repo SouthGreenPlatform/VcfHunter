@@ -134,11 +134,11 @@ the output of the preceding one.
 -   **step d:** generates a bam file where base quality has been reevaluated
     according to GATK standard,
 -   **step e:** generates for each accessions and each chromosomes a
-    file (Accession + "_allele_count_"+ chromosome + ".gz") counting
+    file (Accession + "\_allele_count\_"+ chromosome + ".gz") counting
     variant at each covered bases,
 -   **step f:** generates a several vcf (one for each
     reference sequences) (--prefix + reference sequence +
-    "_allele_count.vcf") file counting for each variant sites (at least
+    "\_allele_count.vcf") file counting for each variant sites (at least
     on reads supporting a variant) and each accession the number of
     reads supporting each allele. For each accession in the vcf a
     genotype (GT tag) was called based on a binomial test, allelic depth
