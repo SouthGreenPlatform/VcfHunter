@@ -136,14 +136,14 @@ the output of the preceding one.
 -   **step e:** generates for each accessions and each chromosomes a
     file (Accession + "*allele*count\_"+ chromosome + ".gz") counting
     variant at each covered bases,
--   **step f:** generates a generates several vcf (one for each
+-   **step f:** generates a several vcf (one for each
     reference sequences) (--prefix + reference sequence +
     "*allele*count.vcf") file counting for each variant sites (at least
     on reads supporting a variant) and each accession the number of
     reads supporting each allele. For each accession in the vcf a
     genotype (GT tag) was called based on a binomial test, allelic depth
     was counted (AD tag) and total depth was rapported (DP tag),
--   **step g:** generates a generates a uniq vcf file resulting in the
+-   **step g:** generates a uniq vcf file resulting in the
     concatenation of all vcf files generated at step g,
 -   **step h:** generates two files (\*\_acc.stats and \*\_lib.stats)
     collecting mapping statistics on each libraries and accessions
