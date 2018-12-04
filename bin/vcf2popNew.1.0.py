@@ -484,26 +484,29 @@ def ident_parent(ACCESSION_HEADER, LISTE, PARENT, KHISTAT, DICOSEGREGATION):
 		type PARENT: list
 		param KHISTAT: Allele coding
 		type KHISTAT: list
-		param DICOSEGREGATION: Dictionnary of populations type to test
+		param DICOSEGREGATION: Dictionary of populations type to test
 		type DICOSEGREGATION: dictionary
 		return: list with [parent marker, first or second]
 	"""
 	
 	
 	dico_parent = {}
-	dico_parent['M'] = [] # Missing parents
-	dico_parent['O'] = [] # homozygous parents
-	dico_parent['E'] = [] # heterozygous parents
+	dico_parent['M'] = [] # Missing parents.
+	dico_parent['O'] = [] # homozygous parents.
+	dico_parent['E'] = [] # heterozygous parents.
 	for n in PARENT:
-		genotype = LISTE[ACCESSION_HEADER.index(n)]
-		geno = set(genotype.split('/'))
-		if len(geno) == 1:
-			if '.' in geno:
-				dico_parent['M'].append(n)
-			else:
-				dico_parent['O'].append(n)
+		if n == 'Un':
+			dico_parent['M'].append(n)
 		else:
-			dico_parent['E'].append(n)
+			genotype = LISTE[ACCESSION_HEADER.index(n)]
+			geno = set(genotype.split('/'))
+			if len(geno) == 1:
+				if '.' in geno:
+					dico_parent['M'].append(n)
+				else:
+					dico_parent['O'].append(n)
+			else:
+				dico_parent['E'].append(n)
 	
 	if len(DICOSEGREGATION[KHISTAT]['MarkerCoding'][0]) == 2: # We are on a parent specific allele
 		if len(PARENT) == 2:
@@ -516,8 +519,10 @@ def ident_parent(ACCESSION_HEADER, LISTE, PARENT, KHISTAT, DICOSEGREGATION):
 			#both parent are heterozygous OR both parent are homozygous OR both parents are missing
 			else:
 				return ['unknown', 'x']
+		if len(PARENT) == 1 and PARENT[0] == 'Un':
+			return ['unknown', 'x']
 		else:
-			sys.exit('Unmanaged parent number. At this time only two parents are allowed... Contact me if you want to add functionnalities')
+			sys.exit('Unmanaged parent number. At this time only two parents are allowed... Contact me if you want to add functionalities')
 	
 	elif len(DICOSEGREGATION[KHISTAT]['MarkerCoding'][0]) == 3: # We are on an allele heterozygous in both parents
 		return ['Bridge', 'x']
@@ -594,7 +599,7 @@ def __main__():
 	# Wrapper options.
 	parser.add_option( '-v', '--vcf',		dest='vcf',			default=None,		help='The VCF file')
 	parser.add_option( '-S', '--seg',		dest='seg',			default=None,		help='Segregation tested. Several segregations can be passed and should be separated by "/". A segregation should look like as follows:\t\t\t\t\t'
-	'Name:Parents:MarkerCoding:MarkerSegregation:PvalueForTest.\nWith a real example: SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-5/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-5 (Ho for homozygous, He for heterozygous)')
+	'Name:Parents:MarkerCoding:MarkerSegregation:PvalueForTest.\nWith a real example: SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-5/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-5 (Ho for homozygous, He for heterozygous). If One or both parent are not in the vcf, replace their names by "Un".')
 	parser.add_option( '-R', '--ref',		dest='ref',			default=None,		help='The Reference fasta file. [Default: %default]')
 	parser.add_option( '-e', '--exclude',	dest='exclude',		default=None,		help='Accession to exclude from the final file.')
 	parser.add_option( '-n', '--NoUsed',	dest='NoUsed',		default=None,		help='Accession to exclude from the filtering.')
