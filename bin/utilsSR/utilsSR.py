@@ -1344,6 +1344,89 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 		dico_accession_infile[CHR][acc].close()
 	return 0
 
+def create_pseudo_VCF_Large(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, END):
+	
+	#1- preparing output
+	outfile = open(PREFIX+'_'+CHR+'_'+str(START)+'_'+str(END)+'_allele_count.vcf', 'w')
+	outfile.write("##fileformat=VCFv4.2\n")
+	outfile.write("##reference=file:///"+REF+"\n")
+	outfile.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
+	outfile.write('##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">\n')
+	outfile.write('##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">\n')
+	for n in DICO_CHR:
+		outfile.write("##contig=<ID="+n+",length="+str(DICO_CHR[n])+">\n")
+	liste2print = ["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"]
+	for acc in LIST_ACC:
+		ACC = acc.split('/')[-1]
+		liste2print.append(ACC)
+	outfile.write('\t'.join(liste2print))
+	outfile.write('\n')
+	
+	# Opening big file
+	file = gzip.open(PREFIX+'_'+CHR+'_Back.gz', 'rt')
+	
+	# Recording accession index in the line
+	AccPosIndex = {}
+	header = file.readline().split()
+	LineLen = len(header) # just for verification
+	for n in LIST_ACC:
+		if not(n in header):
+			sys.stdout.write('The accession '+n+' was not found in the file '+PREFIX+'_'+CHR+'Back.gz. Please check your configuration file.\n')
+			return 1
+		else:
+			AccPosIndex[n] = header.index(n)
+	
+	# Initiating studied alleles (only SNP are managed)
+	liste_allele = ['A', 'C', 'G', 'T', '*']
+	
+	# Performing the calling
+	for line in file:
+		data = line.split()
+		if data:
+			POS = int(data[1])
+			if POS > START and POS <= END:
+				#1- recording total allele coverage information and reference allele
+				reference = data[2]
+				format = data[3].split(':')
+				
+				dico_allele_cov = {}
+				for allele in liste_allele:
+					dico_allele_cov[allele] = 0
+				
+				for acc in LIST_ACC:
+					allele_count = data[AccPosIndex[acc]].split(':')
+					for allele in dico_allele_cov:
+						dico_allele_cov[allele] += get_allele_coverage (allele, format, allele_count)
+			
+				#2- recording expected allele
+				allele_to_keep = [reference]
+				for allele in sorted(dico_allele_cov.keys()):
+					if allele != reference:
+						if dico_allele_cov[allele]:
+							allele_to_keep.append(allele)
+				
+				#3- Calculating genotype and printing results to output if necessary
+				if len(allele_to_keep) > 1:
+					liste2print = [CHR, str(POS), '.', allele_to_keep[0], ','.join(allele_to_keep[1:]), '.', '.', '.', 'GT:AD:DP']
+					for acc in LIST_ACC:
+						liste_cov = []
+						liste_cov_int = []
+						allele_count = data[AccPosIndex[acc]].split(':')
+						depth = allele_count[0]
+						for allele in allele_to_keep:
+							allele_coverage = get_allele_coverage (allele, format, allele_count)
+							liste_cov.append(str(allele_coverage))
+							liste_cov_int.append(allele_coverage)
+						genotype = genotype_accession(liste_cov_int, allele_to_keep, 0.005, DICO_PLOIDY[acc], False, False)
+						liste2print.append(':'.join([genotype,','.join(liste_cov),depth]))
+					outfile.write('\t'.join(liste2print))
+					outfile.write('\n')
+	
+	file.close()
+	outfile.close()
+	
+	return 0
+
 def merge_vcf(PREFIX, DICO_CHR):
 	
 	# recording VCF headers
@@ -1468,50 +1551,6 @@ def perform_count(BAMREADCOUNT, REF, BAM, OUT):
 	
 	bam_count = '%s -b 10 -q 1 -d 1000000 -w 0 -f %s %s > %s' % (BAMREADCOUNT, REF, BAM, OUT)
 	os.system(bam_count)
-
-def generate_pseudo_vcf_oldies(TAB, REF, OUT):
-	
-	# calculating sequence length
-	dico_chr = {}
-	sequence_dict = SeqIO.index(REF, "fasta")
-	for n in sequence_dict:
-		dico_chr[n] = [len(str(sequence_dict[n].seq)), str(sequence_dict[n].seq)]
-	del sequence_dict
-	
-	# Verification
-	file = open(TAB)
-	i = 0
-	chr = ""
-	dico_allele = {}
-	liste_allele = ['A', 'C', 'G', 'T']
-	mot_allele = ':'.join(liste_allele)
-	for line in file:
-		data = line.split()
-		i += 1
-		if data:
-			if chr != data[0]:
-				if not(chr == ""):
-					outfile.close()
-				chr = data[0]
-				outfile = gzip.open(OUT+'_'+chr+'.gz', 'wb')
-			# recording information on the current line 
-			for n in data[4:]:
-				allele_stat = n.split(':')
-				dico_allele[allele_stat[0]] = allele_stat[1]
-			# preparing and printing result
-			liste_mot = []
-			Reference_allele = data[2].replace('a', 'A').replace('c', 'C').replace('g', 'G').replace('t', 'T').replace('n', 'N')
-			for n in liste_allele:
-				liste_mot.append(dico_allele[n])
-			outfile.write('\t' . join([data[0], data[1], Reference_allele, data[3], mot_allele, ':'.join(liste_mot)]))
-			outfile.write('\n')
-	outfile.close()
-	os.remove(TAB)
-	
-	for n in dico_chr:
-		if not(os.path.isfile(OUT+'_'+n+'.gz')):
-			outfile = gzip.open(OUT+'_'+n+'.gz', 'wb')
-			outfile.close()
 
 def generate_pseudo_vcf(TAB, REF, OUT):
 	
@@ -1675,3 +1714,162 @@ def Calc_stats(PREFIX, DICO_LIB):
 	
 	outfile1.close()
 	outfile2.close()
+
+def createGVCF(CHR, ACCS, PREFIX):
+	
+	LargeFile = PREFIX+'_'+CHR+'_Back.gz'
+	IntermFile = PREFIX+'_'+CHR+'_New.gz'
+	
+	for i in range(len(ACCS)):
+		acc = ACCS[i]
+		AccName = acc.split('/')[-1]
+		AccFile = acc+'/'+AccName+'_allele_count_'+CHR+'.gz'
+		if os.path.exists(LargeFile):
+			file1 = gzip.open(LargeFile, 'rt')
+			file2 = gzip.open(AccFile, 'rt')
+			header = file1.readline().split()
+			AccNumber = len(header)-4
+			if AccName in header:
+				sys.stdout.write('The accession '+AccName+' was already found in the file. It will thus not be included once again\n')
+				file1.close()
+				file2.close()
+			else:
+				print(AccName, CHR)
+				outfile = gzip.open(IntermFile,'wt')
+				header.append(AccName)
+				outfile.write('\t'.join(header))
+				outfile.write('\n')
+				
+				# Initiating data aggregation
+				line1 = file1.readline()
+				line2 = file2.readline()
+				while line1 and line2:
+					data1 = line1.split()
+					data2 = line2.split()
+					pos1 = int(data1[1])
+					pos2 = int(data2[1])
+					# print(pos1, pos2, AccName)
+					if pos1 == pos2:
+						GENO1 = data1[3].split(':')
+						GENO2 = data2[4].split(':')
+						Geno1 = set(GENO1)
+						Geno2 = set(GENO2)
+						# Cov1 = data1[4].split(':')
+						Cov2 = data2[5].split(':')
+						Ref1 = data1[2]
+						Ref2 = data2[2]
+						if Ref1 != Ref2:
+							sys.exit('Oups, there is a bug 1\n')
+						# Identification of what is missing from Geno1
+						NotInBigFile = Geno2.difference(Geno1)
+						if NotInBigFile:
+							
+							data1[3] = ':'.join(data1[3].split(':')+list(NotInBigFile))
+							
+							for Var in NotInBigFile:
+								GENO1.append(Var)
+							for i in range(len(data1[4:])):
+									data1[i+4] = ':'.join(data1[i+4].split(':')+['0']*len(NotInBigFile))
+						
+						# Preparing final Genotype information for current accession
+						FinalGENO = data1[3].split(':')
+						
+						FinalAccCov = [data2[3]]
+						for Var in FinalGENO[1:]:
+							if Var in Geno2:
+								FinalAccCov.append(Cov2[GENO2.index(Var)])
+							else:
+								FinalAccCov.append('0')
+						
+						data1 = data1 + [':'.join(FinalAccCov)]
+						
+						outfile.write('\t'.join(data1))
+						outfile.write('\n')
+						
+						line1 = file1.readline()
+						line2 = file2.readline()
+					elif pos1 > pos2: # (1) Adding a new line in the global file with missing data for all accessions already present in this vcf (2) reading new line of file2
+					
+						# print('yes1')
+						GENO2 = '0:'+data2[4]
+						Cov2 = data2[3]+':'+data2[5]
+						MissCov = [':'.join(['0']*len(Cov2.split(':')))]*AccNumber
+						DataToPrint = data2[0:3]+[GENO2]+MissCov+[Cov2]
+						
+						outfile.write('\t'.join(DataToPrint))
+						outfile.write('\n')
+						
+						line2 = file2.readline()
+					
+					elif pos1 < pos2: # (1) Putting missing data to accession of file 2 (2) reading new line of file1
+					
+						# print('yes2')
+						GENO1 = data1[3].split(':')
+						MissCov = ':'.join(['0']*len(GENO1))
+						data1 = data1+[MissCov]
+						
+						outfile.write('\t'.join(data1))
+						outfile.write('\n')
+						
+						line1 = file1.readline()
+				
+				if line1: # We must put missing to the new accession for all remaining sites
+					# print('yes3')
+					data1 = line1.split()
+					GENO1 = data1[3].split(':')
+					MissCov = ':'.join(['0']*len(GENO1))
+					data1 = data1+[MissCov]
+					outfile.write('\t'.join(data1))
+					outfile.write('\n')
+					
+					for line1 in file1:
+						data1 = line1.split()
+						GENO1 = data1[3].split(':')
+						MissCov = ':'.join(['0']*len(GENO1))
+						data1 = data1+[MissCov]
+						outfile.write('\t'.join(data1))
+						outfile.write('\n')
+					
+				elif line2: # We must put missing to all "old" accessions for all remaining sites
+					
+					# print('yes4')
+					data2 = line2.split()
+					GENO2 = '0:'+data2[4]
+					Cov2 = data2[3]+':'+data2[5]
+					MissCov = [':'.join(['0']*len(Cov2.split(':')))]*AccNumber
+					DataToPrint = data2[0:3]+[GENO2]+MissCov+[Cov2]
+					outfile.write('\t'.join(DataToPrint))
+					outfile.write('\n')
+					
+					for line2 in file2:
+						data2 = line2.split()
+						GENO2 = '0:'+data2[4]
+						Cov2 = data2[3]+':'+data2[5]
+						MissCov = [':'.join(['0']*len(Cov2.split(':')))]*AccNumber
+						DataToPrint = data2[0:3]+[GENO2]+MissCov+[Cov2]
+						outfile.write('\t'.join(DataToPrint))
+						outfile.write('\n')
+				
+				file1.close()
+				file2.close()
+				outfile.close()
+				
+				# Renaming New file
+				os.rename(IntermFile, LargeFile)
+			
+		else:
+			file1 = gzip.open(AccFile, 'rt')
+			outfile = gzip.open(LargeFile,'wt')
+			outfile.write('\t'.join(['#CHROM', 'POS', 'REF', 'ALLELE', AccName]))
+			outfile.write('\n')
+			for line in file1:
+				data = line.split()
+				if data:
+					outfile.write('\t'.join(data[0:3]+['0:'+data[4], data[3]+':'+data[5]]))
+					outfile.write('\n')
+			outfile.close()
+	return 0
+			
+	
+	
+	
