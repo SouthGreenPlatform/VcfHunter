@@ -1433,7 +1433,10 @@ def merge_vcf(PREFIX, DICO_CHR):
 	dico_header = {}
 	accessions = set()
 	for chr in DICO_CHR:
-		file = open(PREFIX+'_'+chr+'_all_allele_count.vcf','r')
+		if os.path.exists(PREFIX+'_'+chr+'_all_allele_count.vcf'):
+			file = open(PREFIX+'_'+chr+'_all_allele_count.vcf','r')
+		elif os.path.exists(PREFIX+'_'+chr+'_all_allele_count.vcf.gz'):
+			file = gzip.open(PREFIX+'_'+chr+'_all_allele_count.vcf.gz','rb')
 		if chr in dico_header:
 			return 1
 		if not ('header' in dico_header):
@@ -1524,7 +1527,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	if GZIP == 'n':
 		outfile = open(PREFIX+'_'+CHR+'_all_allele_count.vcf','w')
 	elif GZIP == 'y':
-		outfile = gzip.open(PREFIX+'_'+CHR+'_all_allele_count.vcf'+'.gz','wb')
+		outfile = gzip.open(PREFIX+'_'+CHR+'_all_allele_count.vcf'+'.gz','wt')
 	else:
 		sys.exit('Wrong argument passed to --outgzip options. Argument accepted: y or n\n')
 	
