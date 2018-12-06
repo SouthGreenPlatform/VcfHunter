@@ -108,6 +108,26 @@ def main_combine(job):
 	finally:
 		return rslt
 
+def main_prepa_combine(job):
+
+	try:
+		rslt = utils.createGVCF(job[0],job[1],job[2])
+	except Exception as e:
+		print (e)
+		rslt = 1
+	finally:
+		return rslt
+
+def main_combine_Large(job):
+
+	try:
+		rslt = utils.create_pseudo_VCF_Large(job[0],job[1],job[2],job[3],job[4],job[5],job[6],job[7])
+	except Exception as e:
+		print (e)
+		rslt = 1
+	finally:
+		return rslt
+
 def main_merging_sub_vcf(job):
 
 	try:
@@ -230,7 +250,7 @@ def __main__():
 	
 	# Obtaining chromosome informations
 	dico_chr = {}
-	if 'e' in options.steps or 'f' in options.steps or 'g' in options.steps:
+	if 'e' in options.steps or 'f' in options.steps or 'g' in options.steps or 'E' in options.steps or 'F' in options.steps:
 		# calculating sequence length
 		sequence_dict = SeqIO.index(ref, "fasta")
 		for n in sequence_dict:
@@ -268,7 +288,7 @@ def __main__():
 		totalSize = 0
 		for chr in ChrList:
 			if not chr in dico_chr:
-				sys.exit('This is ambarassing... chromosome: '+chr+' has not been found in the reference fasta file...\n')
+				sys.exit('This is embarrassing... chromosome: '+chr+' has not been found in the reference fasta file...\n')
 			totalSize += dico_chr[chr]
 		
 		# window = int(totalSize/float(nbProcs))
@@ -317,6 +337,89 @@ def __main__():
 	if 'h' in options.steps:
 		utils.Calc_stats(options.prefix, dico_lib)
 		
+	# Merging GVCF into one large GVCF (For very large data set: greater than the limit allowed by unix)
+	if 'E' in options.steps:
+		
+		# getting accession list
+		liste_accessions = sorted(list(dico_lib.keys()))
+		
+		# Selecting chromosomes
+		if options.chrom == 'all':
+			ChrList = list(dico_chr.keys())
+		else:
+			ChrList = options.chrom.split(':')
+		
+		# Preparing chromosomal launching
+		listJobs = []
+		for chr in ChrList:
+			listJobs.append([chr, liste_accessions, options.prefix])
+		
+		pool = mp.Pool(processes=nbProcs)
+		results = pool.map(main_prepa_combine, listJobs)
+		
+		for n in results:
+			if n != 0:
+				sys.stdout.write(str(n)+'\n')
+	
+	# Creating the vcf
+	if 'F' in options.steps:
+		
+		# getting accession list
+		liste_accessions = sorted(list(dico_lib.keys()))
+		
+		# Selecting chromosomes
+		if options.chrom == 'all':
+			ChrList = list(dico_chr.keys())
+		else:
+			ChrList = options.chrom.split(':')
+		
+		# Optimizing window size
+		totalSize = 0
+		for chr in ChrList:
+			if not chr in dico_chr:
+				sys.exit('This is embarrassing... chromosome: '+chr+' has not been found in the reference fasta file...\n')
+			totalSize += dico_chr[chr]
+		
+		# window = int(totalSize/float(nbProcs))
+		window = 1000000
+		dicoWindow = {}
+		for chr in ChrList:
+			dicoWindow[chr] = []
+			start = 0
+			while start < dico_chr[chr]:
+				if start + window <= dico_chr[chr]:
+					dicoWindow[chr].append([start, start + window])
+				else:
+					dicoWindow[chr].append([start, dico_chr[chr]])
+				start += window
+		
+		listJobs = []
+		for chr in dicoWindow:
+			for pos in dicoWindow[chr]:
+				listJobs.append([liste_accessions, ref, options.prefix, dico_ploidy, dico_chr, chr, pos[0], pos[1]])
+		
+		# for n in listJobs:
+			# utils.create_pseudo_VCF_Large(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])
+		
+		pool = mp.Pool(processes=nbProcs)
+		results = pool.map(main_combine_Large, listJobs)
+		
+		for n in results:
+			if n != 0:
+				sys.stdout.write(str(n)+'\n')
+		
+		# Merging files by chromosomes
+		listJobs = []
+		for chr in dicoWindow:
+			listJobs.append([options.prefix, chr, dicoWindow[chr], options.outgzip])
+		pool = mp.Pool(processes=nbProcs)
+		results = pool.map(main_merging_sub_vcf, listJobs)
+		
+		for n in results:
+			if n != 0:
+				sys.stdout.write(str(n)+'\n')
+		
+		sys.stdout.write('Setp F finished\n')
 	
 		
 if __name__ == "__main__": __main__()
