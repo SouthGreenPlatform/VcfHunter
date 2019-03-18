@@ -519,7 +519,7 @@ def ident_parent(ACCESSION_HEADER, LISTE, PARENT, KHISTAT, DICOSEGREGATION):
 			#both parent are heterozygous OR both parent are homozygous OR both parents are missing
 			else:
 				return ['unknown', 'x']
-		if len(PARENT) == 1 and PARENT[0] == 'Un':
+		elif len(PARENT) == 1 and PARENT[0] == 'Un':
 			return ['unknown', 'x']
 		else:
 			sys.exit('Unmanaged parent number. At this time only two parents are allowed... Contact me if you want to add functionalities')

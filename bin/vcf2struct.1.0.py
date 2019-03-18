@@ -655,7 +655,10 @@ def get_genotype(VCF, NAME, PREFIX):
 	outfile.write('\t'.join(mot)+'\n')
 	
 	# Reading and recording informations
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
