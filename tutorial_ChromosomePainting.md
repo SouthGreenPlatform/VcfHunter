@@ -51,7 +51,7 @@ chromosomes of the same origin respectively for triploid (see Figure below (C)) 
 a ratio of 0.25, 0.5, 0.75 for one, two and three ancestral chromosomes of the same
 origin respectively for tetraploid accession (see Figure below (D)).
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig1.png)
+![](/images/AllelePropAndCov_Fig1.png)
 
 In addition, for each position where an allele can be attributed to a group, the read
 coverage for the accession is calculated. An average coverage is then calculated for
@@ -59,7 +59,7 @@ the accession and read coverage along the chromosome of the accession is then pl
 relative to the average coverage of the accession. This approach allow to identify missing
 or supernumerary chromosomes (or chromosomal region) (See Figure below). 
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig2.png)
+![](/images/AllelePropAndCov_Fig2.png)
 
 ### Running analysis
 Two programs are available and can be run depending on what figures you expect. The first
@@ -99,7 +99,7 @@ and as colors are arbitrarily attributed based on an alphanumeric sorting of
 ancestor names and first color is green and second is red, then "AA" is green and
 "BB" is red.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig3.png)
+![](/images/AllelePropAndCov_Fig3.png)
 
 Their is 3 additional admixed accessions, two triploids (GP1 and P025) and a
 tetraploid one P1. These accessions can also be analysed  as Kunnan with the
@@ -116,13 +116,13 @@ and the interpretation that can be made from this coverage. We can observe
 that for accession P025 a chromosome region is missing for the start of
 chromosome 1 and the major part of chromosome 3.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig4.png)
+![](/images/AllelePropAndCov_Fig4.png)
 
 The following figure is the picture of allele ratio you should obtain and
 green and red bars represent the interpretation that can be made from this
 allele ratio and read coverage.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig5.png)
+![](/images/AllelePropAndCov_Fig5.png)
 
 
 One also want to perform this same analysis but by comparing one chromosome
@@ -150,7 +150,7 @@ and the allele ratio file.
 Here is an exemple of file generated for chromosome 3 on the 4 tested
 accessions:
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig6.png)
+![](/images/AllelePropAndCov_Fig6.png)
 
 In this figure, chromosome 3 of all tested accessions are represented in
 the same figure. We added T04 and T02 which are accessions representative

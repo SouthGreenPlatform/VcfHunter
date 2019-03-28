@@ -78,7 +78,7 @@ computation time. This program must be used in conjunction with**
 a variant calling on a selected set of polymorph markers based on user
 specification.**
 
-![](http://banana-genome-http.cirad.fr/image/Process_ReSeq_Fig1.png)
+![](/images/Process_ReSeq_Fig1.png)
 
 #### Options:
 
