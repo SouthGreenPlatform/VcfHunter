@@ -49,7 +49,7 @@ or
 Description
 -----------
 
-The package provided comprised 14 programs listed here:
+The package provided comprised 16 programs listed here:
 
 -   process\_RNAseq.1.0.py (python3)
 -   process\_reseq.1.0.py (python3)
@@ -65,6 +65,8 @@ The package provided comprised 14 programs listed here:
 -   vcf2popNew.1.0.py (python3)
 -   RecombCalculatorDDose.py (python3)
 -   Draw_dot_plot.py (python3)
+-   vcfIdent.1.0.py (python3)
+-   vcfRemove.1.0.py (python3)
 
 All 14 programs run using the following command: ~\~~ python program-name
 \<--options-name value\> ~\~~
@@ -1101,7 +1103,7 @@ analysis from a vcf file based on several criterias including segregation
 	 name is not to long.
 
 *Outputs:*\
- **\*\_tab\_Bridge.tab:** A .tab file correponding to a simplified joinmap format that contained bridge markers.\
+ **\*\_tab\_Bridge.tab:** A .tab file corresponding to a simplified JoinMap format that contained bridge markers.\
  **\*\_tab\_*SegregationName*\_*Parent*.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
 parent2 markers respectively. Only if parent option is filled.\
  **\*\_tab\_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
@@ -1157,7 +1159,7 @@ This program draw a dotplot based on marker pairwise recombination file obtained
 			y: yes
 			n: no: markers are ordered along chromosomes with positions incremented by 1 
 		[default: y]
-	--output: Name of output file. Extension (.png, .svg, .pdf) of the outpout is autaomatically identified by the script.
+	--output: Name of output file. Extension (.png, .svg, .pdf) of the outpout is automatically identified by the script.
 
 *Output:*\
  A dotplot file representing pairwise marker linkage named according to --outpout option.\
@@ -1165,9 +1167,49 @@ This program draw a dotplot based on marker pairwise recombination file obtained
 <br><br>
 
 
+### vcfIdent.1.0.py
+
+This program test, along chromosome, the proportion of alleles shared by one accession, against another one. For example when 
+comparing a triploid accession against a diploid one, if the diploid is A/T and the tetraploid one is A/T/T, the proportion of 
+shared alleles at the given position is 1. If the tetraploid is A/A/A, then the proportion is equal to 0.5. A pdf of this statistic 
+along chromosome is generated as well as a density plot of these values over a given window size. In addition, for each potential 
+values (0 and 1 for haploid comparison, 0, 1 and 2 for diploid comparison), a file summarizing the density of this value on a 
+given windows, that can be loaded to circos to perform a circular representation of this statistics is generated.
+
+*Options:*
+
+    --vcf: The vcf file containing accessions to compare
+    --acc: Accession name to compare to others.
+    --comp: Accession name(s) to be compared. If several accessions should be compared, they should be separated by ":".
+    --win: Half window (unit = variant site) to compute density along chromosomes. (Default value: 0)
+    --out: Prefix for output files names.
 
 
+*Output:*\
+ **\*\_X\-acc.densityY.txt:** Several tabulated file corresponding to the density value for each possible values (Y) resulting from the comparison of the given accession (X) to the one given by --acc option.\
+ **\*\_X\-acc.scatter.txt:** Several files (one for each accession passed to --comp option) that contained the proportion of shared alleles at each compared sites of the vcf.\
+ **\*\.pdf:** A pdf file plotting the allele comparison along chromosome of each accessions passed to --comp option to the one passed to --acc option.
+<br><br>
 
 
+### vcfIdent.1.0.py
 
+This program remove alleles in a given accession if they are shared by a second accession. For Example, if an accession 
+in which we will remove allele is A/A/T and a second one which is the one that will be used to remove is A/A, the result 
+for the first accession will be T in the final vcf. If the accession used to remove is T/T, the result will be A/A as only 
+T is common between the two accessions.
+
+*Options:*
+
+    --vcf: The vcf file containing accessions to compare
+    --acc: Accession name in which allele will be removed in the vcf.
+    --remove: Name of the accession which will be used to remove allele.
+    --out: Prefix for output files names.
+
+
+*Output:*\
+ **\*\.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.\
+ **\*\_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.\
+ **\*\_MoreThanHaplo.vcf:** The parsed vcf correponding to the complement of **\*\_haplo.vcf**.
+<br><br>
 
