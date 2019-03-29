@@ -33,11 +33,12 @@ In this tutorial we assume that you have performed the preliminary steps
 of checking your reads and filtered if necessary. After that, it is time
 to begin the variant calling.
 
-A - Variant calling
--------------------
+# A - Variant calling
+--------------------
 
-a - Mapping of the DNA reads: In this step, reads are aligned against
-the reference sequence using BWA mem algorithm
+## a - Mapping of the DNA reads
+
+In this step, reads are aligned against the reference sequence using BWA mem algorithm
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s a
 
@@ -49,7 +50,9 @@ the reference sequence using BWA mem algorithm
 -   STAT folder containing a .html file summarising statistics on
     libraries.
 
-b - Removing duplicates reads: In this step, read duplicates are removed
+## b - Removing duplicates reads
+
+In this step, read duplicates (resulting from PCR before sequencing) are removed.
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s b
 
@@ -60,8 +63,9 @@ b - Removing duplicates reads: In this step, read duplicates are removed
 -   \*\_rmdup.bai file (index of the bam file)
 -   \*\_duplicate file summarising read duplication statistics
 
-c - Removing duplicates reads: In this step, read are realigned around
-indels
+## c - Removing duplicates reads
+
+In this step, read are realigned around indels.
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s c
 
@@ -70,7 +74,9 @@ indels
 -   \*\_realigned.bam file reads realigned around indels
 -   \*\_realigned.bai file (index of the bam file)
 
-d - Base recalibration: In this step, reads base sequencing quality are
+## d - Base recalibration
+
+In this step, reads base sequencing quality are
 recalculated. **This step is recommended by GATK best practice but we do
 not recommend to use it if you use our pipeline.**
 
@@ -85,7 +91,9 @@ not recommend to use it if you use our pipeline.**
     recalibration (if no vcf have been provided)
 -   \*\_selected.vcf.idx file (index of the vcf file)
 
-e - Allele counting: In this step, reads are used to count for each
+## e - Allele counting
+
+In this step, reads are used to count for each
 covered sites the number of reads supporting each bases
 (A,T,G,C,N,\*=deletion).
 
@@ -97,7 +105,9 @@ Several new files have been added in each folders:
     provided as reference, the count of the number of reads supporting
     each bases (A,T,G,C,N,\*=deletion) at each covered site.
 
-f - Vcf generation: generate the vcf for all accessions in the
+## f - Vcf generation
+
+Generate the vcf for all accessions in the
 configuration file. **WARNING: The genotypes found in
 the output vcf are indicative and may not reflect the correct genotype!
 For example, only two allele are authorized in one genotype to gain
@@ -113,7 +123,9 @@ Several new files in the current directory:
 -   prefix\_\*\_all\_allele\_count.vcf file for each
     chromosomes/sequences in the fasta provided as reference.
 
-g - Vcf merging: generate a single vcf from all chromosome/sequences in
+## g - Vcf merging
+
+Generate a single vcf from all chromosome/sequences in
 the fasta provided as reference. This step is not needed here has only
 one sequence is passed but you can try the command line anyway ;-)
 
@@ -123,7 +135,9 @@ one sequence is passed but you can try the command line anyway ;-)
 
 -   prefix\_all\_allele\_count.vcf file
 
-h - Statistics: Compute mapping statistics
+## h - Statistics
+
+Compute mapping statistics.
 
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s h
 
@@ -142,8 +156,8 @@ Run the pipeline again (without step d)
     python3 ../bin/process_reseq_1.0.py -c ../data/config/DNAseq.conf -t 8 -p DNAseq -s abcefgh
 
 
-B - VCF prefiltering
---------------------
+# B - VCF prefiltering
+----------------------
 
 Once the variant calling is performed, it is now time to filter the
 calling. This is a necessary step with this pipeline because all variant
@@ -185,8 +199,8 @@ combinations of each alleles are tested and not only bi-allelic combination. In
 this case the computation time can be a lot more important if the ploidy level is
 high.
 
-C - VCF Filtering
------------------
+# C - VCF Filtering
+-------------------
 
 Sometime we want to filter the VCF to keep only calling for some accession,
 only biallelic sites, convert to unknown genotype data-point which are not
@@ -208,7 +222,7 @@ command line:
 When performing this filter, we only want to keep bi-allelique sites. In other
 word we want to remove mono-allelic, tri-allelic, tetra-allelic sites. However
 as there are two other type of variant state possible with our pipeline: unknown
-base (N) or deletion relative to reference (*) penta and hexa allelic state can
+base (N) or deletion relative to reference (\*) penta and hexa allelic state can
 also be possible we also need to remove these state. This can be done with the
 following option: *--RmAlAlt 1:3:4:5:6*.
 We also want to convert to missing data, all data-points which are too much covered

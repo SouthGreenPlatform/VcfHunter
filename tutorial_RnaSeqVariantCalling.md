@@ -38,7 +38,6 @@ it is time to begin the variant calling.
 ----------------------
 
 ## a - Reference indexation
-----------------------------
 
 Create an index for STAR RNAseq mapping
 
@@ -49,7 +48,6 @@ prefix+_ref_star\_1). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
 ## b - Identification of splicing sites
----------------------------------------
 
 During this step, all reads from
 all libraries are merged and aligned against the reference sequence
@@ -62,7 +60,6 @@ A file (prefix+"_JUNC_ESTIMATION_SJ.out.tab") containing the splicing
 sites is generated
 
 ## c - Reference indexation
----------------------------
 
 This time the reference is indexed but with the splicing site information identified with previous step
 
@@ -73,7 +70,6 @@ prefix+_ref_star_2). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
 ## d - Read mapping
--------------------
 
 Reads are aligned against the reference sequence using STAR software. Read are indexed one library after the other.
 
@@ -91,7 +87,6 @@ containing a file named prefix + "\_mapping.tab" which summarise mapping
 statistics for all accessions.
 
 ## e - Read merging and ordering
---------------------------------
 
 Reads from different libraries but the same accessions are merged and sorted on coordinates.
 
@@ -104,7 +99,6 @@ Several new files have been added in each folders:
 -   \*_merged.bai files (index of the bam file)
 
 ## f - Removing duplicates reads
---------------------------------
 
 In this step, read duplicates (resulting from PCR before sequencing) are removed.
 
@@ -121,7 +115,6 @@ option. This file named prefix + "*rmdup*stat.tab" contained duplicates
 statistics for all accessions.
 
 ## g - Bam reordering
----------------------
 
 In this step reads are reordered in bam files. This is necessary for subsequent steps.
 
@@ -134,7 +127,6 @@ In this step reads are reordered in bam files. This is necessary for subsequent 
 -   \*_reorder.bai file (index of the bam file)
 
 ## h - Reads splitting
-----------------------
 
 In this step, reads are split on splicing sites
 
@@ -146,7 +138,6 @@ In this step, reads are split on splicing sites
 -   \*_trim.bai file (index of the bam file)
 
 ## i - Indel realignment
-------------------------
 
 In this step, reads realigned around indels. Countrary to **process\_reseq** a vcf on known
 indel could not be provided. It will be implemented in future...
@@ -159,7 +150,6 @@ indel could not be provided. It will be implemented in future...
 -   \*_realigned.bai file (index of the bam file)
 
 ## j - Allele counting
-----------------------
 
 In this step, reads are used to count for each covered sites the number of reads supporting
 each bases (A,T,G,C,N,\*=deletion).
@@ -173,7 +163,6 @@ Several new files have been added in each folders:
     each bases (A,T,G,C,N,\*=deletion) at each covered site.
 
 ## k - Vcf generation
-----------------------
 
 Generate the vcf for all accessions in the configuration file
 
@@ -185,7 +174,6 @@ Several new files in the current directory:
     chromosomes/sequences in the fasta provided as reference.
 
 ## l - Vcf merging
-------------------
 
 Generate a single vcf from all chromosome/sequences in
 the fasta provided as reference. This step is not needed here has only
@@ -198,7 +186,6 @@ one sequence is passed but you can try the command line anyway ;-)
 -   prefix_all_allele_count.vcf file
 
 ## m - Exon coverage
---------------------
 
 Calculate for each gene filled in the gff file passed
 in the configuration file and for each accessions, the proportion of the
@@ -286,9 +273,9 @@ command line:
 When performing this filter, we only want to keep bi-allelique sites. In other
 word we want to remove mono-allelic, tri-allelic, tetra-allelic sites. However
 as there are two other type of variant state possible with our pipeline: unknown
-base (N) or deletion relative to reference (*) penta and hexa allelic state can
+base (N) or deletion relative to reference (\*) penta and hexa allelic state can
 also be possible we also need to remove these state. This can be done with the
-following option: *--RmAlAlt 1:3:4:5:6.*
+following option: *--RmAlAlt 1:3:4:5:6*.
 We also want to convert to missing data, all data-points which are too much covered
 (probably resulting from repeat sequences and thus being multiloci) and those who
 are not enough covered (in which variant calling may be approximative). This can be
