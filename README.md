@@ -86,7 +86,7 @@ fastq files and returns a bam file for each accessions and a final VCF
 file containing alleles count at each variant site having at least one
 variant allele supported by at least one read.
 
-![](/images/Process_RNAseq.png)
+![](/images/Process_RNASeq.png)
 
 #### Options:
 
@@ -192,7 +192,7 @@ computation time. This program must be used in conjunction with**
 a variant calling on a selected set of polymorph markers based on user
 specification.**
 
-![](/images/Process_ReSeq_Fig1.png)
+![](/images/AllelePropAndCov_Fig1.png)
 
 #### Options:
 
@@ -435,34 +435,33 @@ sites.
     analysis is performed in several steps.
 
 1- First the vcf file is recoded as followed: For each allele at
- each variants site two markers were generated; One marker for the
- presence of the allele (0/1 coded) and one for the absence of the
- allele (0/1 coded).
- 
- ![](/images/Vcf2struct_Fig1.png)
- 
- Only alleles present or absent in **part** (not all) of selected
- accessions were included in the final matrix file.
- 
- If groups information was passed to the script, alleles groups were
- attributed based on the following rule: the allele is attributed to
- a group if it is only present in this group but not in other defined
- groups. If no grouping information the GROUP column is filled with
- UN value. This grouping value **doesn't have any influence on the
- analysis**, it only allows to add colors graphs drawn. It will also
- help to validate if the structure of your data correspond to the one
- you suspect.
- 
+each variants site two markers were generated; One marker for the
+presence of the allele (0/1 coded) and one for the absence of the
+allele (0/1 coded).
+
+![](/images/Vcf2struct_Fig1.png)
+
+Only alleles present or absent in **part** (not all) of selected
+accessions were included in the final matrix file.
+
+If groups information was passed to the script, alleles groups were
+attributed based on the following rule: the allele is attributed to
+a group if it is only present in this group but not in other defined
+groups. If no grouping information the GROUP column is filled with
+UN value. This grouping value **doesn't have any influence on the
+analysis**, it only allows to add colors graphs drawn. It will also
+help to validate if the structure of your data correspond to the one
+you suspect.
+
 2- The factorial analysis was performed on the transposed matrix
- using R. Graphical outputs of the analysis were draw and for example
- accessions and alleles can be projected along axis in the following
- picture.
- 
- ![](/images/Vcf2struct_Fig2.png)
- 
- 
- In this example allele projected along synthetic axis were colored
- if group informations were passed to the program.
+using R. Graphical outputs of the analysis were draw and for example
+accessions and alleles can be projected along axis in the following
+picture.
+
+[](/images/Vcf2struct_Fig2.png)
+
+In this example allele projected along synthetic axis were colored
+if group informations were passed to the program.
 
 *Options:*
 
@@ -475,10 +474,10 @@ sites.
 	 unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca
 	 drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)
 	Optional and dependent parameters:
-	--dGroup: If passed, all alleles belonging to groups passed to this option will be removed.
-	--mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the
+    --dGroup: If passed, all alleles belonging to groups passed to this option will be removed.
+    --mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the
 	 filter will be performed on this column, else it will be performed on the GROUP one.
-	
+
 *Outputs:*
 
 **\*_axis***X***_vs_***Y***_accessions.pdf:** Several pdf files showing accessions projected along X and Y axis.
