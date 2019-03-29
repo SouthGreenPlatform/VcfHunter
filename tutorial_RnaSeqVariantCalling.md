@@ -86,7 +86,7 @@ Reads are aligned against the reference sequence using STAR software. Read are i
 containing a file named prefix + "\_mapping.tab" which summarise mapping
 statistics for all accessions.
 
-### e - Read merging and ordering.
+### e - Read merging and ordering
 
 Reads from different libraries but the same accessions are merged and sorted on coordinates.
 
@@ -98,7 +98,7 @@ Several new files have been added in each folders:
     of one accession.
 -   \*_merged.bai files (index of the bam file)
 
-### f - Removing duplicates reads.
+### f - Removing duplicates reads
 
 In this step, read duplicates (resulting from PCR before sequencing) are removed.
 
@@ -114,7 +114,9 @@ An additional file was created in the folder named as passed to -p
 option. This file named prefix + "*rmdup*stat.tab" contained duplicates
 statistics for all accessions.
 
-g - Bam reordering: In this step, is necessary for subsequent steps
+### g - Bam reordering
+
+In this step reads are reordered in bam files. This is necessary for subsequent steps.
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s g
 
@@ -124,7 +126,9 @@ g - Bam reordering: In this step, is necessary for subsequent steps
     sequences are provided in the multifasta
 -   \*_reorder.bai file (index of the bam file)
 
-h - Reads splitting: In this step, reads are splitted on splicing sites
+### h - Reads splitting
+
+In this step, reads are split on splicing sites
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s h
 
@@ -133,9 +137,10 @@ h - Reads splitting: In this step, reads are splitted on splicing sites
 -   \*_trim.bam file containing splitted reads
 -   \*_trim.bai file (index of the bam file)
 
-i - Indel realigment: In this step, reads realigned around indels.
-Countrary to **process\_reseq** a vcf on known indel could not be
-provided. It will be implemented in futur...
+### i - Indel realigment
+
+In this step, reads realigned around indels. Countrary to **process\_reseq** a vcf on known
+indel could not be provided. It will be implemented in future...
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s i
 
@@ -144,9 +149,10 @@ provided. It will be implemented in futur...
 -   \*_realigned.bam file containing realigned reads
 -   \*_realigned.bai file (index of the bam file)
 
-j - Allele counting: In this step, reads are used to count for each
-covered sites the number of reads supporting each bases
-(A,T,G,C,N,\*=deletion).
+### j - Allele counting
+
+In this step, reads are used to count for each covered sites the number of reads supporting
+each bases (A,T,G,C,N,\*=deletion).
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s j
 
