@@ -86,7 +86,7 @@ fastq files and returns a bam file for each accessions and a final VCF
 file containing alleles count at each variant site having at least one
 variant allele supported by at least one read.
 
-![](/images/Process_RNASeq.png)
+![](/images/Process_RNAseq.png)
 
 #### Options:
 
@@ -458,7 +458,7 @@ using R. Graphical outputs of the analysis were draw and for example
 accessions and alleles can be projected along axis in the following
 picture.
 
-[](/images/Vcf2struct_Fig2.png)
+![](/images/Vcf2struct_Fig2.png)
 
 In this example allele projected along synthetic axis were colored
 if group informations were passed to the program.
