@@ -37,34 +37,41 @@ it is time to begin the variant calling.
 A - Variant calling
 -------------------
 
-a - Reference indexation: Create an index for STAR RNAseq mapping
+### a - Reference indexation
+
+Create an index for STAR RNAseq mapping
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s a
 
 1 folder is created in the current directory (name =
-prefix+*ref*star\_1). This folder contains index constructed and used by
+prefix+_ref_star\_1). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
-b - Identification of splicing sites. During this step, all reads from
+### b - Identification of splicing sites
+
+During this step, all reads from
 all libraries are merged and aligned against the reference sequence
 which allowed STAR to identify splicing sites which will be used to
 build a new index (step c) taking in account the splicing site.
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s b
 
-A file (prefix+"*JUNC*ESTIMATION\_SJ.out.tab") containing the splicing
+A file (prefix+"_JUNC_ESTIMATION_SJ.out.tab") containing the splicing
 sites is generated
 
-c - Reference indexation: with the splicing site information
+### c - Reference indexation
+
+This time the reference is indexed but with the splicing site information identified with previous step
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s c
 
 1 folder is created in the current directory (name =
-prefix+*ref*star\_2). This folder contains index constructed and used by
+prefix+_ref_star_2). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
-d - Read mapping: Reads are aligned against the reference sequence using
-STAR software
+### d - Read mapping
+
+Reads are aligned against the reference sequence using STAR software. Read are indexed one library after the other.
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s d
 
@@ -79,8 +86,9 @@ STAR software
 containing a file named prefix + "\_mapping.tab" which summarise mapping
 statistics for all accessions.
 
-e - Read merging and ordering: Reads from different libraries but the
-same accessions are merged and sorted on coordinate.
+### e - Read merging and ordering.
+
+Reads from different libraries but the same accessions are merged and sorted on coordinates.
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s e
 
@@ -90,7 +98,9 @@ Several new files have been added in each folders:
     of one accession.
 -   \*_merged.bai files (index of the bam file)
 
-f - Removing duplicates reads: In this step, read duplicates are removed
+### f - Removing duplicates reads.
+
+In this step, read duplicates (resulting from PCR before sequencing) are removed.
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s f
 
