@@ -1,11 +1,11 @@
 Purpose of VcfHunter
 ====================
 
-VcfExplorer regroups several programs which principale aims are to map
-RNAseq data onto reference genome sequence, perform variant calling,
+VcfExplorer regroups several programs which principal aims are to map
+DNA and RNAseq data onto reference genome sequence, perform variant calling,
 manipulate vcf files, perform chromosome painting of accessions based
-on the contribution of ancestral groups and select marker for genetic
-map analysis.
+on the contribution of ancestral groups, select marker for genetic
+map analysis and perform pairwise chromosome linkage of ordered markers.
 <br><br><br>
 
 Installation
@@ -86,13 +86,13 @@ fastq files and returns a bam file for each accessions and a final VCF
 file containing alleles count at each variant site having at least one
 variant allele supported by at least one read.
 
-![](http://banana-genome-http.cirad.fr/image/Process_RNAseq.png)
+![](/images/Process_RNAseq.png)
 
 #### Options:
 
     --conf: A configuration file containing path to references sequence (multifasta file) and RNAseq reads (fastq files).
     --thread: Number of processor to use (i.e. Max number of accessions treated at the same time). Do not exceed the number of processors available! [default: 1] 
-    --queue: If you are using SGE sheduler: the queue name for the job to perform parallelisation. If not do not fill.
+    --queue: If you are using SGE scheduler: the queue name for the job to perform parallelization. If not do not fill.
     --prefix: Prefix for vcf file and statistics folders.
     --steps: A string containing steps to perform:
         a: STAR indexing reference,
@@ -128,7 +128,7 @@ followed:
 
 #### Output:
 
-**Warning:** This program need to create a .dict and a .fai file un the
+**Warning:** This program need to create a .dict and a .fai file in the
 folder were the reference sequence is stored if they do not already
 exist. Make sure that you have right to write in this folder!
 
@@ -145,7 +145,7 @@ the output of the preceding one.
 -   **step d:** generates a folder for each accession, (names filled in
     column 3 "genome_name") filled in the configuration file, which
     contained the sam files of aligned reads and a .final.out file of
-    mapping statistice for each libraries. In addition a (--prefix)
+    mapping statistic for each libraries. In addition a (--prefix)
     folder containing a mapping statistics file (--prefix + mapping.tab)
     for all accession is generated.
 -   **step e:** generates a merged bam (\*_merged.bam) and bai
@@ -155,9 +155,9 @@ the output of the preceding one.
     with duplicated reads removed. In addition, a file named (--prefix +
     rmdup*stat.tab) file containing duplicate statistics for each
     accessions was generated in the (--prefix) folder.
--   **step g:** generates a reodered (\*_reorder.bam) and bai
+-   **step g:** generates a reordered (\*_reorder.bam) and bai
     (\*_reorder.bai) files for each accessions,
--   **step h:** generates a splitted and trimmed (on splicing sites) bam
+-   **step h:** generates a split and trimmed (on splicing sites) bam
     (\*_trim.bam) and bai (\*_trim.bai) files for each accessions,
 -   **step i:** generates a bam (\*_realigned.bam) and bai
     (\*_realigned.bai) files realigned around indel for each
@@ -171,7 +171,7 @@ the output of the preceding one.
     each accession the number of reads supporting each allele. For each
     accession in the vcf a genotype (GT tag) was called based on a
     binomial test, allelic depth was counted (AD tag) and total depth
-    was rapported (DP tag),
+    was reported (DP tag),
 -   **step l:** generates a uniq vcf file (--prefix +
     "*all*allele_count.vcf") resulting in the concatenation of all vcf
     files generated at step k,
@@ -192,13 +192,13 @@ computation time. This program must be used in conjunction with**
 a variant calling on a selected set of polymorph markers based on user
 specification.**
 
-![](http://banana-genome-http.cirad.fr/image/Process_ReSeq_Fig1.png)
+![](/images/Process_ReSeq_Fig1.png)
 
 #### Options:
 
     --conf: A configuration file containing path to references sequence (multifasta file) and RNAseq reads (fastq files).
     --thread: Max number of accessions treated at the same time. Do not exceed the number of processors available! [default: 1] 
-    --queue: If you are using SGE sheduler: the queue name for the job to perform parallelisation. If not do not fill.
+    --queue: If you are using SGE scheduler: the queue name for the job to perform parallelization. If not do not fill.
     --prefix: Prefix for vcf file and statistics folders.
 	--chrom: Chromosomes to work with (only for step f). If "all" : all chromosomes will be used for calling. Otherwise : a list of chromosome names separated by ":" [Default:all]
     --steps: A string containing steps to perform:
@@ -237,7 +237,7 @@ the output of the preceding one.
     contained the bam (\*_merged.bam) and bai (\*_merged.bai) files of
     aligned reads, a .stat file generated for each libraries with
     **samtools stat** program and a STAT folder containing a html files
-    summarising mapping statistics,
+    summarizing mapping statistics,
 -   **step b:** generates a bam (\*_rmdup.bam) and bai (\*_rmdup.bai)
     files for each accessions with duplicated reads removed. In addition
     in each folder duplicate statistics wer recorder in a file named
@@ -256,7 +256,7 @@ the output of the preceding one.
     on reads supporting a variant) and each accession the number of
     reads supporting each allele. For each accession in the vcf a
     genotype (GT tag) was called based on a binomial test, allelic depth
-    was counted (AD tag) and total depth was rapported (DP tag),
+    was counted (AD tag) and total depth was reported (DP tag),
 -   **step g:** generates a uniq vcf file resulting in the
     concatenation of all vcf files generated at step g,
 -   **step h:** generates two files (\*_acc.stats and \*_lib.stats)
@@ -270,7 +270,7 @@ This script filter VCF file generated by Process_RNAseq.1.0.py by
 removing homozygous sites for all accessions based on accession minimal
 and maximal coverage, accession minimal allele coverage and frequency
 parameters passed. The idea of this tool is to filter out variant lines
-resulting from sequencing errors. Filter are applicated as followed:
+resulting from sequencing errors. Filter are performed as follows:
 
 -   only data points covered by at least "minimal coverage" reads were
     considered,
@@ -293,7 +293,7 @@ resulting from sequencing errors. Filter are applicated as followed:
     --MaxCov: Maximal read coverage for site. [Default: 1000]
     --minFreq: Minimal allele frequency in an accession to keep the allele for calling in the row
     --MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: 3]
-	--dial: Perform only a diallelic calling. i.e Only two allele are possible in a genotype if "y" is passed to this argument. Possible values "y" or "n". [Default: y]
+	--dial: Perform only a bi-allelic calling. i.e Only two allele are possible in a genotype if "y" is passed to this argument. Possible values "y" or "n". [Default: y]
     --out: Prefix for output files. [Default: Pop]
 	--outgzip: Output files in gzip format. [Default: n]
 <br><br>
@@ -301,7 +301,7 @@ resulting from sequencing errors. Filter are applicated as followed:
 ### vcf2struct.1.0.py
 
 This program has been designed to perform statistics, filter, manipulate
-vcf files as well as analysing the mosaique structure of genomes.
+vcf files as well as analyzing the mosaic structure of genomes.
 
 #### Mandatory Options:
 
@@ -354,7 +354,8 @@ of the first vcf
 ***\*_general.stat:*** A file containing vcf global statistics such as
 number of indel and SNP sites, number of different tags in the FILTER
 columns, number of sites with 1,2,3,4, ... variants, number of
-transitions, transversions and variant in annotated regions.\
+transitions, transversions and variant in annotated regions.
+
 ***\*_accession.stat:*** A file containing for each accessions missing
 data number, number of alleles specific to this accession in the vcf,
 number of homozygous sites identical to the reference, number of
@@ -362,7 +363,7 @@ homozygous sites different from the reference and number of heterozygous
 sites.
 
 -   **FILTER:** Filter a vcf file based on several parameters such as
-    datapoint coverage and allele coverage, number of variant and
+    data point coverage and allele coverage, number of variant and
     variant type.
 
 *Options:*
@@ -378,7 +379,7 @@ sites.
 	 genotype will be converted to unknown for the concerned accession. [Default: 3]
     --nMiss: Maximal number of missing genotype in a line to keep the line (integer). [Default: 0]
     --RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be
-	 passed and should be sepatated by ":"). Values: 1,2,3,...,n
+	 passed and should be separated by ":"). Values: 1,2,3,...,n
     --RmType: (optional) Variant status to filter out (several values can be passed in this case they should be separated by ":"). 
         Possible values: 
             *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
@@ -407,7 +408,7 @@ sites.
 *Outputs:* Print to standard output statistics on the comparison.
 
 -   **ADD\_REF:** Add a haploid accession corresponding to the reference
-    to the vcf called ref\_silico\_call.
+    to the vcf called ref_silico_call.
 
 *Options:*
 
@@ -417,7 +418,7 @@ sites.
 
 *Outputs:*
 
-***\*_add_ref.vcf:*** A new vcf file in which the reference has been added as an haploid accession.
+***\*_add_ref.vcf:*** A new vcf file in which the reference has been added as an haploid accession named ref_silico_call.
 
 -   **AL_IDENTITY:** Calculate genotype identity.
 
@@ -431,17 +432,18 @@ sites.
 ***\*_ident.mat:*** A matrix containing genotype pairwise identity.
 
 -   **FACTORIAL:** Perform factorial analysis on the vcf file. This
-    analysis is performed in several steaps.
+    analysis is performed in several steps.
 
 1- First the vcf file is recoded as followed: For each allele at
  each variants site two markers were generated; One marker for the
  presence of the allele (0/1 coded) and one for the absence of the
  allele (0/1 coded).
  
- ![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig1.png)
+ ![](/images/Vcf2struct_Fig1.png)
  
  Only alleles present or absent in **part** (not all) of selected
- accessions were included in the final matrix file.\
+ accessions were included in the final matrix file.
+ 
  If groups information was passed to the script, alleles groups were
  attributed based on the following rule: the allele is attributed to
  a group if it is only present in this group but not in other defined
@@ -456,10 +458,10 @@ sites.
  accessions and alleles can be projected along axis in the following
  picture.
  
- ![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig2.png)
+ ![](/images/Vcf2struct_Fig2.png)
  
  
- In this example allele projected along synthetic axis were colorated
+ In this example allele projected along synthetic axis were colored
  if group informations were passed to the program.
 
 *Options:*
@@ -472,30 +474,34 @@ sites.
     --group: (optional) A file containing two sections: A section[group] with in col 1 accession name ; col 2 group (UN for
 	 unknown group). All group should be in capital letters. A section [color], that define for each group a color for pca
 	 drawing (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1)
-	Optional and dependant parameters:
+	Optional and dependent parameters:
 	--dGroup: If passed, all alleles belonging to groups passed to this option will be removed.
 	--mat: Matrix of grouped alleles (with either a GROUP or a K-mean_GROUP column). If a K-mean_GROUP column is found, the
 	 filter will be performed on this column, else it will be performed on the GROUP one.
 	
 *Outputs:*
 
-**\*_axis***X***_vs_***Y***_accessions.pdf:** Several pdf files showing
-accessions projected along X and Y axis.\
-**\*_axis***X***_vs_***Y***.pdf:** Several pdf files showing accessions projected
-along X and Y synthetic axis in a first graph and allele projection
-along X and Y synthetic axis in a second graph.\
-***\*_inertia.pdf:*** A pdf files showing axis inertia.\
+**\*_axis***X***_vs_***Y***_accessions.pdf:** Several pdf files showing accessions projected along X and Y axis.
+
+**\*_axis***X***_vs_***Y***.pdf:** Several pdf files showing accessions projected along X and Y synthetic axis in a first graph and allele projection along X and Y synthetic axis in a second graph.
+
+***\*_inertia.pdf:*** A pdf files showing axis inertia.
+
 ***\*_matri_4_PCA.tab:*** A tabulated file of the recoded vcf file passed
-to R for the factorial analysis.\
-***\*_multivariate.R:*** The R script file passed to R to do the
-abalysis.\
-***\*_multivariate.Rout:*** The R script log file.\
+to R for the factorial analysis.
+
+***\*_multivariate.R:*** The R script file passed to R to do the analysis.
+
+***\*_multivariate.Rout:*** The R script log file.
+
 ***\*_individuals_coordinates.tab:*** A tabulated file of individuals
-coordinates along synthetic axis.\
+coordinates along synthetic axis.
+
 ***\*_variables_coordinates.tab:*** A tabulated file of allele coordinates
-along synthetic axis.\
+along synthetic axis.
+
 ***\*_variables_coordinates_scaled.tab:*** A tabulated file of allele scaled
-coordinates (colums centered and reduced) along synthetic axis.
+coordinates (columns centered and reduced) along synthetic axis.
 
 -   **SNP\_CLUST-Kmean:** Perform a k-mean clustering of allele based on
     their coordinates on synthetic axis. It uses the k-mean algorithm of
@@ -509,37 +515,41 @@ coordinates (colums centered and reduced) along synthetic axis.
     --mat: The *_matrix_4_PCA.tab tabulated file containing variant allele encoded generated by FACTORIAL.
     --prefix: The prefix for output files. [Default: WorkOnVcf]
     --thread: Number of processor available. [Default: 1]
-    --iter: Parallele k-mean clustering different startpoints performed. [Default: 100]
+    --iter: Parallel k-mean clustering different star-points performed. [Default: 100]
 	--AP: Cluster absent (A) and present (P) lines. Possible values, "y" or "n" [Default: y]
 
 *Outputs:*
 
-***\*_centroid_coordinates.tab:*** Coordinates of the distincts final
-centroides calculated for the X k-mean random starpoints.\
+***\*_centroid_coordinates.tab:*** Coordinates of the distinct final
+centroids calculated for the X k-mean random star-points.
+
 ***\*_centroid_iteration_grouping.tab:*** A tabulated file indicating
-centroid group attribution.\
+centroid group attribution.
+
 ***\*_kMean_allele.tab:*** A tabulated file equivalent to
-*\*_matrix_4_PCA.tab* in which an column (named K-mean\_GROUP) containing
-k-mean allele grouping has been added.\
+*\*_matrix_4_PCA.tab* in which an column (named K-mean_GROUP) containing
+k-mean allele grouping has been added.
+
 ***\*_group_color.tab:*** Color file in which a RGB color as been
 attributed to each k-mean cluster group. This file can be used for
-VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.\
+VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.
+
 ***\*_kMean_gp\_prop.tab:*** A tabulated file reporting for each allele the
 probability to be in each groups. This is not a "real" probability, the
 idea was to have a statistics in case you want to filter alleles. This
-value was calculated as the inverse of the euclidian distance of one
+value was calculated as the inverse of the euclidean distance of one
 point and each centroids and these values were normalized so that the
 sum is equal to 1.
 
 -   **SNP\_CLUST-MeanShift:** Perform a clustering using the MeanShift
     algorithm of scikit-learn of allele based on their coordinates on
-    synthetic axis.\
+    synthetic axis.
 
 *Options:*
 
     --VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
     --dAxes: Axes to use in mean shift clustering. Axis should be separated by ":".
-    --quantile: The quantile value to estimate de bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: 0.2]
+    --quantile: The quantile value to estimate the bandwidth parameters used in the MeanShift. Value should be in [0:1]. [Default: 0.2]
     --mat: The *_matrix_4_PCA.tab tabulated file containing variant allele encoded generated by FACTORIAL.
     --prefix: The prefix for output files. [Default: WorkOnVcf]
     --thread: Number of processor available. [Default: 1]
@@ -549,29 +559,25 @@ sum is equal to 1.
 
 *Outputs:*
 
-***\*_centroid_coordinates.tab:*** Coordinates of centroides calculated.\
-***\*_centroid_iteration_grouping.tab:*** A tabulated file indicating
-centroid group attribution.\
-***\*_kMean_allele.tab:*** A tabulated file equivalent to
-*\*_matrix_4_PCA.tab* in which an column (named K-mean\_GROUP) containing
-k-mean allele grouping has been added.\
-***\*_group_color.tab:*** Color file in which a RGB color as been
-attributed to each k-mean cluster group. This file can be used for
-VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.\
-***\*_kMean_gp_prop.tab:*** A tabulated file reporting for each allele the
-probability to be in each groups. This is not a "real" probability, the
-idea was to have a statistics in case you want to filter alleles. This
-value was calculated as the inverse of the euclidian distance of one
-point and each centroids and these values were normalized so that the
-sum is equal to 1.
+***\*_centroid_coordinates.tab:*** Coordinates of centroids calculated.
+
+***\*_centroid_iteration_grouping.tab:*** A tabulated file indicating centroid group attribution.
+
+***\*_kMean_allele.tab:*** A tabulated file equivalent to *\*_matrix_4_PCA.tab* in which an column (named K-mean_GROUP) containing k-mean allele grouping has been added.
+
+***\*_group_color.tab:*** Color file in which a RGB color as been attributed to each k-mean cluster group. This file can be used for VISUALIZE_VAR_2D and VISUALIZE_VAR_3D tools.
+
+***\*_kMean_gp_prop.tab:*** A tabulated file reporting for each allele the probability to be in each groups. This is not a "real" probability, the
+idea was to have a statistics in case you want to filter alleles. This value was calculated as the inverse of the euclidian distance of one
+point and each centroids and these values were normalized so that the sum is equal to 1.
 
 -   **VISUALIZE_VAR_2D:** Perform plots of alleles projected along
-    synthetic axes.\
+    synthetic axes.
 
 *Options:*
 
     --VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
-    --dAxes: Axes to plot. Axis should be separated by ":". All conbination between axis will be drawn.
+    --dAxes: Axes to plot. Axis should be separated by ":". All combination between axis will be drawn.
     --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
     --group: (optional) A file containing at least the a section [color], that define for each group a color
 	 (in RGB+alpha percentage, ex: red=1:green=0:blue=0:alpha=0.1). This file can be the *_group_color.tab
@@ -592,7 +598,7 @@ grouped alleles projected along X and Y synthetic axes.
 *Options:*
 
     --VarCoord: The *_variables_coordinates.tab file generated by FACTORIAL.
-    --dAxes: 3 axes to plot. Axis should be separated by ":". All conbination between axis will be drawn.
+    --dAxes: 3 axes to plot. Axis should be separated by ":". All combination between axis will be drawn.
     --mat: The *_matrix_4_PCA.tab or *_kMean_allele.tab.
     --dGroup: Groups IDs to draw. Groups names should be separated by ":". Groups names will be searched in the
 	 file provided in --mat argument in the "K-mean_GROUP" column, and if such column is not present, they will
@@ -602,7 +608,7 @@ grouped alleles projected along X and Y synthetic axes.
 
 *Outputs:*
 
-Display to standard output an interractive plot.
+Display to standard output an interactive plot.
 
 -   **FILTER_ON_MAX_GP_PROP:** Filter the matrix file by removing
     ambiguous grouped alleles. *i.e.* alleles which changed of groups
@@ -617,9 +623,7 @@ Display to standard output an interractive plot.
 
 *Outputs:*
 
-***\*_kMean_allele_filtered_with_x_value.tab:*** A filtered
-file of \***_kMean_allele.tab** file in which ambiguous (according to --gpPropValue = x) alleles were
-removed.
+***\*_kMean_allele_filtered_with_x_value.tab:*** A filtered file of \***_kMean_allele.tab** file in which ambiguous (according to --gpPropValue = x) alleles were removed.
 
 -   **MERGE\_VCF:** Add an accession from a vcf to a second one vcf
     file. If the variant line is absent for the added accession, missing
@@ -704,7 +708,7 @@ chromosomes, the genotype (first of the two columns) and allele grouping
 ### vcf2linear.1.1.py (python3)
 
 This programs aims at performing a chromosome painting of accessions
-along chromosome based on the allele grouping correponding to the
+along chromosome based on the allele grouping corresponding to the
 ancestral groups. The idea is to search, for distinct regions (along the
 chromosomes) of the accession we want to study, the probability of an
 ancestral origin (homozygous or heterozygous). Because, distinct
@@ -715,10 +719,11 @@ be to calculate for each regions, the expected ancestral allele grouping
 proportion (based on ancestral accessions) and compare this value to the
 observed one. Because dataset can be small and/or representatives of
 ancestral group are very few, the expected ancestral allele grouping
-proportion can be difficult to estimate.\
+proportion can be difficult to estimate.
+
  This programs solves the problem by simulating ancestral population
 from accessions identified as representatives of the ancestral groups
-under panmixie hypothesis. For each ancestral populations a total of 100
+under panmixiea hypothesis. For each ancestral populations a total of 100
 individuals were simulated. The same was performed for hybrids between
 two populations. At the and of this simulation process mean and standard
 deviation of allele grouping proportions were calculated for each
@@ -726,43 +731,50 @@ ancestral group on sliding windows of size n overlapping of n-1. Because
 the simulation process and access to the simulation is a long process,
 we also implemented a function that estimated grouping proportions based
 on sums of binomial densities. The mean values estimated are exact but
-standard deviations are approximated.\
+standard deviations are approximated.
+
  These grouping proportions were then calculated on tested accessions
 and estimated proportion were used to calculate the ancestry probability
-as followed.\
+as followed.
 
-With:\
+With:
+
  ***Hmu***: Mean gX expected number for the group gX based on
-simulations on homozygous groups,\
+simulations on homozygous groups,
+
  ***Hsd***: Maximal standard deviation value calculated for all groups
-based on simulations on homozygous groups,\
+based on simulations on homozygous groups,
+
  ***Emu***: Mean gX expected number for the group gX based on
-simulations on heterozygous groups,\
+simulations on heterozygous groups,
+
  ***Esd***: Maximal standard deviation value calculated for all groups
-based on simulations on heterozygous groups,\
+based on simulations on heterozygous groups,
+
  ***Nmu***: Mean noisy allele grouped based on simulations (calculated
 as the number of alleles not from the right group according to the
-simulated population),\
- ***Nsd***: Noise standard deviation,\
- ***obs***: gX number observed for the accession on the window,\
- ***PgX***: Probability to be at least gX,\
- ***PgN***: Probability to be in the noise (unknown/additionnal
-ancestor),\
+simulated population),
+
+ ***Nsd***: Noise standard deviation,
+ 
+ ***obs***: gX number observed for the accession on the window,
+ 
+ ***PgX***: Probability to be at least gX,
+ 
+ ***PgN***: Probability to be in the noise (unknown/additional ancestor),
+
  ***N(x, mu, sd)***: Probability density function of the normal
 distribution for mean = *mu* and standard deviation = *sd*.
 
 -   probability to be homozygous for group gX:
     -   if *obs* ***superior or equal*** (*Hmu* - *Hsd*): *PgX* = 1
-    -   if *obs* ***inferior*** (*Hmu* - *Hsd*) : *PgX = N(obs, Hmu-Hsd,
-        Hsd)/N(Hmu-Hsd, Hmu-Hsd, Hsd)*
+    -   if *obs* ***inferior*** (*Hmu* - *Hsd*) : *PgX = N(obs, Hmu-Hsd, Hsd)/N(Hmu-Hsd, Hmu-Hsd, Hsd)*
 -   probability to be heterozygous for group gX:
     -   if *obs* ***superior or equal*** (*Emu* - *Esd*): *PgX* = 1
-    -   if *obs* ***inferior*** (*Emu* - *Esd*) : *PgX = N(obs, Emu-Esd,
-        Esd)/N(Emu-Esd, Emu-Esd, Esd)*
+    -   if *obs* ***inferior*** (*Emu* - *Esd*) : *PgX = N(obs, Emu-Esd, Esd)/N(Emu-Esd, Emu-Esd, Esd)*
 -   probability to be in the noise:
     -   if *obs* ***inferior or equal*** (*Nmu* + *Nsd*): *PgN* = 1
-    -   if *obs* ***superior*** (*Nmu* + *Nsd*): *PgN = N(obs, Emu+Esd,
-        Esd)/N(Emu+Esd, Emu+Esd, Esd)*
+    -   if *obs* ***superior*** (*Nmu* + *Nsd*): *PgN = N(obs, Emu+Esd, Esd)/N(Emu+Esd, Emu+Esd, Esd)*
 
 Genotype grouping at the window was then attributed based on the maximal
 probability and haplotypes representation was performed trying to
@@ -774,7 +786,7 @@ minimize the recombination events.
     --mat: A matrix file containing allele grouping with either "K-mean_GROUP" or "GROUP" columns, if "K-mean_GROUP" does not
 	 exists the "GROUP" column will be used. These files are those generated by FACTORIAL (*_matrix_4_PCA.tab), SNP_CLUST (*_kMean_allele.tab)
 	 or  FILTER_ON_MAX_GP_PROP (*_kMean_allele_filtered_with_x_value.tab).
-    --names: A one column file containing accession names to treat (it is not necessarilly thoses used in the Factorial analysis
+    --names: A one column file containing accession names to treat (it is not necessarily those used in the Factorial analysis
 	but they must share variant sites).
     --namesH: A two column file containing accession names used to simulate populations. 
     --chr: Chromosomes names to work with (each chromosome names should be separated by ":"). If not filled, all chromosomes will be used.
@@ -801,9 +813,9 @@ minimize the recombination events.
 	--FormerFolder: Folder containing previous chromosome painting. This chromosome painting will be used to better
 	estimate the expected number of alleles based on admixed accessions representative of a group. If only the ancestral
 	 group is found in the haplotypes of the admixed accessions (passed to --Ambiguous), the probability is calculated has
-	 the number of alleles of the groupe observed at this position. In others cases, the probability is still 1 if an alleles
+	 the number of alleles of the group observed at this position. In others cases, the probability is still 1 if an alleles
 	 of the group is observed.
-	--sdMult: Multiplicator of standard deviation for probability calculation of a segment to be of a group. [Default: 1]
+	--sdMult: Multiplier of standard deviation for probability calculation of a segment to be of a group. [Default: 1]
     --prefix: The prefix for output files. [Default: WorkOnVcf]
 
 *Output*
@@ -811,7 +823,7 @@ minimize the recombination events.
 A folder with the name passed in --prefix options which contained
 several files for each accessions and each chromosomes:
 
-**\*_Accession\_chromosome.tab:** A tabulated file with for each window
+**\*_Accession_chromosome.tab:** A tabulated file with for each window
 around a given position:
 
 -   1- the count of each grouped alleles *(as much columns as ancestral
@@ -824,7 +836,7 @@ around a given position:
     groups)*,
 -   4- the corresponding expected standard deviation *(as much column as
     ancestral groups)*,
--   5- the retained maximal standart deviation for only one ancestry,
+-   5- the retained maximal standard deviation for only one ancestry,
 -   6- the expected number of grouped alleles, for a given group, in
     case of two ancestral origin (heterozygous) *(as much columns as
     ancestral groups)*,
@@ -832,7 +844,7 @@ around a given position:
     origin (heterozygous) *(as much columns as ancestral groups)*,
 -   8- the corresponding expected standard deviation *(as much columns
     as ancestral groups)*,
--   9- the retained maximal standart deviation for two distinct ancestry
+-   9- the retained maximal standard deviation for two distinct ancestry
     ,
 -   10- the probability to have a single origin for the group X *(as
     much columns as ancestral groups)*,
@@ -843,18 +855,16 @@ around a given position:
     ancestral groups)*,
 -   14- expected noise standard deviation *(as much columns as ancestral
     groups)*,
--   15- the retained maximal noise standart deviation,
+-   15- the retained maximal noise standard deviation,
 -   16- accession noise probabilities *(as much columns as ancestral
     groups)*.\
 
-**Accession\_chromosome\_haplo1.tab:** A tabulated file listing grouped
-region bloacs for haplotype1\
- **Accession\_chromosome\_haplo2.tab:** A tabulated file listing grouped
-region bloacs for haplotype2\
- **Accession\_chromosome\_density.pdf:** A pdf file summarysing all
-statistics (heterozygosity, expected and observed ancestries along
-chromosomes, accessions ancestry probabilities and infered accession
-haplotypes)
+**Accession\_chromosome\_haplo1.tab:** A tabulated file listing grouped region blocs for haplotype1
+
+ **Accession\_chromosome\_haplo2.tab:** A tabulated file listing grouped region blocs for haplotype2
+
+ **Accession\_chromosome\_density.pdf:** A pdf file summarizing all statistics (heterozygosity, expected and observed ancestries along
+chromosomes, accessions ancestry probabilities and inferred accession haplotypes)
 <br><br>
 
 ### haplo2kar.1.0.py
@@ -897,7 +907,7 @@ for all selected accessions.
 
 *Output:*
 
- **\*\_chromosme\_X.pdf:** As much pdf file as necessary with
+ **\*_chromosme_X.pdf:** As much pdf file as necessary with
 chromosome painting for all chromosomes of this accession.
 <br><br>
 
@@ -920,17 +930,18 @@ painting for all selected accessions and chromosomes.
 *Output:*
 
  **\*.conf**: the configuration file used by circos.
-I choose to keep this file so that it can be edited to change aspect of
-the Figure if you want. After editing this file you will only have to
-run the following command line to have your new Figure : *circos -conf Circos\_All\_Admix.conf -noparanoid*\
-**\*\_housekeeping.conf**: a second file used by circos\
-**\*\.kar**: a third file also used by circos\
+I choose to keep this file so that it can be edited to change aspect of the Figure if you want. After editing this file you will only have to run the following command line to have your new Figure : *circos -conf Circos\_All\_Admix.conf -noparanoid*
+
+**\*\_housekeeping.conf**: a second file used by circos
+
+**\*\.kar**: a third file also used by circos
+
 **\*\.png**: the circos Figure
 <br><br>
 
 ### vcfFilter.1.0.py
 
-This program filter a vcf file based on several criterias. This
+This program filter a vcf file based on several criteria. This
 is a improved version of FILTER option of vcf2struct.1.0.py
 
 *Options:*
@@ -944,7 +955,7 @@ is a improved version of FILTER option of vcf2struct.1.0.py
             *Values which can be found in the FILTER column: PASS, DP_FILTER, QD_FILTER, SnpCluster, 
             *Other values: INDELS, SNP, AUTAPO (accession specific variant site).
     --RmAlAlt: (optional) Number of alleles at the site in filtered accessions to remove the variant site (several values can be
-	 passed and should be sepatated by ":"). Values: 1,2,3,...,n
+	 passed and should be separated by ":"). Values: 1,2,3,...,n
     --MinCov: Minimal coverage by accession to keep genotype calling (integer). If the value is lower, genotype will be converted to
 	 unknown for the concerned accession. [Default: 10]
     --MaxCov: Maximal coverage by accession to keep genotype calling (integer). If the value is greater, genotype will be converted to
@@ -964,7 +975,7 @@ is a improved version of FILTER option of vcf2struct.1.0.py
 ### vcf2allPropAndCov.py
 
 This program perform two things based on a vcf. 1) It plots for an
-accession, the allele coverage alongs its chromosomes. 2) It identify,
+accession, the allele coverage along its chromosomes. 2) It identify,
 based on known ancestral accessions in the vcf, the alleles specific to
 each groups and plot the alleles proportion at a site in the accession
 along chromosomes.
@@ -980,18 +991,21 @@ along chromosomes.
 
 *Output:*
 
- **\*Cov.png:** a png file presenting SNP coverage along the chromosomes.\
- **\*Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.\
- **\*_AlleleOriginAndRatio.tab:** a tabulated file repporting for each sites were an ancestral allele
+ **\*Cov.png:** a png file presenting SNP coverage along the chromosomes.
+ 
+ **\*Ratio.png:** a png file presenting ancestral allele proportion at a site along the chromosomes.
+ 
+ **\*_AlleleOriginAndRatio.tab:** a tabulated file reporting for each sites were an ancestral allele
 has been attributed, its origin and the proportion of reads supporting this allele. This files contains
-chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).\
- **\*_stats.tab:** a tabulated file repporting various statistics on the alleles of the accession.
+chromosome (col1), position (col2), allele (col3), ancestral origin (col4) and allele ratio (col5).
+
+ **\*_stats.tab:** a tabulated file reporting various statistics on the alleles of the accession.
 <br><br>
 
 ### vcf2allPropAndCovByChr.py
 
 This program perform two things based on a vcf. 1) It plots for a chromosome of all accessions in a vcf,
-the allele coverage alongs its chromosomes. 2) It identify,based on known ancestral accessions in the vcf,
+the allele coverage along its chromosomes. 2) It identify,based on known ancestral accessions in the vcf,
 the alleles specific to each groups and plot the alleles proportion at a site along chromosomes for all
 accessions.
 
@@ -1008,24 +1022,25 @@ accessions.
 
 *Output:*
 
- **prefix\_chromosomeN_X_Cov.png:** X png files presenting SNP coverage along chromosomeN.\
+ **prefix\_chromosomeN_X_Cov.png:** X png files presenting SNP coverage along chromosomeN.
+ 
  **prefix\_chromosomeN_X_Ratio.png:** X png files presenting ancestral allele proportion at a site along chromosomeN.
 <br><br>
 
 
 ### vcf2pop.1.0.py
 
-This program will select markers for genetical mapping
-analysis from a vcf file based on several criterias. It will
-outpout coded markers for two genetical mapping software
-(onemap and joinmap).
+This program will select markers for genetic mapping
+analysis from a vcf file based on several criteria. It will
+outpout coded markers for two genetic mapping software
+(onemap and JoinMap).
 
 *Options:*
 
     --vcf: The vcf file
-	--MinCov: Minimal read coverage for a marker in an accession (interger). If a lower value is
+	--MinCov: Minimal read coverage for a marker in an accession (integer). If a lower value is
 	 found data point is converted to missing. [Default: 10]
-	--MaxCov: Maximal read coverage for a marker in an accession (interger). If a greater value is
+	--MaxCov: Maximal read coverage for a marker in an accession (integer). If a greater value is
 	 found data point is converted to missing. [Default: 1000]
 	--WinFreq: Window for minority allele coverage frequency to be insufficient to call a
 	 heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if
@@ -1041,7 +1056,7 @@ outpout coded markers for two genetical mapping software
 			BiP: bi-parental cross. Expected segregation tested: 0.5/0.5 (parental markers) and 0.25/0.5/0.25 (bridge markers).
 			SELF: selfing population. Expected segregation tested: 0.25/0.5/0.25 (bridge markers).
 	--prefix: Prefix for output files. [Default: Pop]
-	--addcov: A tabulated file containing genotype of all markers passing filter is outputed.
+	--addcov: A tabulated file containing genotype of all markers passing filter is printed.
 	 If this option is passed, in addition to genotypes, alleles coverage information is also filled.
 		Possible values:
 			y: add this information
@@ -1055,41 +1070,54 @@ outpout coded markers for two genetical mapping software
 	--parent: (optional) Names of the parents of the population (separated by ":"). If passed,
 	 these names will be used to parse marker depending of there segregation and heterozygosity
 	 in the parents.
-	--NoUsed: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	--NoUsed: (optional) A tabulated file containing in one column, names of accessions to exclude from the
 	 filtration (based on missing data and p-value) but which will be kept in final files.
-	--exclude: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	--exclude: (optional) A tabulated file containing in one column, names of accessions to exclude from the
 	 analysis and the files.
 	--ref: (optional) The reference fasta file. If passed, a tag associated to the marker will be
-	 outpouted in a fasta file. This tag will contained 125 bases before the marker and 125 bases
+	 printed in a fasta file. This tag will contained 125 bases before the marker and 125 bases
 	 after.
 	--remove: (optional) For some programs, marker name length is limited. This option helps you to reduce marker
 	 names. By default marker name is "chromosome name"+"M"+"site position". A string can be passed
-	 that will be searched and removed from all marker name. This is not neccessary if your chromosome
+	 that will be searched and removed from all marker name. This is not necessary if your chromosome
 	 name is not to long.
 
 *Outputs:*
 
- **\*_JM_Bridge.loc:** A .loc file that can be passed to joinmap that contained bridge markers.\
- **\*_JM_*Parent*.loc:** Two .loc file that can be passed to joinmap that contained parent1 and
-parent2 markers respectively. Only if parent option is filled.\
- **\*_JM_unknown.loc:** A .loc file that can be passed to joinmap that contained unknown parent
-markers (missing data for both parents). Only if parent option is filled.\
- **\*_onemap_Bridge.tab:** A .tab file that can be passed to onemap that contained bridge markers.\
+ **\*_JM_Bridge.loc:** A .loc file that can be passed to JoinMap that contained bridge markers.
+ 
+ **\*_JM_*Parent*.loc:** Two .loc file that can be passed to JoinMap that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.
+
+ **\*_JM_unknown.loc:** A .loc file that can be passed to JoinMap that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.
+
+ **\*_onemap_Bridge.tab:** A .tab file that can be passed to onemap that contained bridge markers.
+ 
  **\*_onemap_*Parent*.tab:** Two .tab file that can be passed to onemap that contained parent1 and
-parent2 markers respectively. Only if parent option is filled.\
+parent2 markers respectively. Only if parent option is filled.
+
  **\*_onemap_unknown.tab:** A .tab file that can be passed to onemap that contained unknown parent
-markers (missing data for both parents). Only if parent option is filled.\
- **\*_tab_Bridge.tab:** A .tab file correponding to a simplified joinmap format that contained bridge markers.\
- **\*_tab_*Parent*.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
-parent2 markers respectively. Only if parent option is filled.\
- **\*_tab_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
-markers (missing data for both parents). Only if parent option is filled.\
- **\*_report.tab:** A file report.\
- **\*_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers
-(no filtering applied in this vcf).\
+markers (missing data for both parents). Only if parent option is filled.
+
+ **\*_tab_Bridge.tab:** A .tab file corresponding to a simplified JoinMap format that contained bridge markers.
+ 
+ **\*_tab_*Parent*.tab:** Two .tab file corresponding to a simplified JoinMap format that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.
+
+ **\*_tab_unknown.tab:** A .tab file corresponding to a simplified JoinMap format that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.
+
+ **\*_report.tab:** A report file.
+ 
+ **\*_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding to conserved markers
+(no filtering applied in this vcf).
+
  **\*.tab:** A file containing for aech selected marker, the genotype of each accessions based on filter applied.
-Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
- **\*.pdf:** A pdf file containing various statistics on the vcf filtrations. Only if --drawplot=y.\
+Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.
+
+ **\*.pdf:** A pdf file containing various statistics on the vcf filtrations. Only if --drawplot=y.
+ 
  **\*_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
 Only if --ref option is filled.
 <br><br>
@@ -1097,8 +1125,8 @@ Only if --ref option is filled.
 
 ### vcf2popNew.1.0.py
 
-This program will select markers for genetical mapping
-analysis from a vcf file based on several criterias including segregation
+This program will select markers for genetic mapping
+analysis from a vcf file based on several criteria including segregation
  ratio. It will outpout coded markers as requested by the user.
 
 *Options:*
@@ -1108,9 +1136,9 @@ analysis from a vcf file based on several criterias including segregation
 	 A segregation should look like as follows: Name:Parents:MarkerCoding:MarkerSegregation:PvalueForTest.
 	 With a real example: SimpleDose:P1,P2:Ho,He@nn,np:0.5,0.5:1e-5/Bridge:P1,P2:Ho,He,Ho@hh,hk,kk:0.25,0.5,0.25:1e-5
 	 (Ho for homozygous, He for heterozygous)
-	--MinCov: Minimal read coverage for a marker in an accession (interger). If a lower value is
+	--MinCov: Minimal read coverage for a marker in an accession (integer). If a lower value is
 	 found data point is converted to missing. [Default: 10]
-	--MaxCov: Maximal read coverage for a marker in an accession (interger). If a greater value is
+	--MaxCov: Maximal read coverage for a marker in an accession (integer). If a greater value is
 	 found data point is converted to missing. [Default: 1000]
 	--WinFreq: Window for minority allele coverage frequency to be insufficient to call a
 	 heterozygous but to high to call an homozygous (example: "0.05:0.1"). With the example if
@@ -1120,36 +1148,42 @@ analysis from a vcf file based on several criterias including segregation
 	--miss: Maximal missing data proportion in the progeny (Excluding parents) (between 0 and 1).
 	 greater missing proportion will result in removing the marker. [Default: 0.2]
 	--prefix: Prefix for output files. [Default: Pop]
-	--addcov: A tabulated file containing genotype of all markers passing filter is outputed.
+	--addcov: A tabulated file containing genotype of all markers passing filter is printed.
 	 If this option is passed, in addition to genotypes, alleles coverage information is also filled.
 		Possible values:
 			y: add this information
 			n: do not add this information
 		[default: n]
-	--NoUsed: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	--NoUsed: (optional) A tabulated file containing in one column, names of accessions to exclude from the
 	 filtration (based on missing data and p-value) but which will be kept in final files.
-	--exclude: (optional) A tabultated file containing in one column, names of accessions to exclude from the
+	--exclude: (optional) A tabulated file containing in one column, names of accessions to exclude from the
 	 analysis and the files.
 	--ref: (optional) The reference fasta file. If passed, a tag associated to the marker will be
-	 outpouted in a fasta file. This tag will contained 125 bases before the marker and 125 bases
+	 printed in a fasta file. This tag will contained 125 bases before the marker and 125 bases
 	 after.
 	--remove: (optional) For some programs, marker name length is limited. This option helps you to reduce marker
 	 names. By default marker name is "chromosome name"+"M"+"site position". A string can be passed
-	 that will be searched and removed from all marker name. This is not neccessary if your chromosome
+	 that will be searched and removed from all marker name. This is not necessary if your chromosome
 	 name is not to long.
 
 *Outputs:*
 
- **\*_tab_Bridge.tab:** A .tab file corresponding to a simplified JoinMap format that contained bridge markers.\
- **\*_tab\_***SegregationName_Parent***.tab:** Two .tab filecorreponding to a simplified joinmap format that contained parent1 and
-parent2 markers respectively. Only if parent option is filled.\
- **\*\_tab_unknown.tab:** A .tab file correponding to a simplified joinmap format that contained unknown parent
-markers (missing data for both parents). Only if parent option is filled.\
- **\*_report.tab:** A file report.\
- **\*_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding toconserved markers
-(no filtering applied in this vcf).\
- **\*.tab:** A file containing for aech selected marker, the genotype of each accessions based on filter applied.
-Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.\
+ **\*_tab_Bridge.tab:** A .tab file corresponding to a simplified JoinMap format that contained bridge markers.
+ 
+ **\*_tab\_***SegregationName_Parent***.tab:** Two .tab file corresponding to a simplified JoinMap format that contained parent1 and
+parent2 markers respectively. Only if parent option is filled.
+
+ **\*\_tab_unknown.tab:** A .tab file corresponding to a simplified JoinMap format that contained unknown parent
+markers (missing data for both parents). Only if parent option is filled.
+
+ **\*_report.tab:** A report file.
+ 
+ **\*_sub.vcf:** A sub vcf corresponding to the original vcf with only lines corresponding to conserved markers
+(no filtering applied in this vcf).
+
+ **\*.tab:** A file containing for each selected marker, the genotype of each accessions based on filter applied.
+Two additional values are added at the end of the file: the Khi-Square value and the P-value of the test.
+
  **\*_tags.fasta:** A fasta file containing marker tags (to align against another reference genome for example).
 Only if --ref option is filled.
 <br><br>
@@ -1176,8 +1210,9 @@ It can also calculate marker segregation distortion.
 
 *Output:*
 
- **_REC.tab:** A tabulated file of pairwise marker recombination rate (--setp R).\
- **_SegDist.tab:** A tabulated file of marker segragtion distortions (--setp S).
+ **_REC.tab:** A tabulated file of pairwise marker recombination rate (--setp R).
+ 
+ **_SegDist.tab:** A tabulated file of marker segregation distortions (--setp S).
 <br><br>
 
 
@@ -1201,7 +1236,8 @@ This program draw a dotplot based on marker pairwise recombination file obtained
 
 *Output:*
 
- A dotplot file representing pairwise marker linkage named according to --outpout option.\
+ A dotplot file representing pairwise marker linkage named according to --outpout option.
+ 
  A heatmap file representing pairwise statistic coding named according to --outpout option.
 <br><br>
 
@@ -1249,8 +1285,10 @@ T is common between the two accessions.
 
 *Output:*
 
- **\*.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.\
- **\*_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.\
- **\*_MoreThanHaplo.vcf:** The parsed vcf correponding to the complement of **\*_haplo.vcf**.
+ **\*.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.
+ 
+ **\*_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.
+ 
+ **\*_MoreThanHaplo.vcf:** The parsed vcf corresponding to the complement of **\*_haplo.vcf**.
 <br><br>
 
