@@ -189,7 +189,6 @@ def __main__():
 	picard = loca_programs.get('Programs','picard')
 	gatk = loca_programs.get('Programs','gatk')
 	python = loca_programs.get('Programs','python')
-	vcfConcat = loca_programs.get('Programs','vcfconcat')
 	
 	# Checking options
 	if options.keepUn != 'y' and options.keepUn != 'n':

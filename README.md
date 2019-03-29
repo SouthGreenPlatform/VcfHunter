@@ -14,9 +14,12 @@ Installation
 All proposed tools described here are written in python and work on
 linux system To install the tools:
 
-1.  unzip the tar.gz file with the following command line : tar -xvzf
-2.  open the loca\_programs.conf file
-3.  set the path to each programs required
+1.  Open the loca\_programs.conf file loacted in ***bin*** folder
+2.  Set the path to each required program. If the program is loaded in the
+environment (available in $PATH), the complete path is not required and
+then only program name can be set in loca\_programs.conf.
+For example if bwa is already loaded in the environment, put ***bwa = bwa***.
+If bam-readcound is not loaded in the environment put ***bamreadcount = /homedir/gmartin/Programmes/bam-readcount/bin/bam-readcount***
 <br><br><br>
 
 Dependencies
@@ -49,27 +52,27 @@ or
 Description
 -----------
 
-The package provided comprised 16 programs listed here:
+The package provided comprised 17 programs listed here:
 
--   process\_RNAseq.1.0.py (python3)
--   process\_reseq.1.0.py (python3)
--   VcfPreFilter.1.0.py (python3)
--   vcf2struct.1.0.py (python3)
--   vcf2linear.1.0.py (python3)
--   haplo2kar.1.0.py (python3)
--   haplo2karByChr.1.0.py (python3)
--   haplo2Circos.1.0.py (python3)
--   vcfFilter.1.0.py (python3)
--   vcf2allPropAndCov.py (python3)
--   vcf2pop.1.0.py (python3)
--   vcf2popNew.1.0.py (python3)
--   RecombCalculatorDDose.py (python3)
--   Draw_dot_plot.py (python3)
--   vcfIdent.1.0.py (python3)
--   vcfRemove.1.0.py (python3)
+-   process\_RNAseq.1.0.py (Martin et al., sub)
+-   process\_reseq.1.0.py (Garsmeur et al., 2018)
+-   VcfPreFilter.1.0.py (Garsmeur et al., 2018)
+-   vcfFilter.1.0.py (Garsmeur et al., 2018)
+-   vcf2pop.1.0.py (Garsmeur et al., 2018)
+-   vcf2popNew.1.0.py (Baurens et al., 2018)
+-   RecombCalculatorDDose.py (Baurens et al., 2018)
+-   Draw_dot_plot.py (Baurens et al., 2018)
+-   vcf2allPropAndCov.py (Baurens et al., 2018)
+-   vcf2allPropAndCovByChr.py (Baurens et al., 2018)
+-   vcf2struct.1.0.py (Martin et al., sub)
+-   vcf2linear.1.0.py (Martin et al., sub)
+-   haplo2kar.1.0.py (Martin et al., sub)
+-   haplo2karByChr.1.0.py (Martin et al., sub)
+-   haplo2Circos.1.0.py (Martin et al., sub)
+-   vcfIdent.1.0.py (Martin et al., sub)
+-   vcfRemove.1.0.py (Martin et al., sub)
 
-All 14 programs run using the following command: ~\~~ python program-name
-\<--options-name value\> ~\~~
+All 17 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
 
 Programs
@@ -1192,7 +1195,7 @@ given windows, that can be loaded to circos to perform a circular representation
 <br><br>
 
 
-### vcfIdent.1.0.py
+### vcfRemove.1.0.py
 
 This program remove alleles in a given accession if they are shared by a second accession. For Example, if an accession 
 in which we will remove allele is A/A/T and a second one which is the one that will be used to remove is A/A, the result 
