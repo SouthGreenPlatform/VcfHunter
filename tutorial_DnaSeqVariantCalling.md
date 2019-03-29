@@ -1,8 +1,9 @@
 Tutorial for VcfHunter
 ======================
 
-This tutorial go through all steps from variant calling from DNAseq
-to marker generation for genetic mapping.
+This tutorial go through all steps of DNA seq variant calling from read
+mapping to vcf filtration.
+
 ***VcfHunter tools***
 
 Go to the VcfHunter folder (Scripts can be run from any folder but the
@@ -18,8 +19,8 @@ sequence and a gff file containing the reference sequence annotation
 from each gene pool respectively). *data/config/* is a folder containing
 one configuration files needed for the DNAseq variant calling.
 
-A specific folder as been created to test the tools (*TestTools*). Go to
-this folder to run all command lines of this toolbox. But these tools
+A specific folder as been created to test the tools (*TestTools*). **Go to
+this folder to run all command lines of this toolbox**. But these tools
 can also be launched from everywhere you have permission to write, you
 will only have to change path to the configuration files.
 
@@ -34,12 +35,6 @@ to begin the variant calling.
 
 A - Variant calling
 -------------------
-
-Because different mapping tools are needed to perfom the mapping
-depending on the type of data (DNA), two different pipeline
-shoold be use for read mapping and post mapping processing.
-
-### Variant calling
 
 a - Mapping of the DNA reads: In this step, reads are aligned against
 the reference sequence using BWA mem algorithm
@@ -163,7 +158,7 @@ launched as followed:
 
     python3 ../bin/VcfPreFilter.1.0.py -v DNAseq_all_allele_count.vcf -m 10 -M 10000 -f 0.05 -c 3 -o DNAseq_prefiltered.vcf -d y
 
-The outpout is a vcf file (named as filled in -o option) in which the
+The output is a vcf file (named as filled in -o option) in which the
 variant line are filtered as followed:
 
 -   1 - an accession of a variant line is considered only if its site
@@ -181,7 +176,7 @@ selected alleles (even accessions which are not enough covered according
 our parameters will have a genotype). An additional tag (GC) is added in
 the FORMAT column of the VCF. This tag is calculated as followed :
 (best genotype probability)/(second best genotype probability) and give an
-idea of the quality of the calling at the datapoint.
+idea of the quality of the calling at the data point.
 Two "types" of genotypes can be called: if the ***-d y*** option is passed (default),
 only two alleles are authorized in a genotype (*ie* a triploid accession cannot
 be 0/1/2). This gain computation time but genotype can be erroneous if divergent
@@ -194,7 +189,7 @@ C - VCF Filtering
 -----------------
 
 Sometime we want to filter the VCF to keep only calling for some accession,
-only diallelic sites, convert to unknown genotype data-point which are not
+only biallelic sites, convert to unknown genotype data-point which are not
 sufficiently covered, remove variant sites with too much missing data, ...
 The purpose of the following script is to perform those filter. As there are
 several filtering options possible, we will show an example of filtering that
@@ -210,7 +205,7 @@ command line:
 
     head -n 1000 DNAseq_prefiltered.vcf | grep "#CHROM" | sed 's/\t/\n/g' | tail -n +10 > all_names.tab
 
-When performing this filter, we only want to keep di-allelique sites. In other
+When performing this filter, we only want to keep bi-allelique sites. In other
 word we want to remove mono-allelic, tri-allelic, tetra-allelic sites. However
 as there are two other type of variant state possible with our pipeline: unknown
 base (N) or deletion relative to reference (*) penta and hexa allelic state can
@@ -233,7 +228,7 @@ Now we run the analysis:
  
     python3 ../bin/vcfFilter.1.0.py --vcf DNAseq_prefiltered.vcf --names all_names.tab --MinCov 10 --MaxCov 300 --MinAl 3 --nMiss 1 --RmAlAlt 1:3:4:5:6 --prefix DNAseq_Filtered -g y
 
-The outpout is a vcf file (named ***DNAseq_Filtered_filt.vcf.gz***) in which the
+The output is a vcf file (named ***DNAseq_Filtered_filt.vcf.gz***) in which the
 variant line have been filtered.
 
 
