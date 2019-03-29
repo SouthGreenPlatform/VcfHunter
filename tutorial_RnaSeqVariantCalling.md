@@ -37,7 +37,8 @@ it is time to begin the variant calling.
 A - Variant calling
 -------------------
 
-### a - Reference indexation
+a - Reference indexation
+------------------------
 
 Create an index for STAR RNAseq mapping
 
@@ -47,7 +48,8 @@ Create an index for STAR RNAseq mapping
 prefix+_ref_star\_1). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
-### b - Identification of splicing sites
+b - Identification of splicing sites
+------------------------------------
 
 During this step, all reads from
 all libraries are merged and aligned against the reference sequence
@@ -59,7 +61,8 @@ build a new index (step c) taking in account the splicing site.
 A file (prefix+"_JUNC_ESTIMATION_SJ.out.tab") containing the splicing
 sites is generated
 
-### c - Reference indexation
+c - Reference indexation
+------------------------
 
 This time the reference is indexed but with the splicing site information identified with previous step
 
@@ -69,7 +72,8 @@ This time the reference is indexed but with the splicing site information identi
 prefix+_ref_star_2). This folder contains index constructed and used by
 STAR to align RNAseq reads
 
-### d - Read mapping
+d - Read mapping
+----------------
 
 Reads are aligned against the reference sequence using STAR software. Read are indexed one library after the other.
 
@@ -86,7 +90,8 @@ Reads are aligned against the reference sequence using STAR software. Read are i
 containing a file named prefix + "\_mapping.tab" which summarise mapping
 statistics for all accessions.
 
-### e - Read merging and ordering
+e - Read merging and ordering
+-----------------------------
 
 Reads from different libraries but the same accessions are merged and sorted on coordinates.
 
@@ -98,7 +103,8 @@ Several new files have been added in each folders:
     of one accession.
 -   \*_merged.bai files (index of the bam file)
 
-### f - Removing duplicates reads
+f - Removing duplicates reads
+-----------------------------
 
 In this step, read duplicates (resulting from PCR before sequencing) are removed.
 
@@ -114,7 +120,8 @@ An additional file was created in the folder named as passed to -p
 option. This file named prefix + "*rmdup*stat.tab" contained duplicates
 statistics for all accessions.
 
-### g - Bam reordering
+g - Bam reordering
+------------------
 
 In this step reads are reordered in bam files. This is necessary for subsequent steps.
 
@@ -126,7 +133,8 @@ In this step reads are reordered in bam files. This is necessary for subsequent 
     sequences are provided in the multifasta
 -   \*_reorder.bai file (index of the bam file)
 
-### h - Reads splitting
+h - Reads splitting
+-------------------
 
 In this step, reads are split on splicing sites
 
@@ -137,7 +145,8 @@ In this step, reads are split on splicing sites
 -   \*_trim.bam file containing splitted reads
 -   \*_trim.bai file (index of the bam file)
 
-### i - Indel realigment
+i - Indel realignment
+---------------------
 
 In this step, reads realigned around indels. Countrary to **process\_reseq** a vcf on known
 indel could not be provided. It will be implemented in future...
@@ -149,7 +158,8 @@ indel could not be provided. It will be implemented in future...
 -   \*_realigned.bam file containing realigned reads
 -   \*_realigned.bai file (index of the bam file)
 
-### j - Allele counting
+j - Allele counting
+-------------------
 
 In this step, reads are used to count for each covered sites the number of reads supporting
 each bases (A,T,G,C,N,\*=deletion).
@@ -162,8 +172,10 @@ Several new files have been added in each folders:
     provided as reference, the count of the number of reads supporting
     each bases (A,T,G,C,N,\*=deletion) at each covered site.
 
-k - Vcf generation: generate the vcf for all accessions in the
-configuration file
+k - Vcf generation
+-------------------
+
+Generate the vcf for all accessions in the configuration file
 
     python3 ../bin/process_RNAseq.1.0.py -c ../data/config/RNAseq.conf -t 8 -p RNAseq -s k
 
@@ -172,7 +184,10 @@ Several new files in the current directory:
 -   prefix_\*_all_allele_count.vcf file for each
     chromosomes/sequences in the fasta provided as reference.
 
-l - Vcf merging: generate a single vcf from all chromosome/sequences in
+l - Vcf merging
+---------------
+
+Generate a single vcf from all chromosome/sequences in
 the fasta provided as reference. This step is not needed here has only
 one sequence is passed but you can try the command line anyway ;-)
 
@@ -182,7 +197,10 @@ one sequence is passed but you can try the command line anyway ;-)
 
 -   prefix_all_allele_count.vcf file
 
-m - Exon coverage: Calculate for each gene filled in the gff file passed
+m - Exon coverage
+-----------------
+
+Calculate for each gene filled in the gff file passed
 in the configuration file and for each accessions, the proportion of the
 exon covered by the library.
 
