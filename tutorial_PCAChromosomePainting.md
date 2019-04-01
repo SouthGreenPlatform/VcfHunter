@@ -505,6 +505,8 @@ And the clustering:
 
     python3 ../bin/vcf2struct.1.0.py --type SNP_CLUST-MeanShift --VarCoord Final/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat Final/ClustAnalysis_matrix_4_PCA.tab --thread 8 --prefix Final/ClustAnalysis  --quantile 0.15
 
+The output should look like this:
+
     loading modules
     modules loaded
     number of estimated clusters : 4
