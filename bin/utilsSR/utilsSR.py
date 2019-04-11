@@ -1552,7 +1552,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 
 def perform_count(BAMREADCOUNT, REF, BAM, OUT):
 	
-	bam_count = '%s -b 10 -q 1 -d 1000000 -w 0 -f %s %s > %s' % (BAMREADCOUNT, REF, BAM, OUT)
+	bam_count = '%s -b 10 -q 1 -d 1000000 -w 0 -f %s %s | gzip > %s' % (BAMREADCOUNT, REF, BAM, OUT+'.gz')
 	os.system(bam_count)
 
 def generate_pseudo_vcf(TAB, REF, OUT):
@@ -1569,7 +1569,7 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 	sys.stdout.flush()
 	
 	# Verification
-	file = open(TAB)
+	file = gzip.open(TAB+'.gz', 'rt')
 	i = 0
 	chr = ""
 	dico_allele = {}
