@@ -1166,7 +1166,7 @@ def get_allele_coverage (ALLELE, FORMAT, LISTE):
 def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, END):
 	
 	#1- preparing output
-	outfile = open(PREFIX+'_'+CHR+'_'+str(START)+'_'+str(END)+'_allele_count.vcf', 'w')
+	outfile = gzip.open(PREFIX+'_'+CHR+'_'+str(START)+'_'+str(END)+'_allele_count.vcf.gz', 'wt')
 	outfile.write("##fileformat=VCFv4.2\n")
 	outfile.write("##reference=file:///"+REF+"\n")
 	outfile.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
@@ -1347,7 +1347,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 def create_pseudo_VCF_Large(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, END):
 	
 	#1- preparing output
-	outfile = open(PREFIX+'_'+CHR+'_'+str(START)+'_'+str(END)+'_allele_count.vcf', 'w')
+	outfile = gzip.open(PREFIX+'_'+CHR+'_'+str(START)+'_'+str(END)+'_allele_count.vcf.gz', 'wt')
 	outfile.write("##fileformat=VCFv4.2\n")
 	outfile.write("##reference=file:///"+REF+"\n")
 	outfile.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
@@ -1494,7 +1494,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	accessions = []
 	for pos in LIST:
 		POS = '-'.join(map(str,pos))
-		file = open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf','r')
+		file = gzip.open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf.gz','rt')
 		if POS in dico_header:
 			return 1
 		if not ('header' in dico_header):
@@ -1535,7 +1535,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	outfile.write('\t'.join(['#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT']+accessions)+'\n')
 	for pos in LIST:
 		POS = '-'.join(map(str,pos))
-		file = open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf','r')
+		file = gzip.open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf.gz','rt')
 		for line in file:
 			data = line.split()
 			if data[0][0] != "#":
@@ -1547,7 +1547,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	outfile.close()
 	
 	for pos in LIST:
-		os.remove(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf')
+		os.remove(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf.gz')
 	return 0
 
 def perform_count(BAMREADCOUNT, REF, BAM, OUT):
