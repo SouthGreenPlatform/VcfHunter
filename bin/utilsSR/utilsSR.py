@@ -1582,46 +1582,47 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 		sum_deletion = 0
 		i += 1
 		if data:
-			if chr != data[0]:
-				if not(chr == ""):
-					outfile.close()
-				chr = data[0]
-				outfile = gzip.open(OUT+'_'+chr+'.gz', 'wt')
-			# Recording information on the current line 
-			for n in data[4:]:
-				if n[0] != "=": # To remove the column begining with "=" which I don't know what it means...
-					allele_stat = n.split(':')
-					dico_allele[allele_stat[0]] = allele_stat[1]
-					liste_allele.append(allele_stat[0])
-					# To manage deletions
-					if allele_stat[0][0] == '-':
-						cov = int(allele_stat[1]) # Getting number of reads with the deletion
-						for i in range(len(allele_stat[0][1:])): # Recording this number for adjacent sites with this same deletion (for final coverage calculation)
-							if not(pos+i in dico_deletions):
-								dico_deletions[pos+i] = 0
-							dico_deletions[pos+i] += cov
-						Final_cov -= cov
-						sum_deletion += cov
-			# Preparing and printing result
-			liste_mot = []
-			for n in liste_allele:
-				liste_mot.append(dico_allele[n])
-			
-			Reference_allele = data[2].replace('a', 'A').replace('c', 'C').replace('g', 'G').replace('t', 'T').replace('n', 'N')
-			if pos in dico_deletions:
-				if dico_deletions[pos] != sum_deletion:
-					liste_allele.append("*")
-					liste_mot.append(str(dico_deletions[pos]-sum_deletion))
+			if data[3] != "0":
+				if chr != data[0]:
+					if not(chr == ""):
+						outfile.close()
+					chr = data[0]
+					outfile = gzip.open(OUT+'_'+chr+'.gz', 'wt')
+				# Recording information on the current line
+				for n in data[4:]:
+					if n[0] != "=": # To remove the column beginning with "=" which I don't know what it means...
+						allele_stat = n.split(':')
+						dico_allele[allele_stat[0]] = allele_stat[1]
+						liste_allele.append(allele_stat[0])
+						# To manage deletions
+						if allele_stat[0][0] == '-':
+							cov = int(allele_stat[1]) # Getting number of reads with the deletion
+							for i in range(len(allele_stat[0][1:])): # Recording this number for adjacent sites with this same deletion (for final coverage calculation)
+								if not(pos+i in dico_deletions):
+									dico_deletions[pos+i] = 0
+								dico_deletions[pos+i] += cov
+							Final_cov -= cov
+							sum_deletion += cov
+				# Preparing and printing result
+				liste_mot = []
+				for n in liste_allele:
+					liste_mot.append(dico_allele[n])
+				
+				Reference_allele = data[2].replace('a', 'A').replace('c', 'C').replace('g', 'G').replace('t', 'T').replace('n', 'N')
+				if pos in dico_deletions:
+					if dico_deletions[pos] != sum_deletion:
+						liste_allele.append("*")
+						liste_mot.append(str(dico_deletions[pos]-sum_deletion))
+					else:
+						liste_allele.append("*")
+						liste_mot.append(str(dico_deletions[pos]))
+					outfile.write('\t' . join([data[0], data[1], Reference_allele, str(Final_cov+dico_deletions[pos]), ':'.join(liste_allele), ':'.join(liste_mot)]))
+					del dico_deletions[pos]
 				else:
 					liste_allele.append("*")
-					liste_mot.append(str(dico_deletions[pos]))
-				outfile.write('\t' . join([data[0], data[1], Reference_allele, str(Final_cov+dico_deletions[pos]), ':'.join(liste_allele), ':'.join(liste_mot)]))
-				del dico_deletions[pos]
-			else:
-				liste_allele.append("*")
-				liste_mot.append(str(0))
-				outfile.write('\t' . join([data[0], data[1], Reference_allele, data[3], ':'.join(liste_allele), ':'.join(liste_mot)]))
-			outfile.write('\n')
+					liste_mot.append(str(0))
+					outfile.write('\t' . join([data[0], data[1], Reference_allele, data[3], ':'.join(liste_allele), ':'.join(liste_mot)]))
+				outfile.write('\n')
 	outfile.close()
 	os.remove(TAB)
 	
