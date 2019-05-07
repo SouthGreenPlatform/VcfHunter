@@ -231,7 +231,8 @@ def __main__():
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
 	parser.add_option( '',	'--NoMiss',			dest='NoMiss',		default='n',			help='No missing data are allowed in accessions used to group alleles. [Default: %default]')
 	parser.add_option( '',	'--all',			dest='all',			default='n',			help='Allele should be present in all accessions of the group. [Default: %default]')
-	(options, args) = parser.parse_args()
+	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
+	(options, args) = parser.parse_args()	
 	
 	if options.conf == None:
 		sys.exit('Please provide a conf file to --conf argument')
@@ -243,6 +244,7 @@ def __main__():
 		sys.exit('Please provide a ploidy level to --ploidy argument')
 	# recording accession name
 	ACCESS = options.acc
+	PREFIX = options.prefix
 	
 	# recording accession group
 	dico_group = {}
@@ -255,8 +257,8 @@ def __main__():
 			dico_group[data[1]].append(data[0])
 	file.close()
 	
-	outfile = open(ACCESS+'_AlleleOriginAndRatio.tab','w')
-	outfile1 = open(ACCESS+'_stats.tab','w')
+	outfile = open(PREFIX+ACCESS+'_AlleleOriginAndRatio.tab','w')
+	outfile1 = open(PREFIX+ACCESS+'_stats.tab','w')
 	
 	# recording vcf file to work with
 	file = open(options.conf)
@@ -427,6 +429,6 @@ def __main__():
 		outfile1.write('\n')
 	outfile1.close()
 	# It's time to draw
-	draw_chr(dico_draw, dico_chr, dico_group, ACCESS, sum(total)/len(total), int(options.ploidy))
+	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy))
 	
 if __name__ == "__main__": __main__()
