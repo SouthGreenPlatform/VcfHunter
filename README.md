@@ -132,6 +132,10 @@ followed:
 folder were the reference sequence is stored if they do not already
 exist. Make sure that you have right to write in this folder!
 
+**Warning:** If you use the STAR aligner for the read mapping onto the
+reference sequence, it only works on uncompressed fastq files (gunzip
+fastq.gz)
+
 Outputs are dependent of the steps you are running and each steps use
 the output of the preceding one.
 
