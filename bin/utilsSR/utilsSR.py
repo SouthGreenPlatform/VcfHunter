@@ -1624,7 +1624,7 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 					outfile.write('\t' . join([data[0], data[1], Reference_allele, data[3], ':'.join(liste_allele), ':'.join(liste_mot)]))
 				outfile.write('\n')
 	outfile.close()
-	os.remove(TAB)
+	os.remove(TAB+'.gz')
 	
 	for n in dico_chr:
 		if not(os.path.isfile(OUT+'_'+n+'.gz')):
