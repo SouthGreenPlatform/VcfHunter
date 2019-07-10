@@ -292,6 +292,50 @@ def printSegDist(MATRIX, OUT):
 			outfile.write('\n')
 	outfile.close()
 
+def printSegDistProp(MATRIX, OUT):
+	
+	outfile = open(OUT+'_SegDist.tab','w')
+	
+	file = open(MATRIX)
+	header = file.readline().split()
+	
+	# Checking
+	if not ('Marker' in header) and  not ('marker' in header):
+		sys.exit('No Marker column found in the matrix file')
+	if not ('coding' in header):
+		sys.exit('No coding column found in the matrix file')
+	if not ('ratio' in header):
+		sys.exit('No ratio column found in the matrix file')
+	# Checking done
+	
+	for line in file:
+		data = line.split()
+		if data:
+			if 'Marker' in header:
+				mName = data[header.index('Marker')]
+			else:
+				mName = data[header.index('marker')]
+			coding = data[header.index('coding')].split(',')
+			ratio = list(map(float, data[header.index('ratio')].split(',')))
+			liste = []
+			
+			if len(coding) != len(ratio):
+				sys.exit('Expected ration does not match marker coding!!!\n'+line)
+			
+			freq_obs = []
+			for i in range(len(coding)):
+				freq_obs.append(data[4:].count(coding[i]))
+			total = numpy.sum(freq_obs)
+			
+			freq_theor = []
+			for i in range(len(coding)):
+				freq_theor.append(ratio[i]*total)
+			
+			chi2, p = stats.chisquare(freq_obs, f_exp=freq_theor)
+			outfile.write('\t'.join([mName, str((numpy.mean(abs(numpy.array(freq_obs) - numpy.array(freq_theor)))/sum(freq_obs)))]))
+			outfile.write('\n')
+	outfile.close()
+
 def marker_decode(MARKER_CODING, RATIO, MARKER, CODE, REVERSE, INDI_NUMBER):
 	
 	if REVERSE:
@@ -372,7 +416,8 @@ def __main__():
 	parser.add_option( '-p', '--phased', dest='phased', default='n', help='The matrix has been phased (y or n), [default: %default]')
 	parser.add_option( '-s', '--steps', dest='steps', default=None, help='Analysis to perform\t\t\t\t\t\t'
 	'R: Calculate recombination rate\t\t\t\t\t'
-	'S: Calculate segregation distortions\t\t\t\t'
+	'S: Calculate segregation distortions (-log10(X² test))\t\t\t\t'
+	's: Calculate segregation distortions (as proportion of individuals deviating from expectation)\t\t\t\t'
 	'P: Phase markers based on their order\t\t\t\t')
 	
 	(options, args) = parser.parse_args()
@@ -427,6 +472,9 @@ def __main__():
 	
 	if 'S' in options.steps:
 		printSegDist(options.matrix, options.output)
+	
+	if 's' in options.steps:
+		printSegDistProp(options.matrix, options.output)
 	
 	if 'P' in options.steps:
 		PhaseMarker(options.matrix, options.output)
