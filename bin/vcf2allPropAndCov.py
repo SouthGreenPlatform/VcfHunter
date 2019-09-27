@@ -37,7 +37,7 @@ from scipy.interpolate import spline
 from textwrap import wrap
 
 
-def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
+def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE):
 	
 	
 	
@@ -51,10 +51,10 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 		if chr in DICO_INFO:
 			chr_list.append(chr)
 	
-	# On calcule le nombre de fenetres
+	# Calculating chromosome number
 	NB = len(chr_list)
 	
-	# Calcule de la taille max
+	# Calculating max chromosome size
 	MAXI = 0
 	for n in CHR_INFO:
 		if MAXI < CHR_INFO[n]:
@@ -82,12 +82,12 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 	
 	######Drawing allele ratio######
 	
-	# On fait la figure
+	# Drawing figures
 	POSSPAN = 0
 	fig = plt.figure(figsize=(10.5, 14.85))
 	fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
 	
-	# On dessine par chromosomes
+	# Drawing per chromosome
 	for chr in chr_list:
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 1.1)
@@ -106,7 +106,19 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 				if gp in DICO_INFO[chr][pos]:
 					value.append(DICO_INFO[chr][pos][gp])
 					final_pos.append(pos)
-			ax.plot(final_pos, value, 'o', ms=1.5, mew=0, mfc=color[group.index(gp)])
+			
+			ax.plot(final_pos, value, 'o', ms=PSIZE, mew=0, mfc=color[group.index(gp)])
+			
+			if DCURVE == 'y':
+				ValueNorm = []
+				PosNorm = []
+				Window = 1+2*halfWindow
+				for n in range(len(value)-Window):
+					IntermVal = value[n:n+Window]
+					ValueNorm.append(sum(IntermVal)/len(IntermVal))
+					PosNorm.append(final_pos[n+halfWindow])
+				ax.plot(PosNorm, ValueNorm, color=color[group.index(gp)], lw=LSIZE)
+			
 			ax.axes.yaxis.set_ticklabels([])
 			ax.axes.xaxis.set_ticklabels([])
 		
@@ -120,7 +132,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 	ax.set_xticks(minor_ticks, minor=True)
 	ax.set_xticklabels(ticks_labels)
 	
-	# On mets le nom des chromosomes
+	# Drawing chromosome name
 	POSSPAN = 0
 	for chr in chr_list:
 		ax = plt.subplot2grid((NB,15),(POSSPAN,0), colspan=1, rowspan=1)
@@ -137,12 +149,12 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 	
 	######Drawing coverage######
 	
-	# On fait la figure
+	# Creating figure
 	POSSPAN = 0
 	fig = plt.figure(figsize=(10.5, 14.85))
 	fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
 	
-	# On dessine par chromosomes
+	# Drawing per chromosomes
 	for chr in chr_list:
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 2*MEAN_COV)
@@ -158,13 +170,12 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 			value.append(DICO_INFO[chr][pos]['cov'])
 			final_pos.append(pos)
 		ax.fill_between([0]+final_pos+[CHR_INFO[chr]], fill_plus1, fill_moins1, color=(1,0,0), alpha=0.20) ## For band
-		# ax.fill_between([0]+final_pos+[CHR_INFO[chr]], fill_plus2, fill_moins2, color=(0,0,1), alpha=0.10) ## for band
 		ax.axhline(y=MEAN_COV, linewidth=0.5, color = (0,0,0))
 		ax.axhline(y=(PLOIDY+1)/PLOIDY*MEAN_COV, linewidth=0.5, color = (0,1,0))
 		ax.axhline(y=(PLOIDY-1)/PLOIDY*MEAN_COV, linewidth=0.5, color = (0,1,0))
 		ax.axhline(y=(PLOIDY+2)/PLOIDY*MEAN_COV, linewidth=0.5, color = (0,0,1))
 		ax.axhline(y=(PLOIDY-2)/PLOIDY*MEAN_COV, linewidth=0.5, color = (0,0,1))
-		ax.plot(final_pos, value, 'o', ms=1.5, mew=0, mfc='black')
+		ax.plot(final_pos, value, 'o', ms=PSIZE, mew=0, mfc='black')
 		ax.axes.yaxis.set_ticklabels([])
 		ax.axes.xaxis.set_ticklabels([])
 		
@@ -178,7 +189,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 	ax.set_xticks(minor_ticks, minor=True)
 	ax.set_xticklabels(ticks_labels)
 	
-	# On mets le nom des chromosomes
+	# Adding chromosome name
 	POSSPAN = 0
 	for chr in chr_list:
 		ax = plt.subplot2grid((NB,15),(POSSPAN,0), colspan=1, rowspan=1)
@@ -219,6 +230,10 @@ def __main__():
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
 	parser.add_option( '',	'--NoMiss',			dest='NoMiss',		default='n',			help='No missing data are allowed in accessions used to group alleles. [Default: %default]')
 	parser.add_option( '',	'--all',			dest='all',			default='n',			help='Allele should be present in all accessions of the group. [Default: %default]')
+	parser.add_option( '',  '--dcurve',			dest='dcurve',		default='n',			help='Draw mean curve for ratio. Possible values: y or n [Default: %default]')
+	parser.add_option( '',  '--psize',			dest='psize',		default='1.5',			help='Dot size in graph. [Default: %default]')
+	parser.add_option( '',  '--lsize',			dest='lsize',		default='1',			help='Size of the line of the mean value curve. [Default: %default]')
+	parser.add_option( '',  '--win',			dest='halfwin',		default='10',			help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
@@ -421,6 +436,6 @@ def __main__():
 		outfile1.write('\n')
 	outfile1.close()
 	# It's time to draw
-	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy))
+	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize))
 	
 if __name__ == "__main__": __main__()
