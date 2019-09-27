@@ -23,22 +23,9 @@
 import sys
 sys.stdout.write('loading modules\n')
 import optparse
-import os
-import shutil
-import subprocess
-import tempfile
-import fileinput
-import time
-import random
-import math
 import gzip
-import datetime
-import traceback
-import multiprocessing as mp
-from inspect import currentframe, getframeinfo
-from operator import itemgetter
 
-import numpy
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib
@@ -55,7 +42,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY):
 	
 	
 	# Color definition
-	color = ((0,0.8,0),(1,0,0),(0,0,1),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
+	color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
 	
 	# getting chromosomes list
 	chr_list_temp = sorted(list(CHR_INFO.keys()))
@@ -226,6 +213,7 @@ def __main__():
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program count allele ratio based on two origins")
 	# Wrapper options. 
 	parser.add_option( '',	'--conf',			dest='conf',		default=None,			help='Conf file containing vcf location (one per chromosome). [Default: %default]')
+	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='Path to single vcf file on vcf for all chromosomes is available. [Default: %default]')
 	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 2 column file containing accession name (col1) origin/group (Col2). [Default: %default]')
 	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='Accession to work with. [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
@@ -234,14 +222,15 @@ def __main__():
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
-	if options.conf == None:
-		sys.exit('Please provide a conf file to --conf argument')
+	if options.conf == None and options.vcf == None:
+		sys.exit('Please provide either a conf file to --conf argument or a vcf file to --vcf argument')
 	if options.origin == None:
 		sys.exit('Please provide a origin file to --origin argument')
 	if options.acc == None:
 		sys.exit('Please provide a accession name to --acc argument')
 	if options.ploidy == None:
 		sys.exit('Please provide a ploidy level to --ploidy argument')
+	
 	# recording accession name
 	ACCESS = options.acc
 	PREFIX = options.prefix
@@ -261,13 +250,16 @@ def __main__():
 	outfile1 = open(PREFIX+ACCESS+'_stats.tab','w')
 	
 	# recording vcf file to work with
-	file = open(options.conf)
 	dico_vcf = set()
-	for line in file:
-		data = line.split()
-		if data:
-			dico_vcf.add(data[0])
-	file.close()
+	if options.vcf == None:
+		file = open(options.conf)
+		for line in file:
+			data = line.split()
+			if data:
+				dico_vcf.add(data[0])
+		file.close()
+	else:
+		dico_vcf.add(options.vcf)
 	
 	total_unmissing_sites = 0
 	
