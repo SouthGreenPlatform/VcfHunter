@@ -37,7 +37,7 @@ from scipy.interpolate import spline
 from textwrap import wrap
 
 
-def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE):
+def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE, VERT, VERTREG):
 	
 	
 	
@@ -92,6 +92,15 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 1.1)
 		ax.set_xlim(0, MAXI)
+		
+		if chr in VERT:
+			for pos in VERT[chr]:
+				ax.axvline(x=pos, ymin=0, ymax = 2*MEAN_COV, linewidth=2, color='black')
+		
+		if chr in VERTREG:
+			for pos in VERTREG[chr]:
+				ax.fill_betweenx([0,2*MEAN_COV], int(pos[0]), int(pos[1]), color=(0.3,0.3,0.3), alpha=0.20)
+		
 		for gp  in group:
 			# Getting position
 			position = sorted(list(DICO_INFO[chr].keys()))
@@ -121,11 +130,6 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 			
 			ax.axes.yaxis.set_ticklabels([])
 			ax.axes.xaxis.set_ticklabels([])
-		
-		# if chr == "chr01":
-			# ax.axvline(x=650000, ymin=0, ymax = 1.05, linewidth=1, color='k')
-		# elif chr == "chr03":
-			# ax.axvline(x=26675034, ymin=0, ymax = 1.05, linewidth=1, color='k')
 		
 		POSSPAN += 1
 	ax.set_xticks(ticks_pos)
@@ -166,6 +170,15 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 		fill_moins1 = [(PLOIDY-0.5)/PLOIDY*MEAN_COV]*(len(DICO_INFO[chr])+2) ## For band
 		fill_plus2 = [(PLOIDY+1.5)/PLOIDY*MEAN_COV]*(len(DICO_INFO[chr])+2) ## For band
 		fill_moins2 = [(PLOIDY-1.5)/PLOIDY*MEAN_COV]*(len(DICO_INFO[chr])+2) ## For band
+		
+		if chr in VERT:
+			for pos in VERT[chr]:
+				ax.axvline(x=pos, ymin=0, ymax = 2*MEAN_COV, linewidth=2, color='black')
+		
+		if chr in VERTREG:
+			for pos in VERTREG[chr]:
+				ax.fill_betweenx([0,2*MEAN_COV], int(pos[0]), int(pos[1]), color=(0.3,0.3,0.3), alpha=0.20)
+		
 		for pos in position:
 			value.append(DICO_INFO[chr][pos]['cov'])
 			final_pos.append(pos)
@@ -178,11 +191,6 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 		ax.plot(final_pos, value, 'o', ms=PSIZE, mew=0, mfc='black')
 		ax.axes.yaxis.set_ticklabels([])
 		ax.axes.xaxis.set_ticklabels([])
-		
-		# if chr == "chr01":
-			# ax.axvline(x=650000, ymin=0, ymax = 2*MEAN_COV, linewidth=1, color='k')
-		# elif chr == "chr03":
-			# ax.axvline(x=26675034, ymin=0, ymax = 2*MEAN_COV, linewidth=1, color='k')
 		
 		POSSPAN += 1
 	ax.set_xticks(ticks_pos)
@@ -234,6 +242,7 @@ def __main__():
 	parser.add_option( '',  '--psize',			dest='psize',		default='1.5',			help='Dot size in graph. [Default: %default]')
 	parser.add_option( '',  '--lsize',			dest='lsize',		default='1',			help='Size of the line of the mean value curve. [Default: %default]')
 	parser.add_option( '',  '--win',			dest='halfwin',		default='10',			help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
+	parser.add_option( '',  '--loc',			dest='loc',			default='',				help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
@@ -245,6 +254,24 @@ def __main__():
 		sys.exit('Please provide a accession name to --acc argument')
 	if options.ploidy == None:
 		sys.exit('Please provide a ploidy level to --ploidy argument')
+	
+	VERT = {}
+	VERTREG = {}
+	for n in options.loc.split(':'):
+		info = n.split(',')
+		if len(info) == 1:
+			pass
+		else:
+			chr = info[0]
+			if not(chr in VERT):
+				VERT[chr] = set()
+				VERTREG[chr] = []
+			if len(info) == 2:
+				VERT[chr].add(int(info[1]))
+			elif len(info) == 3:
+				VERTREG[chr].append(info[1:])
+			else:
+				sys.stdout.write('Wrong format passed to --loc argument\n')
 	
 	# recording accession name
 	ACCESS = options.acc
@@ -436,6 +463,6 @@ def __main__():
 		outfile1.write('\n')
 	outfile1.close()
 	# It's time to draw
-	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize))
+	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG)
 	
 if __name__ == "__main__": __main__()
