@@ -37,12 +37,12 @@ from scipy.interpolate import spline
 from textwrap import wrap
 
 
-def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE, VERT, VERTREG):
+def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE, VERT, VERTREG, DICOCOLOR):
 	
 	
 	
 	# Color definition
-	color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
+	# color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
 	
 	# getting chromosomes list
 	chr_list_temp = sorted(list(CHR_INFO.keys()))
@@ -116,7 +116,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 					value.append(DICO_INFO[chr][pos][gp])
 					final_pos.append(pos)
 			
-			ax.plot(final_pos, value, 'o', ms=PSIZE, mew=0, mfc=color[group.index(gp)])
+			ax.plot(final_pos, value, 'o', ms=PSIZE, mew=0, mfc=DICOCOLOR[gp])
 			
 			if DCURVE == 'y':
 				ValueNorm = []
@@ -126,7 +126,7 @@ def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, hal
 					IntermVal = value[n:n+Window]
 					ValueNorm.append(sum(IntermVal)/len(IntermVal))
 					PosNorm.append(final_pos[n+halfWindow])
-				ax.plot(PosNorm, ValueNorm, color=color[group.index(gp)], lw=LSIZE)
+				ax.plot(PosNorm, ValueNorm, color=DICOCOLOR[gp], lw=LSIZE)
 			
 			ax.axes.yaxis.set_ticklabels([])
 			ax.axes.xaxis.set_ticklabels([])
@@ -243,6 +243,7 @@ def __main__():
 	parser.add_option( '',  '--lsize',			dest='lsize',		default='1',			help='Size of the line of the mean value curve. [Default: %default]')
 	parser.add_option( '',  '--win',			dest='halfwin',		default='10',			help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 	parser.add_option( '',  '--loc',			dest='loc',			default='',				help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
+	parser.add_option( '',  '--col',			dest='col',			default=None,				help='A color file with 4 columns: col1=group and the three last column corresponded to RGB code. [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
@@ -290,6 +291,21 @@ def __main__():
 	
 	outfile = open(PREFIX+ACCESS+'_AlleleOriginAndRatio.tab','w')
 	outfile1 = open(PREFIX+ACCESS+'_stats.tab','w')
+	
+	# Preparing color file
+	DicoColor = {}
+	if options.col == None:
+		color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
+		groupList = sorted(list(dico_group.keys()))
+		for gp in groupList:
+			DicoColor[gp] = color[groupList.index(gp)]
+	else:
+		file = open(options.col)
+		for line in file:
+			data = line.split()
+			if data:
+				DicoColor[data[0]] = (int(data[1])/255.0,int(data[2])/255.0,int(data[3])/255.0)
+	
 	
 	# recording vcf file to work with
 	dico_vcf = set()
@@ -463,6 +479,6 @@ def __main__():
 		outfile1.write('\n')
 	outfile1.close()
 	# It's time to draw
-	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG)
+	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG, DicoColor)
 	
 if __name__ == "__main__": __main__()
