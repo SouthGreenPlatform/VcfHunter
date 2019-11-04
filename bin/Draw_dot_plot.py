@@ -194,7 +194,7 @@ def fill_the_matrix(MATRIX, DICO_ORDERED_LOCI, MAT):
 						MAT[dico_ordered_loci_index][i] = value
 	file.close()
 
-def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
+def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD):
 	
 	## Obtaining xmax and ymax
 	xmax = DICO_ORDERED_LOCI['pos'][-1]
@@ -216,7 +216,10 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 			if data:
 				if data[0] in DICO_ORDERED_LOCI['marker']:
 					list_stat.append(float(data[1]))
-					list_pos.append(DICO_ORDERED_LOCI['pos'][DICO_ORDERED_LOCI['marker'].index(data[0])])
+					if INVORD != "n":
+						list_pos.append(abs(DICO_ORDERED_LOCI['pos'][DICO_ORDERED_LOCI['marker'].index(data[0])]-ymax))
+					else:
+						list_pos.append(DICO_ORDERED_LOCI['pos'][DICO_ORDERED_LOCI['marker'].index(data[0])])
 		file.close()
 		stat_max = max(list_stat)*1.1
 		
@@ -251,22 +254,33 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 	ax.axes.get_yaxis().set_visible(False) # remove y ticks
 	ax.axes.get_xaxis().set_visible(False) # remove y ticks
 	
-	## drawing boxes
+	## drawing dot plot
 	for i in range(len(DICO_ORDERED_LOCI['pos'])):
 		for j in range(len(DICO_ORDERED_LOCI['pos'])):
 			if i < j:
-				posi = DICO_ORDERED_LOCI['pos'][i]
-				posj = DICO_ORDERED_LOCI['pos'][j]
-				posiplus1 = DICO_ORDERED_LOCI['pos'][i+1]
-				posjmoins1 = DICO_ORDERED_LOCI['pos'][j-1]
+				if INVORD != "n":
+					posi = abs(DICO_ORDERED_LOCI['pos'][i]-ymax)
+					posj = DICO_ORDERED_LOCI['pos'][j]
+					posiplus1 = abs(DICO_ORDERED_LOCI['pos'][i+1]-ymax)
+					posjmoins1 = DICO_ORDERED_LOCI['pos'][j-1]
+				else:
+					posi = DICO_ORDERED_LOCI['pos'][i]
+					posj = DICO_ORDERED_LOCI['pos'][j]
+					posiplus1 = DICO_ORDERED_LOCI['pos'][i+1]
+					posjmoins1 = DICO_ORDERED_LOCI['pos'][j-1]
 				val = MAT[i][j]
 				if val <= 0.16:
 					ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
 	## done
 	
 	## Drawing a white triangle for the upper diagonal
-	points = [[0, 0], [0, ymax], [xmax, ymax]]
-	ax.add_patch(plt.Polygon(points, fc=(1,1,1), ec='red', linewidth=0))
+	if INVORD != "n":
+		points = [[0, 0], [0, ymax], [xmax, 0]]                            
+		ax.add_patch(plt.Polygon(points, fc=(1,1,1), ec='red', linewidth=0))
+	else:
+		points = [[0, 0], [0, ymax], [xmax, ymax]]                            
+		ax.add_patch(plt.Polygon(points, fc=(1,1,1), ec='red', linewidth=0))
+	
 	## done
 	
 	## drawing chromosome separation
@@ -277,7 +291,10 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 		list_chr = CHR.split(':')
 	#	-drawing separations
 	for chr in list_chr:
-		ax.add_artist(matplotlib.lines.Line2D((0, xmax), (DICO_ORDERED_LOCI['chr'][chr][1], DICO_ORDERED_LOCI['chr'][chr][1]), color='black', linewidth=1))
+		if INVORD != "n":
+			ax.add_artist(matplotlib.lines.Line2D((0, xmax), (abs(DICO_ORDERED_LOCI['chr'][chr][1]-ymax), abs(DICO_ORDERED_LOCI['chr'][chr][1]-ymax)), color='black', linewidth=1))
+		else:
+			ax.add_artist(matplotlib.lines.Line2D((0, xmax), (DICO_ORDERED_LOCI['chr'][chr][1], DICO_ORDERED_LOCI['chr'][chr][1]), color='black', linewidth=1))
 		ax.add_artist(matplotlib.lines.Line2D((DICO_ORDERED_LOCI['chr'][chr][1], DICO_ORDERED_LOCI['chr'][chr][1]), (0, ymax), color='black', linewidth=1))
 	if AGP != None:
 		ax.add_artist(matplotlib.lines.Line2D((0, xmax), (0, 0), color='black', linewidth=1))
@@ -311,9 +328,14 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 						p2 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[0], Ymax]
 						p3 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[1], (falseYmin/2.0)]
 						Xpoints = [p1, p2, p3]
-						p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
-						p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
-						p3 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+						if INVORD != "n":
+							p1 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+							p2 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+							p3 = [((Xmax+Xmin)/2.0), abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+						else:
+							p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+							p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+							p3 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
 						Ypoints = [p1, p2, p3]
 					else:
 						p1 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[0], Ymin]
@@ -322,11 +344,18 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 						p4 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[1], (falseYmin/2.0)]
 						p5 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value, Ymin]
 						Xpoints = [p1, p2, p3, p4, p5]
-						p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
-						p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
-						p3 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value]
-						p4 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
-						p5 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value]
+						if INVORD != "n":
+							p1 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+							p2 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+							p3 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value)-ymax)]
+							p4 = [((Xmax+Xmin)/2.0), abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+							p5 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value)-ymax)]
+						else:
+							p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+							p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+							p3 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value]
+							p4 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+							p5 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]-seuil_value]
 						Ypoints = [p1, p2, p3, p4, p5]
 				else:
 					if poly[1] - poly[0] < seuil_value:
@@ -334,9 +363,14 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 						p2 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[1], Ymax]
 						p3 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[0], (falseYmin/2.0)]
 						Xpoints = [p1, p2, p3]
-						p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
-						p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
-						p3 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+						if INVORD != "n":
+							p1 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+							p2 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+							p3 = [((Xmax+Xmin)/2.0), abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+						else:
+							p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+							p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+							p3 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
 						Ypoints = [p1, p2, p3]
 					else:
 						p1 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[1], Ymin]
@@ -345,11 +379,18 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 						p4 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[0], (falseYmin/2.0)]
 						p5 = [DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value, Ymin]
 						Xpoints = [p1, p2, p3, p4, p5]
-						p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
-						p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
-						p3 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value]
-						p4 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
-						p5 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value]
+						if INVORD != "n":
+							p1 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+							p2 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[1])-ymax)]
+							p3 = [Xmax, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value)-ymax)]
+							p4 = [((Xmax+Xmin)/2.0), abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0])-ymax)]
+							p5 = [Xmin, abs((DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value)-ymax)]
+						else:
+							p1 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+							p2 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[1]]
+							p3 = [Xmax, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value]
+							p4 = [((Xmax+Xmin)/2.0), DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]]
+							p5 = [Xmin, DICO_ORDERED_LOCI['chr'][chr][0]+poly[0]+seuil_value]
 						Ypoints = [p1, p2, p3, p4, p5]
 				ax.add_patch(plt.Polygon(Xpoints, fc=(0.5,0.5,0.5), ec='black', linewidth=1))
 				ax.add_patch(plt.Polygon(Ypoints, fc=(0.5,0.5,0.5), ec='black', linewidth=1))
@@ -363,13 +404,13 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT):
 	for chr in list_chr:
 		start = DICO_ORDERED_LOCI['chr'][chr][0]
 		end = DICO_ORDERED_LOCI['chr'][chr][1]
-		# print(start, end)
-		ax.text(end-(xmax*0.02), end-(xmax*0.004), chr, size=10, va='top', ha='right', fontweight='bold')
+		if INVORD != "n":
+			ax.text(end-(xmax*0.02), abs(end-(xmax*0.004)-ymax), chr, size=10, va='bottom', ha='right', fontweight='bold')
+		else:
+			ax.text(end-(xmax*0.02), end-(xmax*0.004), chr, size=10, va='top', ha='right', fontweight='bold')
 	## done
 	
 	fig.savefig(OUT)
-	# fig.savefig(OUT+'.pdf')
-	# fig.savefig(OUT+'.svg')
 	plt.close(fig)
 
 def __main__():
@@ -383,7 +424,9 @@ def __main__():
 	parser.add_option( '-a', '--agp',		dest='agp',		default=None, 	help='Agp file locating scaffolds in the reference sequence')
 	parser.add_option( '-s', '--stat',		dest='stat',	default=None, 	help='A two column file with column 1: marker name, column 2: statistics')
 	parser.add_option( '-p', '--phys',		dest='phys',	default='y', 	help='A value specifying if the marker position should be defined based on physical position or not. Possible values: "y" or "n", [Default: %default]')
-	parser.add_option( '-o', '--output',	dest='output',	default='test', help='Output file name')
+	parser.add_option( '-i', '--invord',	dest='invord',	default='n', 	help='Invert Ordinate axis. By default 0 of ordinate axis is located '
+	'at the bottom left corner. Setting parameter to "y" will draw 0 at left top. [Default: %default]')
+	parser.add_option( '-o', '--output',	dest='output',	default='test.png', help='Output file name')
 	
 	(options, args) = parser.parse_args()
 	V = os.getpid()
@@ -432,7 +475,7 @@ def __main__():
 	fill_the_matrix(options.matrix, dico_ordered_loci, mat)
 	
 	# 4- It's time to plot the matrix
-	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output, options.stat)
+	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output, options.stat, options.invord)
 	
 	toto = os.system("pmap %s | grep total" % V)
 
