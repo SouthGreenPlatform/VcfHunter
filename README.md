@@ -19,7 +19,7 @@ linux system To install the tools:
 environment (available in $PATH), the complete path is not required and
 then only program name can be set in loca_programs.conf.
 For example if bwa is already loaded in the environment, put ***bwa = bwa***.
-If bam-readcound is not loaded in the environment put ***bamreadcount = /homedir/gmartin/Programmes/bam-readcount/bin/bam-readcount***
+If bam-readcound is not loaded in the environment put ***bamreadcount = /toto/tartenpion/programmes/bam-readcount/bin/bam-readcount***
 <br><br><br>
 
 Dependencies
