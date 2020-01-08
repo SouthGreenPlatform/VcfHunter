@@ -7,7 +7,7 @@ and/or RNAseq to caracterization of genome mosaic structure using
 
 Go to the VcfHunter folder (Scripts can be run from any folder but the
 command lines in this tutorial assume you are in this folder and that
-you have python 2.7 and 3 versions).
+you have python 3 versions).
 
 ### Available data:
 
@@ -432,7 +432,7 @@ each allele at each variants site two markers were generated; One marker
 for the presence of the allele (0/1 coded) and one for the absence of
 the allele (0/1 coded).
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig3.png)
+![](/images/Vcf2struct_Fig3.png)
 
 Only alleles present or absent in **part** (not all) of selected
 accessions were included in the final matrix file named
@@ -449,7 +449,7 @@ warning messages and command lines are recorded in the file named
 analysis were draw and for example accessions and alleles can be
 projected along axis in the following picture.
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig4.png)
+![](/images/Vcf2struct_Fig4.png)
 
 In this example the left graphe represent accessions projected along
 axis 1 and 2 and the right represent the allele projected along
@@ -463,7 +463,7 @@ the following nomenclature ***prefix +
 The cumulated inertia is plotted in the graphe named
 ***AllClust/ClustAnalysis\_inertia.pdf***
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig5.png)
+![](/images/Vcf2struct_Fig5.png)
 
 Individual and variables coordinates for the selected 6 fisrt axis
 (--nAxes option) are recorded in files named
@@ -504,7 +504,7 @@ Outpout are strictely the same with two exceptions: pdf files are
 colorated according to the groups passed in --group option. And the
 "GROUP" column has been filled if the grouping rules are fulfilled.
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig6.png)
+![](/images/Vcf2struct_Fig6.png)
 
 You can observe that if you compare this example with the preceding one
 that only the orientation of the axis changed but the accessions and
@@ -582,7 +582,7 @@ Output is as much files as axis combinations named according to the
 following nomenclature ***prefix + \_axisX\_vs\_axisY.png***. The output
 should look like this:
 
-![](http://banana-genome-http.cirad.fr/image/CentroidGrouping_axis1_vs_axis2.png)
+![](/images/CentroidGrouping_axis1_vs_axis2.png)
 
 This Figure represent the centroids location. Colors may not be the same
 when you run the analysis because the color attribution is random.
@@ -594,7 +594,7 @@ Visualization of the allele grouping can be done as followed:
 The outpout named ***prefix + \_axis1\_vs\_axis2.png*** look like this
 (color may be different):
 
-![](http://banana-genome-http.cirad.fr/image/AlleleGrouping_axis1_vs_axis2.png)
+![](/images/AlleleGrouping_axis1_vs_axis2.png)
 
 In this picture you have the representation of the allele clustering
 performed by the Mean Shift approach. We can clearly observe that the
@@ -609,7 +609,7 @@ necessary to have a 3d visualization but we can try the command anyway:
 
 A window which should look like this should open:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig7.png)
+![](/images/Vcf2struct_Fig7.png)
 
 This 3d visualisation can be rotated with the mouse.
 
@@ -670,7 +670,7 @@ line:
 
     python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
 
-![](http://banana-genome-http.cirad.fr/image/sub1_AlleleGrouping_axis1_vs_axis2.png)
+![](/images/sub1_AlleleGrouping_axis1_vs_axis2.png)
 
 You can observe that g3 and g4 are close and could be merged if we want
 4 clusters. I don't say that it is the solution but for our example, we
@@ -697,7 +697,7 @@ be like this:
 
     python3 ../bin/vcf2struct.1.0.py --type VISUALIZE_VAR_2D --VarCoord AllClust/ClustAnalysis_variables_coordinates.tab --dAxes 1:2 --mat AllClust/ClustAnalysis_kMean_allele.tab --group AllClust/ClustAnalysis_group_color.tab --prefix AllClust/AlleleGrouping
 
-![](http://banana-genome-http.cirad.fr/image/sub2_AlleleGrouping_axis1_vs_axis2.png)
+![](/images/sub2_AlleleGrouping_axis1_vs_axis2.png)
 
 We have an over represented central group g0, which correspond to
 unassigned alleles. However, we can observe that the group g2 is steel a
@@ -732,7 +732,7 @@ When you look at the
 observe that accessions are separated on the 2 axis with no intermediate
 accessions that could perturbate the analysis.
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig8.png)
+![](/images/Vcf2struct_Fig8.png)
 
 And the clustering:
 
@@ -758,11 +758,11 @@ previously described command lines:
 
 The resulting centroid grouping:
 
-![](http://banana-genome-http.cirad.fr/image/FinaleCentroidGrouping_axis1_vs_axis2.png)
+![](/images/FinaleCentroidGrouping_axis1_vs_axis2.png)
 
 The final allele grouping:
 
-![](http://banana-genome-http.cirad.fr/image/FinaleAlleleGrouping_axis1_vs_axis2.png)
+![](/images/FinaleAlleleGrouping_axis1_vs_axis2.png)
 
 F - Performing the chromosome painting
 --------------------------------------
@@ -779,7 +779,7 @@ fixation is not the same between accession depending if the accessions
 are allogamous or autogamous. This program has been designed to solve
 these problems (at least try) as explained in the following Figure:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig9.png)
+![](/images/Vcf2struct_Fig9.png)
 
 This figure explained the impact of an unbalance in the allele fixation
 levels of ancestral population on the expectation of grouped allele
@@ -819,7 +819,7 @@ expected number of alleles of a group can be greatly underestimated as
 well as the mean value (cf Figure below). In this context, the --prop
 value may be more appropriate.
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig10.png)
+![](/images/Vcf2struct_Fig10.png)
 
 This figure showed the impact of the ancestral accession sampling on the
 simulating of ancestral population. To partially solve this problem, we
@@ -832,7 +832,7 @@ ancestral group. This can be donne by comparing the clustering and
 accession grouping. In the following picture we showed the clustering of
 alleles and accession projections allong synthetic axis.
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig10bis.png)
+![](/images/Vcf2struct_Fig10bis.png)
 
 In this picture we can observe that sample1 to sample20 are accession
 corresponding to the group **g1**, accessions from sample21 to sample40
@@ -890,7 +890,7 @@ is from noise and these values are reported in column named:
 
 Haplotype probabilities are calculated as followed:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig11.png)
+![](/images/Vcf2struct_Fig11.png)
 
 If the observed grouped allele number is higher than the **expected
 value - the maximal standard deviation** a probability of 1 is
@@ -937,7 +937,7 @@ following nomenclature ***accessionName\_chr\_density.pdf*** and can be
 found in the folder passed in --prefix option. The following Figure is
 obtained from the accession *sample68*
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig12.png)
+![](/images/Vcf2struct_Fig12.png)
 
 This Figure regroup several informations such as the heterozygosity
 level along the chromosome, for each ancestry the expected number of
@@ -963,7 +963,7 @@ following command line:
 This command line outpout a pdf named ***sample68.pdf*** which should
 look like this:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig13.png)
+![](/images/Vcf2struct_Fig13.png)
 
 This is not very different from the previous Figure but the idea was
 just to try the command line. You can also observe that pericentromeric
@@ -990,7 +990,7 @@ accession run the following command line:
 This command line overwrite the original Figure and the outpout should
 look like this:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig14.png)
+![](/images/Vcf2struct_Fig14.png)
 
 You can observe our three chromosomes (RefSeq, RefSeq1 and RefSeq2) of
 the same accession in one Figure.
@@ -1013,7 +1013,7 @@ This command creates a file named ***All\_Admix\_RefSeq\_1.pdf*** which
 contained haplotypes for accessions passed in --acc option. The outpout
 should look like this (at the bottom of the page):
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig15.png)
+![](/images/Vcf2struct_Fig15.png)
 
 This program is designed to print at most 53 (default parameters)
 chromosome per pages, if you have more chromosomes to draw, if this
@@ -1043,7 +1043,7 @@ This programs outpouts 4 files:
 
 The Figure obtained should look like this:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig16.png)
+![](/images/Vcf2struct_Fig16.png)
 
 In the circos picture, accessions are ordered from the outside to the
 inside in following the order passed in --acc option.
@@ -1085,7 +1085,7 @@ And then, it is time to draw the Circos:
 
 The output should look like this:
 
-![](http://banana-genome-http.cirad.fr/image/Vcf2struct_Fig17.png)
+![](/images/Vcf2struct_Fig17.png)
 
 H - E-chromosome painting using non admixed ancestral accessions
 ----------------------------------------------------------------
@@ -1132,7 +1132,7 @@ chromosomes of the same origin respectively for triploid (see Figure below (C)) 
 a ratio of 0.25, 0.5, 0.75 for one, two and three ancestral chromosomes of the same
 origin respectively for tetraploid accession (see Figure below (D)).
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig1.png)
+![](/images/AllelePropAndCov_Fig1.png)
 
 In addition, for each position where an allele can be attributed to a group, the read
 coverage for the accession is calculated. An average coverage is then calculated for
@@ -1140,7 +1140,7 @@ the accession and read coverage along the chromosome of the accession is then pl
 relative to the average coverage of the accession. This approach allow to identify missing
 or supernumerary chromosomes (or chromosomal region) (See Figure below). 
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig2.png)
+![](/images/AllelePropAndCov_Fig2.png)
 
 ### Running analysis
 Two programs are available and can be run depending on what figures you expect. The first
@@ -1180,7 +1180,7 @@ and as colors are arbitrarily attributed based on an alphanumeric sorting of
 ancestor names and first color is green and second is red, then "AA" is green and
 "BB" is red.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig3.png)
+![](/images/AllelePropAndCov_Fig3.png)
 
 Their is 3 additional admixed accessions, two triploids (GP1 and P025) and a
 tetraploid one P1. These accessions can also be analysed  as Kunnan with the
@@ -1197,13 +1197,13 @@ and the interpretation that can be made from this coverage. We can observe
 that for accession P025 a chromosome region is missing for the start of
 chromosome 1 and the major part of chromosome 3.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig4.png)
+![](/images/AllelePropAndCov_Fig4.png)
 
 The following figure is the picture of allele ratio you should obtain and
 green and red bars represent the interpretation that can be made from this
 allele ratio and read coverage.
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig5.png)
+![](/images/AllelePropAndCov_Fig5.png)
 
 
 One also want to perform this same analysis but by comparing one chromosome
@@ -1231,7 +1231,7 @@ and the allele ratio file.
 Here is an exemple of file generated for chromosome 3 on the 4 tested
 accessions:
 
-![](http://banana-genome-http.cirad.fr/image/AllelePropAndCov_Fig6.png)
+![](/images/AllelePropAndCov_Fig6.png)
 
 In this figure, chromosome 3 of all tested accessions are represented in
 the same figure. We added T04 and T02 which are accessions representative
