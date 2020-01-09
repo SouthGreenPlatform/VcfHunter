@@ -48,6 +48,9 @@ or
 
 **Baurens et al., 2018.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2018. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481
 
+or
+
+**Martin et al., sub** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal*
 
 Description
 -----------
