@@ -42,15 +42,16 @@ How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
 
-**Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
-
-or 
-
-**Baurens et al., 2018.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2018. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/article/36/1/97/5162481
+**Martin et al., 2020.** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. 2020. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal* https://onlinelibrary.wiley.com/doi/abs/10.1111/tpj.14683
 
 or
 
-**Martin et al., 2020.** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. 2020. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal* https://onlinelibrary.wiley.com/doi/abs/10.1111/tpj.14683
+**Baurens et al., 2019.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2019. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/article/36/1/97/5162481
+
+or
+
+**Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
+
 
 Description
 -----------
