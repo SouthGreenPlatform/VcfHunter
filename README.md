@@ -46,18 +46,18 @@ Depending on the tool you use (see ***Description*** section) please cite either
 
 or 
 
-**Baurens et al., 2018.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2018. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/advance-article/doi/10.1093/molbev/msy199/5162481
+**Baurens et al., 2018.** Baurens F-C, Martin G, Hervouet C, Salmon F, Yohomé D, Ricci S, Rouard M, Habas R, Lemainque A, Yahiaoui N, et al. 2018. **Recombination and large structural variations shape interspecific edible bananas genomes.** *Mol. Biol. Evol.* https://academic.oup.com/mbe/article/36/1/97/5162481
 
 or
 
-**Martin et al., sub** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal*
+**Martin et al., 2020.** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. 2020. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal* https://onlinelibrary.wiley.com/doi/abs/10.1111/tpj.14683
 
 Description
 -----------
 
 The package provided comprised 17 programs listed here:
 
--   process_RNAseq.1.0.py (Martin et al., sub)
+-   process_RNAseq.1.0.py (Martin et al., 2020)
 -   process_reseq.1.0.py (Garsmeur et al., 2018)
 -   VcfPreFilter.1.0.py (Garsmeur et al., 2018)
 -   vcfFilter.1.0.py (Garsmeur et al., 2018)
@@ -67,13 +67,13 @@ The package provided comprised 17 programs listed here:
 -   Draw_dot_plot.py (Baurens et al., 2018)
 -   vcf2allPropAndCov.py (Baurens et al., 2018)
 -   vcf2allPropAndCovByChr.py (Baurens et al., 2018)
--   vcf2struct.1.0.py (Martin et al., sub)
--   vcf2linear.1.0.py (Martin et al., sub)
--   haplo2kar.1.0.py (Martin et al., sub)
--   haplo2karByChr.1.0.py (Martin et al., sub)
--   haplo2Circos.1.0.py (Martin et al., sub)
--   vcfIdent.1.0.py (Martin et al., sub)
--   vcfRemove.1.0.py (Martin et al., sub)
+-   vcf2struct.1.0.py (Martin et al., 2020)
+-   vcf2linear.1.0.py (Martin et al., 2020)
+-   haplo2kar.1.0.py (Martin et al., 2020)
+-   haplo2karByChr.1.0.py (Martin et al., 2020)
+-   haplo2Circos.1.0.py (Martin et al., 2020)
+-   vcfIdent.1.0.py (Martin et al., 2020)
+-   vcfRemove.1.0.py (Martin et al., 2020)
 
 All 17 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
