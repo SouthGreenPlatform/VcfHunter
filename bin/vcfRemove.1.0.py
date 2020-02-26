@@ -23,6 +23,7 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.stdout.write('loading modules\n')
+import gzip
 import optparse
 
 def recup_geno(LINE, HEADER, ACCESSION):
@@ -82,11 +83,14 @@ def __main__():
 	ACC = options.acc
 	REMOVE = options.remove
 	
-	# recording informations in a dictionnary
-	file = open(options.vcf)
-	outfile = open(options.out+'.vcf','w')
-	outfile1 = open(options.out+'_haplo.vcf','w')
-	outfile2 = open(options.out+'_MoreThanHaplo.vcf','w')
+	# recording informations in a dictionary
+	if options.vcf[-3:] == '.gz':
+		file = gzip.open(options.vcf,'rt')
+	else:
+		file = open(options.vcf)
+	outfile = gzip.open(options.out+'.vcf.gz','wt')
+	outfile1 = gzip.open(options.out+'_haplo.vcf.gz','wt')
+	outfile2 = gzip.open(options.out+'_MoreThanHaplo.vcf.gz','wt')
 	for line in file:
 		data = line.split()
 		if data:

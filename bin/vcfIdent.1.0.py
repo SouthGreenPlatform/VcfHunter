@@ -23,6 +23,7 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.stdout.write('loading modules\n')
+import gzip
 import optparse
 
 import numpy
@@ -172,7 +173,10 @@ def __main__():
 	
 	# recording informations in a dictionnary
 	dico_chr = {}
-	file = open(options.vcf)
+	if options.vcf[-3:] == '.gz':
+		file = gzip.open(options.vcf,'rt')
+	else:
+		file = open(options.vcf)
 	for line in file:
 		data = line.split()
 		if data:
