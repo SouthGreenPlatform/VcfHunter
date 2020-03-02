@@ -63,7 +63,7 @@ In this step, read duplicates (resulting from PCR before sequencing) are removed
 -   \*\_rmdup.bai file (index of the bam file)
 -   \*\_duplicate file summarising read duplication statistics
 
-## c - Removing duplicates reads
+## c - Indel realignment
 
 In this step, read are realigned around indels.
 
