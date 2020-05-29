@@ -490,7 +490,10 @@ def RecordAccession(VCF, NAMES, MAT):
 			ACC_TO_WORK = file.readline().replace('K-mean_GROUP','').replace('GROUP','').split()
 			file.close()
 		else:
-			file = open(VCF)
+			if VCF[-3:] == '.gz':
+				file = gzip.open(VCF,'rt')
+			else:
+				file = open(VCF)
 			for line in file:
 				data = line.split()
 				if data:
@@ -764,7 +767,10 @@ def get_genotype_and_group(VCF, MAT, DGROUP, NAME, PREFIX):
 	outfile.write('\t'.join(mot)+'\n')
 	
 	# Reading and recording informations
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -820,7 +826,11 @@ def random_sub_set(VCF, NRAND, PREFIX):
 	"""
 	
 	# Recording variant line in a file
-	file = open(VCF)
+	
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	i = 0
 	list_line = []
 	for line in file:
@@ -842,7 +852,10 @@ def random_sub_set(VCF, NRAND, PREFIX):
 	
 	# Printing vcf subset
 	outfile = open(PREFIX+'_subset.vcf', 'w')
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	i = 0
 	for line in file:
 		data = line.split()
@@ -1295,7 +1308,10 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	
 	# Reading vcf file
 	PrintFilter = 1
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -1553,7 +1569,10 @@ def compare2calling(VCF, VCF2, COMP1, COMP2):
 	# Loading genotype information of accession 1
 	sites_number = 0
 	dico_comp1 = {}
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -1637,7 +1656,10 @@ def AddRefToCall(VCF, PREFIX, COV):
 	outfile = open(PREFIX+'_add_ref.vcf','w')
 	
 	# Opening vcf
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	# Reading file line by line
 	for line in file:
 		data = line.split()
@@ -1822,7 +1844,10 @@ def CalcAllelicIdent(VCF, PREFIX):
 	
 	i = 0
 	# reading file
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -3128,7 +3153,10 @@ def DrawAllele(VCF, MAT, NAMES, DGROUP, PREFIX, GCOL, FASTA, EXCLCHR):
 			acc_to_draw = file.readline().replace('K-mean_GROUP','').replace('GROUP','').split()
 			file.close()
 		else:
-			file = open(VCF)
+			if VCF[-3:] == '.gz':
+				file = gzip.open(VCF,'rt')
+			else:
+				file = open(VCF)
 			for line in file:
 				data = line.split()
 				if data:
@@ -3288,7 +3316,10 @@ def DrawAllele(VCF, MAT, NAMES, DGROUP, PREFIX, GCOL, FASTA, EXCLCHR):
 			print('toto')
 		else:
 			# getting ploidy informations
-			file = open(VCF)
+			if VCF[-3:] == '.gz':
+				file = gzip.open(VCF,'rt')
+			else:
+				file = open(VCF)
 			for line in file:
 				data = line.split()
 				if data:
@@ -3472,7 +3503,10 @@ def	create_karyotype_file(PREFIX, VCF, FASTA, EXCLCHR):
 	# Recording information
 	if FASTA == None:
 		dico_chr = {}
-		file = open(VCF)
+		if VCF[-3:] == '.gz':
+			file = gzip.open(VCF,'rt')
+		else:
+			file = open(VCF)
 		for line in file:
 			data = line.split()
 			if data:
@@ -3655,7 +3689,10 @@ def MergeVcf(VCF, VCF2, COMP1, PREFIX):
 	found = 0
 	not_found = 0
 	outfile = open(PREFIX+'_merged.vcf','w')
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
@@ -3838,7 +3875,10 @@ def	get_allele_group_prop(VCF, MAT, PREFIX, NAMES, DGROUP, EXCLCHR):
 			acc_to_draw = file.readline().replace('K-mean_GROUP','').replace('GROUP','').split()
 			file.close()
 		else:
-			file = open(VCF)
+			if VCF[-3:] == '.gz':
+				file = gzip.open(VCF,'rt')
+			else:
+				file = open(VCF)
 			for line in file:
 				data = line.split()
 				if data:
@@ -3936,7 +3976,10 @@ def	get_allele_group_prop(VCF, MAT, PREFIX, NAMES, DGROUP, EXCLCHR):
 			dico_acc_freq[n][j] = 0
 	
 	sys.stdout.write("Recording VCF informations...\n")
-	file = open(VCF)
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
 	for line in file:
 		data = line.split()
 		if data:
