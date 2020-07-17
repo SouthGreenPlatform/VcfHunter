@@ -39,11 +39,6 @@ from textwrap import wrap
 
 def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE, VERT, VERTREG, DICOCOLOR):
 	
-	
-	
-	# Color definition
-	# color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
-	
 	# getting chromosomes list
 	chr_list_temp = sorted(list(CHR_INFO.keys()))
 	chr_list = []
@@ -295,10 +290,10 @@ def __main__():
 	# Preparing color file
 	DicoColor = {}
 	if options.col == None:
-		color = ((0,0.8,0),(1,0,0),(0,0,1),(0.93725,0.60784,0.05882),(0.780392156862745,0.0823529411764706,0.52156862745098),(0.541176470588235,0.211764705882353,0.0588235294117647),(1,0.498039215686275,0),(0.5,0.5,0.5),(1,1,0))
+		cmap = matplotlib.cm.get_cmap('gist_rainbow')
 		groupList = sorted(list(dico_group.keys()))
-		for gp in groupList:
-			DicoColor[gp] = color[groupList.index(gp)]
+		for i in range(len(groupList)):
+			DicoColor[groupList[i]] = cmap(i/(len(groupList)-1))
 	else:
 		file = open(options.col)
 		for line in file:
