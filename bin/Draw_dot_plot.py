@@ -104,7 +104,7 @@ def record_ordered_loci(DICO_LOCI, CHR, AGP, DICO_ORDERED_LOCI, PHYSICAL):
 				list_pos[i][1] = marker_order
 				marker_order += 1
 		elif PHYSICAL != 'y':
-			sys.exit("Wrong value passed to --pysical argument. Only possible values are 'y' or 'n'")
+			sys.exit("Wrong value passed to --phys argument. Only possible values are 'y' or 'n'")
 		for i in range(len(list_pos)):
 			if i > 0:
 				total.append(list_pos[i][1]-list_pos[i-1][1]+1)
@@ -118,6 +118,7 @@ def record_ordered_loci(DICO_LOCI, CHR, AGP, DICO_ORDERED_LOCI, PHYSICAL):
 			DICO_ORDERED_LOCI['chr'][chr].append(increment)
 			DICO_ORDERED_LOCI['marker'].append(chr)
 			DICO_ORDERED_LOCI['pos'].append(increment)
+			DICO_ORDERED_LOCI['CId'].append(chr)
 			
 			list_pos = sorted(DICO_LOCI[chr], key=operator.itemgetter(1))
 			if PHYSICAL == 'n':
@@ -126,11 +127,12 @@ def record_ordered_loci(DICO_LOCI, CHR, AGP, DICO_ORDERED_LOCI, PHYSICAL):
 					list_pos[i][1] = marker_order
 					marker_order += 1
 			elif PHYSICAL != 'y':
-				sys.exit("Wrong value passed to --pysical argument. Only possible values are 'y' or 'n'")
+				sys.exit("Wrong value passed to --phys argument. Only possible values are 'y' or 'n'")
 			
 			for i in range(len(list_pos)):
 				DICO_ORDERED_LOCI['marker'].append(list_pos[i][0])
 				DICO_ORDERED_LOCI['pos'].append(list_pos[i][1] + increment)
+				DICO_ORDERED_LOCI['CId'].append(chr)
 				last_pos = list_pos[i][1] + increment
 			DICO_ORDERED_LOCI['chr'][chr].append(last_pos)
 			increment = last_pos + Mean_dist
@@ -152,6 +154,7 @@ def record_ordered_loci(DICO_LOCI, CHR, AGP, DICO_ORDERED_LOCI, PHYSICAL):
 			DICO_ORDERED_LOCI['chr'][chr].append(increment)
 			DICO_ORDERED_LOCI['marker'].append(chr+'-start')
 			DICO_ORDERED_LOCI['pos'].append(increment)
+			DICO_ORDERED_LOCI['CId'].append(chr)
 			
 			list_pos = sorted(DICO_LOCI[chr], key=operator.itemgetter(1))
 			if PHYSICAL == 'n':
@@ -160,15 +163,17 @@ def record_ordered_loci(DICO_LOCI, CHR, AGP, DICO_ORDERED_LOCI, PHYSICAL):
 					list_pos[i][1] = marker_order
 					marker_order += 1
 			elif PHYSICAL != 'y':
-				sys.exit("Wrong value passed to --pysical argument. Only possible values are 'y' or 'n'")
+				sys.exit("Wrong value passed to --phys argument. Only possible values are 'y' or 'n'")
 			
 			for i in range(len(list_pos)):
 				DICO_ORDERED_LOCI['marker'].append(list_pos[i][0])
 				DICO_ORDERED_LOCI['pos'].append(list_pos[i][1] + increment)
+				DICO_ORDERED_LOCI['CId'].append(chr)
 			last_pos = dico_agp[chr] + increment
 			DICO_ORDERED_LOCI['chr'][chr].append(last_pos)
 			DICO_ORDERED_LOCI['marker'].append(chr+'-fin')
 			DICO_ORDERED_LOCI['pos'].append(last_pos)
+			DICO_ORDERED_LOCI['CId'].append(chr)
 			increment = last_pos + 1
 
 def fill_the_matrix(MATRIX, DICO_ORDERED_LOCI, MAT):
@@ -194,7 +199,7 @@ def fill_the_matrix(MATRIX, DICO_ORDERED_LOCI, MAT):
 						MAT[dico_ordered_loci_index][i] = value
 	file.close()
 
-def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD):
+def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD, PHYSICAL, STRINGENT):
 	
 	## Obtaining xmax and ymax
 	xmax = DICO_ORDERED_LOCI['pos'][-1]
@@ -258,6 +263,10 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD):
 	for i in range(len(DICO_ORDERED_LOCI['pos'])):
 		for j in range(len(DICO_ORDERED_LOCI['pos'])):
 			if i < j:
+				chri = DICO_ORDERED_LOCI['CId'][i]
+				chrj = DICO_ORDERED_LOCI['CId'][j]
+				chriplus1 = DICO_ORDERED_LOCI['CId'][i+1]
+				chrjmoisn1 = DICO_ORDERED_LOCI['CId'][j-1]
 				if INVORD != "n":
 					posi = abs(DICO_ORDERED_LOCI['pos'][i]-ymax)
 					posj = DICO_ORDERED_LOCI['pos'][j]
@@ -270,7 +279,22 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD):
 					posjmoins1 = DICO_ORDERED_LOCI['pos'][j-1]
 				val = MAT[i][j]
 				if val <= 0.16:
-					ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
+					if PHYSICAL == 'n':
+						ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
+					elif PHYSICAL != 'y':
+						sys.exit("Wrong value passed to --phys argument. Only possible values are 'y' or 'n'")
+					elif STRINGENT == 'y':
+						if chri == chrj:
+							ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
+						else:
+							valijmoins1 = MAT[i][j-1]
+							valiplus1j = MAT[i+1][j]
+							if valijmoins1 <= 0.16 and valiplus1j <= 0.16:
+								ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
+					elif STRINGENT != 'n':
+						sys.exit("Wrong value passed to --stringent argument. Only possible values are 'y' or 'n'")
+					else:
+						ax.add_patch(mpatches.Rectangle((posjmoins1,posi) , posj-posjmoins1, posiplus1-posi, fc=couleur(val), ec='black', linewidth=0))
 	## done
 	
 	## Drawing a white triangle for the upper diagonal
@@ -418,15 +442,17 @@ def __main__():
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
 	"\n\n This program draw dot plot from a data matrix.")
 	# Wrapper options. 
-	parser.add_option( '-m', '--matrix',	dest='matrix',	default=None, 	help='The matrix marker file')
-	parser.add_option( '-l', '--loc', 		dest='loc',		default=None, 	help='Loci to plot with their locations')
-	parser.add_option( '-c', '--chr', 		dest='chr',		default=None, 	help='List of chromosomes to draw in this order (separated by ":")')
-	parser.add_option( '-a', '--agp',		dest='agp',		default=None, 	help='Agp file locating scaffolds in the reference sequence')
-	parser.add_option( '-s', '--stat',		dest='stat',	default=None, 	help='A two column file with column 1: marker name, column 2: statistics')
-	parser.add_option( '-p', '--phys',		dest='phys',	default='y', 	help='A value specifying if the marker position should be defined based on physical position or not. Possible values: "y" or "n", [Default: %default]')
-	parser.add_option( '-i', '--invord',	dest='invord',	default='n', 	help='Invert Ordinate axis. By default 0 of ordinate axis is located '
+	parser.add_option( '-m', '--matrix',	dest='matrix',		default=None, 	help='The matrix marker file')
+	parser.add_option( '-l', '--loc', 		dest='loc',			default=None, 	help='Loci to plot with their locations')
+	parser.add_option( '-c', '--chr', 		dest='chr',			default=None, 	help='List of chromosomes to draw in this order (separated by ":")')
+	parser.add_option( '-a', '--agp',		dest='agp',			default=None, 	help='Agp file locating scaffolds in the reference sequence')
+	parser.add_option( '-s', '--stat',		dest='stat',		default=None, 	help='A two column file with column 1: marker name, column 2: statistics')
+	parser.add_option( '-p', '--phys',		dest='phys',		default='y', 	help='A value specifying if the marker position should be defined based on physical position or not. Possible values: "y" or "n", [Default: %default]')
+	parser.add_option( '-i', '--invord',	dest='invord',		default='n', 	help='Invert Ordinate axis. By default 0 of ordinate axis is located '
 	'at the bottom left corner. Setting parameter to "y" will draw 0 at left top. [Default: %default]')
-	parser.add_option( '-o', '--output',	dest='output',	default='test.png', help='Output file name')
+	parser.add_option( '-S', '--stringent',	dest='stringent',	default='n', 	help='Only when physical is applied. Because of the rule to draw rectangle in physical dotplot, some large regions at translocation breakpoints boundaries '
+	'are drawn associated while it is not the case due to arge regions of missing markers, this options remove such false association but first marker at boundaries of such events are lost. Possible values: "y" or "n", [Default: %default]')
+	parser.add_option( '-o', '--output',	dest='output',		default='test.png', help='Output file name')
 	
 	(options, args) = parser.parse_args()
 	V = os.getpid()
@@ -453,21 +479,22 @@ def __main__():
 	plt.close(fig)
 	
 	# 1- Recording chromosomes and loci to draw
-	dico_loci = {}
+	dico_loci = {} # dico_loci [chr] -> [[MarkerName, position]]
 	record_loci(options.loc, options.chr, dico_loci)
 	toto = os.system("pmap %s | grep total" % V)
 	
 	# 2- Recording marker order and their final position
 	dico_ordered_loci = {}
-	dico_ordered_loci['marker'] = []
-	dico_ordered_loci['pos'] = []
-	dico_ordered_loci['chr'] = {}
+	dico_ordered_loci['marker'] = [] # dico_ordered_loci['marker'] -> [ordered marker name]
+	dico_ordered_loci['pos'] = [] # dico_ordered_loci['pos'] -> [ordered marker position], positions are calculated on ordered chromosome cumulated size
+	dico_ordered_loci['chr'] = {} # dico_ordered_loci['chr'] -> [chromosome position]
+	dico_ordered_loci['CId'] = [] # dico_ordered_loci['CId'] -> [marker corresponding chromosome]
 	record_ordered_loci(dico_loci, options.chr, options.agp, dico_ordered_loci, options.phys)
 	toto = os.system("pmap %s | grep total" % V)
 	
 	# 3- It's time to create matrix
 	list_4_matrix = list([999999] * len(dico_ordered_loci['marker']))
-	mat = []
+	mat = [] # a matrix MarkerNumber * MarkerNumber
 	for n in range(len(dico_ordered_loci['marker'])):
 		mat.append(list(list_4_matrix))
 	
@@ -475,7 +502,7 @@ def __main__():
 	fill_the_matrix(options.matrix, dico_ordered_loci, mat)
 	
 	# 4- It's time to plot the matrix
-	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output, options.stat, options.invord)
+	draw_plot(mat, dico_ordered_loci, options.agp, options.chr, options.output, options.stat, options.invord, options.phys, options.stringent)
 	
 	toto = os.system("pmap %s | grep total" % V)
 

@@ -238,7 +238,8 @@ def __main__():
 	parser.add_option( '',  '--lsize',			dest='lsize',		default='1',			help='Size of the line of the mean value curve. [Default: %default]')
 	parser.add_option( '',  '--win',			dest='halfwin',		default='10',			help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 	parser.add_option( '',  '--loc',			dest='loc',			default='',				help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
-	parser.add_option( '',  '--col',			dest='col',			default=None,				help='A color file with 4 columns: col1=group and the three last column corresponded to RGB code. [Default: %default]')
+	parser.add_option( '',  '--col',			dest='col',			default=None,			help='A color file with 4 columns: col1=group and the three last column corresponded to RGB code. [Default: %default]')
+	parser.add_option( '',  '--excl',			dest='excl',		default=None,			help='A file containing region to exclude for ancestry attribution in some introgressed accessions. [Default: %default]')
 	parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
@@ -268,6 +269,29 @@ def __main__():
 				VERTREG[chr].append(info[1:])
 			else:
 				sys.stdout.write('Wrong format passed to --loc argument\n')
+	
+	# Recording regions to exclude if required
+	sys.stdout.write("Recording excluded regions\n")
+	sys.stdout.flush()
+	DicoRegion = {}
+	if options.excl != None:
+		file = open(options.excl)
+		for line in file:
+			data = line.split()
+			if data:
+				if len(data) != 8:
+					sys.exit('The program exited without finishing because the following line does not have a correct number of columns:\n'+line)
+				else:
+					START = int(data[6])
+					END = int(data[7])
+					CHR = data[1]
+					ACC = data[0]
+					if not (ACC in DicoRegion):
+						DicoRegion[ACC] = {}
+					if not (CHR in DicoRegion[ACC]):
+						DicoRegion[ACC][CHR] = set()
+					DicoRegion[ACC][CHR].add((START, END))
+		file.close()
 	
 	# recording accession name
 	ACCESS = options.acc
@@ -316,6 +340,10 @@ def __main__():
 	
 	total_unmissing_sites = 0
 	
+	
+	sys.stdout.write("Working on the vcf\n")
+	sys.stdout.flush()
+	
 	# For linear drawing
 	dico_draw = {}
 	dico_chr = {}
@@ -338,29 +366,45 @@ def __main__():
 					ALT = data[header.index("ALT")].split(',')
 					VARIANT = REF + ALT
 					
-					# recording group1 and group2 alleles
+					# Recording non introgressed accessions at the position
+					dicoIntro = set()
+					for gp in dico_group:
+						for ACC in dico_group[gp]:
+							if ACC in DicoRegion:
+								if CHR in DicoRegion[ACC]:
+									for region in DicoRegion[ACC][CHR]:
+										START = region[0]
+										END = region[1]
+										if START < POS and POS < END:
+											dicoIntro.add(ACC)
+					
+					# recording group alleles
 					dico_allele = {}
 					for gp in dico_group:
 						dico_allele[gp] = set()
 						for ACC in dico_group[gp]:
-							ACCESSION = data[header.index(ACC)].split(':')
-							GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
-							for geno in GENOTYPE:
-								dico_allele[gp].add(geno)
+							if not (ACC in dicoIntro):
+								ACCESSION = data[header.index(ACC)].split(':')
+								GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
+								for geno in GENOTYPE:
+									dico_allele[gp].add(geno)
 					
 					# to manage missing data in groups
-					Good = 1
+					Good = True
 					for gp in dico_allele:
 						if options.NoMiss == 'n':
 							if '.' in dico_allele[gp] and len(dico_allele[gp]) == 1:
-								Good = 0
+								Good = False
 						elif options.NoMiss == 'y':
 							if '.' in dico_allele[gp]:
-								Good = 0
+								Good = False
 						else:
 							sys.exit('Oups, their is a bug... either the vcf has a problem or I made a mistake in the programing\n')
+						if len(dico_allele[gp]) == 0:
+							Good = False
+							print('Unpredicted region because of introgression in all representative of a group :', CHR, POS, gp)
 					if Good:
-						# recording accession 
+						# recording accession
 						add_cov = 0
 						if not ('.' in GENOTYPE):
 							total_unmissing_sites += 1
@@ -389,14 +433,15 @@ def __main__():
 							for gp in dico_group:
 								DICO_ACC[gp] = 0
 								for ACC in dico_group[gp]:
-									ACCESSION = data[header.index(ACC)].split(':')
-									GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
-									if not('.' in  GENOTYPE):
-										DICO_ACC[gp] += 1
-										for geno in GENOTYPE:
-											if not(geno in DICO_ALL_IN_ACC_COUNT):
-												DICO_ALL_IN_ACC_COUNT[geno] = 0
-											DICO_ALL_IN_ACC_COUNT[geno] += 1
+									if not (ACC in dicoIntro):
+										ACCESSION = data[header.index(ACC)].split(':')
+										GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
+										if not('.' in  GENOTYPE):
+											DICO_ACC[gp] += 1
+											for geno in GENOTYPE:
+												if not(geno in DICO_ALL_IN_ACC_COUNT):
+													DICO_ALL_IN_ACC_COUNT[geno] = 0
+												DICO_ALL_IN_ACC_COUNT[geno] += 1
 							
 							# Selecting allele to work with
 							dico_allele = {}

@@ -2424,7 +2424,7 @@ def Draw2dPlot(VARCOORD, DAXES, MAT, GROUP, DGROUP, PREFIX):
 		file = open(MAT)
 		# recording header
 		header = file.readline().split()
-		# Recording markers to draw and their group to a dictionnary
+		# Recording markers to draw and their group to a dictionary
 		for line in file:
 			data = line.split()
 			if data:
@@ -2461,6 +2461,14 @@ def Draw2dPlot(VARCOORD, DAXES, MAT, GROUP, DGROUP, PREFIX):
 	else:
 		if len(dico_color['UN']['to_plot']) == 0:
 			del dico_color['UN']
+	
+	## Additional manipulation to manage a single color file which can contain non existing groups
+	ColorToDelet = set()
+	for n in dico_color:
+		if len(dico_color[n]['to_plot']) == 0:
+			ColorToDelet.add(n)
+	for n in ColorToDelet:
+		del dico_color[n]
 	
 	for n in dico_color:
 		sys.stdout.write('Group '+n+' contains '+str(len(dico_color[n]['to_plot']))+' dots\n')
