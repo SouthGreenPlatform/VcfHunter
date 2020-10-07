@@ -204,7 +204,7 @@ specification.**
 
 #### Options:
 
-    --conf: A configuration file containing path to references sequence (multifasta file) and RNAseq reads (fastq files).
+    --conf: A configuration file containing path to references sequence (multifasta file) and DNAseq reads (fastq files).
     --thread: Max number of accessions treated at the same time. Do not exceed the number of processors available! [default: 1] 
     --queue: If you are using SGE scheduler: the queue name for the job to perform parallelization. If not do not fill.
     --prefix: Prefix for vcf file and statistics folders.
