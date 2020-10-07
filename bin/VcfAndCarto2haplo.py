@@ -1,3 +1,24 @@
+#
+#  Copyright 2014 CIRAD
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, see <http://www.gnu.org/licenses/> or
+#  write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#
+# -*- coding: utf-8 -*-
 import argparse
 import sys
 import gzip
@@ -5,7 +26,7 @@ import gzip
 
 def __main__():
 	#Parse Command Line
-	parser = argparse.ArgumentParser()
+	parser = argparse.ArgumentParser("python VcfAndCarto2haplo.py [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\nThis program use a vcf file and a phased genotyping matrix to generate haplotypes of the parent of individuals used to create the genotyping matrix.")
 	# Wrapper options.
 	parser.add_argument( '-v', '--vcf',			dest='vcf',			default=None,		help='The vcf file')
 	parser.add_argument( '-m', '--matrix',		dest='matrix',		default=None,		help='The matrix file')

@@ -201,7 +201,10 @@ def calculDis(VCF, NAMES, PREFIX):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n"
+	"This program calculate a simple matching dissimilarity between accessions passed in a vcf. The dissimilarity is calculated "
+	"as the sum of 1-(shared alleles between two individuals) divided by the lower ploidy (of the two individuals) multiplication "
+	"of the number of compared sites.")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-n',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')
