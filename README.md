@@ -1299,8 +1299,8 @@ T is common between the two accessions.
 
 *Output:*
 
- **\*.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.
- **\*_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.
+ **\*.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.\
+ **\*_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.\
  **\*_MoreThanHaplo.vcf:** The parsed vcf corresponding to the complement of **\*_haplo.vcf**.
 <br><br>
 
@@ -1353,9 +1353,9 @@ slightly change the way recombination rate is calculated.
 
 *Output:*
 
- **\*.tab:** The statistics of recombination rate observed in the windows.
- **\*_high.tab:** The list of regions in which recombination rate has been estimated based on markers of surrounding windows.
- **\*.png:** The statistics plotted in a png figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.
+ **\*.tab:** The statistics of recombination rate observed in the windows.\
+ **\*_high.tab:** The list of regions in which recombination rate has been estimated based on markers of surrounding windows.\
+ **\*.png:** The statistics plotted in a png figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.\
  **\*.svg:** The statistics plotted in a svg figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.
 <br><br>
 
@@ -1401,10 +1401,10 @@ This program calculate the proportion of alleles of an haplotype found in an acc
 
 *Output:*
 
- A tabulated file containing four columns:
-  col 1: individual name
-  col 2: proportion of sites having an allele shared with searched haplotype (calculated by dividing col3 by col4)
-  col 3: number of sites having an allele shared with searched haplotype
+ A tabulated file containing four columns:\
+  col 1: individual name\
+  col 2: proportion of sites having an allele shared with searched haplotype (calculated by dividing col3 by col4)\
+  col 3: number of sites having an allele shared with searched haplotype\
   col 4: number of sites with data on both haplotype and individual.
 <br><br>
 
@@ -1424,7 +1424,7 @@ of the number of compared sites.
 
 *Output:*
 
- **\*.dis:** A tabulated file containing the square matrix containing individual dissimilarity. The first line and column contained individual recoded name.
+ **\*.dis:** A tabulated file containing the square matrix containing individual dissimilarity. The first line and column contained individual recoded name.\
  **\*.cor:** A tabulated file corresponding to the file passed in --names argument with an additional first column making the correspondence between individuals and IDs in the .dis file
 <br><br>
 
