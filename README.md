@@ -56,7 +56,7 @@ or
 Description
 -----------
 
-The package provided comprised 17 programs listed here:
+The package provided comprised 23 programs listed here:
 
 -   process_RNAseq.1.0.py (Martin et al., 2020)
 -   process_reseq.1.0.py (Garsmeur et al., 2018)
@@ -75,8 +75,15 @@ The package provided comprised 17 programs listed here:
 -   haplo2Circos.1.0.py (Martin et al., 2020)
 -   vcfIdent.1.0.py (Martin et al., 2020)
 -   vcfRemove.1.0.py (Martin et al., 2020)
+-   vcf2cov.py
+-   CaReRa.py
+-   VcfAndCarto2haplo.py
+-   HaploProp.py
+-   vcf2dis.py
+-   vcfAndConsToRatio.py
 
-All 17 programs run using the following command: python program-name <--options-name value>
+
+All 23 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
 
 Programs
@@ -1299,3 +1306,141 @@ T is common between the two accessions.
  **\*_MoreThanHaplo.vcf:** The parsed vcf corresponding to the complement of **\*_haplo.vcf**.
 <br><br>
 
+
+### vcf2cov.py
+
+This program draw coverage from accessions found in a vcf file and output figures in png format. Several options are available 
+to custom figures.
+
+*Options:*
+
+    --vcf: The vcf file containing accessions to compare
+    --acc: List of accessions to draw in a 2 column file (c1 = acc name, c2 = ploidy)
+    --minCov: Minimal coverage to keep the data point
+    --maxCov: Maximal coverage to keep the data point
+    --psize: Dot size in graph.
+    --lsize: Size of the line of the mean value curve.
+    --win: Size of half sliding window that allow to draw mean value curve. The mean value attributed to a dot will be calculated on [dot - win_dot ; dot + win_dot]
+    --loc: Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ...
+    --out: Prefix for file name output.
+
+
+*Output:*
+
+ **\*.png:** Png figures files. One file for each accessions passed in --acc option.
+<br><br>
+
+
+### CaReRa.py
+
+This program calculate, on a given window, the recombination rate observed based on segregating matrix. Options allowed to 
+slightly change the way recombination rate is calculated.
+
+*Options:*
+
+    --fasta: The multifasta file containing reference sequence on which tags were located.
+    --mat: Phased and corrected matrix file. 
+      col 1: markers name (named "marker"), 
+      col 2: marker coding ("nn,np" or "hh,hk,kk" or "hh,k-" or "ll,lm") (named "coding"),
+      col 3 and 4 are necessary but not used by the program (named "ratio" and "rephased", respectively),
+      col 5 to end : individual genotypes.
+	 First line contain header.
+     Redundant names (markers and individuals) are not allowed
+    --win: The windows (in bases) in which the number of recombinations will be calculated.
+    --chr: List of chromosomes to draw separated by ",". If omitted, all chromosomes will be drawn.
+    --excl: (optional) List of marker couple to exclude. A couple of marker should have this structure (Name1:Name2) and each couple should be separated by ",". This should be used in case of structural variations.
+    --rmun: (optional) Remove regions in which recombination rate has been estimated based on markers of surrounding windows. This only remove values in tab files. Values: "y" or "n".
+    --prefix: Prefix for the output files.
+
+*Output:*
+ **\*.tab:** The statistics of recombination rate observed in the windows.
+ **\*_high.tab:** The list of regions in which recombination rate has been estimated based on markers of surrounding windows.
+ **\*.png:** The statistics plotted in a png figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.
+ **\*.svg:** The statistics plotted in a svg figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.
+<br><br>
+
+### VcfAndCarto2haplo.py
+
+This program use a vcf file and a phased genotyping matrix to generate haplotypes of the parent of individuals used to 
+create the genotyping matrix.
+
+*Options:*
+
+    --vcf: The vcf file containing individuals and sites used to create the genotyping matrix
+    --matrix: A matrix file containing phased markers. This file contained several mandatory columns:
+      col 1: markers name (named "marker"), 
+      col 2: marker coding ("nn,np" or "hh,hk,kk") (named "coding"),
+      col 3 and 4 are necessary but not used by the program (named "ratio" and "rephased", respectively),
+      col 5 to end : individual genotypes.
+     First line contain header.
+     Redundant names (markers and individuals) are not allowed
+    --marker: A list of additional markers file (in one column). If these markers are not found in the matrix, the program will try to phases these markers if possible (i.e. the marker is homozygous in all individuals).
+    --output: The name of the output file
+
+*Output:*
+ A tabulated file containing on column 1: marker_name and on column 2: both haplotypes separated by "|"
+<br><br>
+
+### HaploProp.py
+
+This program calculate the proportion of alleles of an haplotype found in an accession genotyped in a vcf file.
+
+*Options:*
+
+    --vcf: The vcf file containing individuals in which we want to calculate the proportion of sites having the searched haplotype.
+    --haplo: A tabulated file containing three columns:
+      col 1: chromosome, 
+      col 2: position,
+      col 3 Allele.
+     This file does not contain header.
+    --out: The name of the output file
+
+*Output:*
+ A tabulated file containing four columns:
+  col 1: individual name
+  col 2: proportion of sites having an allele shared with searched haplotype (calculated by dividing col3 by col4)
+  col 3: number of sites having an allele shared with searched haplotype
+  col 4: number of sites with data on both haplotype and individual.
+<br><br>
+
+
+### vcf2dis.py
+
+This program calculate a simple matching dissimilarity between accessions passed in a vcf. The dissimilarity is calculated 
+as the sum of 1-(shared alleles between two individuals) divided by the lower ploidy (of the two individuals) multiplication 
+of the number of compared sites.
+
+*Options:*
+    --vcf: The vcf file containing individuals in which we want to calculate the dissimilarity index.
+    --names: A file containing accessions we wanted to calculate dissimilarity on. Accessions should be listed in one column, additional informations can be passed in additional columns. This file should contain an header.
+    --prefix: Prefix for the output files.
+
+*Output:*
+ **\*.dis:** A tabulated file containing the square matrix containing individual dissimilarity. The first line and column contained individual recoded name.
+ **\*.cor:** A tabulated file corresponding to the file passed in --names argument with an additional first column making the correspondence between individuals and IDs in the .dis file
+<br><br>
+
+	
+### vcfAndConsToRatio.py
+
+This program looks for specific alleles of a consensus haplotype found in one specific group of accessions and absent 
+from another group of accessions. The read allelic ratio of these specific alleles was then searched and plotted along 
+chromosome for each studied accession. This program only work on one chromosome and several chromosomes should not be 
+passed in the consensus.
+
+*Options:*
+--haplo: A tabulated file containing three columns:
+      col 1: chromosome, 
+      col 2: position,
+      col 3 Allele.
+     This file does not contain header.
+--With: A list of accessions with the searched haplotype. Individuals should be listed in one column.
+--Without: A list of accessions without the searched haplotype. Individuals should be listed in one column.
+--acc: (optional) A list of accessions in which we want to draw the allelic read ratio. Individuals should be listed in one column.
+--vcf: A vcf file containing individuals passed to --With and --Without arguments
+--VCF: A vcf file containing individuals passed to --acc argument. If the individuals passed to --acc argument are in the vcf passed to --vcf, repeat the name of the vcf file in --VCF argument.
+--out: Prefix for the output files.
+
+*Output:*
+ **\*.png:** A list of png files containing consensus accessions specific group alleles proportions along the studied chromosome. At most 15 individuals were reported per png file.
+<br><br>
