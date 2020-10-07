@@ -1300,9 +1300,7 @@ T is common between the two accessions.
 *Output:*
 
  **\*.vcf:** A vcf file containing all accession in the former vcf but in which the alleles of the accession passed in --acc option have alleles common with accession passed to --remove option removed.
- 
  **\*_haplo.vcf:** A parsed vcf corresponding to the **\*.vcf** file with only line in which the accession passed to --acc option is now haploid.
- 
  **\*_MoreThanHaplo.vcf:** The parsed vcf corresponding to the complement of **\*_haplo.vcf**.
 <br><br>
 
@@ -1352,7 +1350,9 @@ slightly change the way recombination rate is calculated.
     --rmun: (optional) Remove regions in which recombination rate has been estimated based on markers of surrounding windows. This only remove values in tab files. Values: "y" or "n".
     --prefix: Prefix for the output files.
 
+
 *Output:*
+
  **\*.tab:** The statistics of recombination rate observed in the windows.
  **\*_high.tab:** The list of regions in which recombination rate has been estimated based on markers of surrounding windows.
  **\*.png:** The statistics plotted in a png figure. Red curve represent values attributed to central position of the window. Blue curved represented smoothed values. Red areas represent regions in which recombination rate was estimated based on surrounding windows due to absence of markers in the windows.
@@ -1377,9 +1377,12 @@ create the genotyping matrix.
     --marker: A list of additional markers file (in one column). If these markers are not found in the matrix, the program will try to phases these markers if possible (i.e. the marker is homozygous in all individuals).
     --output: The name of the output file
 
+
 *Output:*
+
  A tabulated file containing on column 1: marker_name and on column 2: both haplotypes separated by "|"
 <br><br>
+
 
 ### HaploProp.py
 
@@ -1395,7 +1398,9 @@ This program calculate the proportion of alleles of an haplotype found in an acc
      This file does not contain header.
     --out: The name of the output file
 
+
 *Output:*
+
  A tabulated file containing four columns:
   col 1: individual name
   col 2: proportion of sites having an allele shared with searched haplotype (calculated by dividing col3 by col4)
@@ -1411,11 +1416,14 @@ as the sum of 1-(shared alleles between two individuals) divided by the lower pl
 of the number of compared sites.
 
 *Options:*
+
     --vcf: The vcf file containing individuals in which we want to calculate the dissimilarity index.
     --names: A file containing accessions we wanted to calculate dissimilarity on. Accessions should be listed in one column, additional informations can be passed in additional columns. This file should contain an header.
     --prefix: Prefix for the output files.
 
+
 *Output:*
+
  **\*.dis:** A tabulated file containing the square matrix containing individual dissimilarity. The first line and column contained individual recoded name.
  **\*.cor:** A tabulated file corresponding to the file passed in --names argument with an additional first column making the correspondence between individuals and IDs in the .dis file
 <br><br>
@@ -1429,18 +1437,21 @@ chromosome for each studied accession. This program only work on one chromosome 
 passed in the consensus.
 
 *Options:*
---haplo: A tabulated file containing three columns:
-      col 1: chromosome, 
-      col 2: position,
-      col 3 Allele.
+
+    --haplo: A tabulated file containing three columns:
+     col 1: chromosome, 
+     col 2: position,
+     col 3 Allele.
      This file does not contain header.
---With: A list of accessions with the searched haplotype. Individuals should be listed in one column.
---Without: A list of accessions without the searched haplotype. Individuals should be listed in one column.
---acc: (optional) A list of accessions in which we want to draw the allelic read ratio. Individuals should be listed in one column.
---vcf: A vcf file containing individuals passed to --With and --Without arguments
---VCF: A vcf file containing individuals passed to --acc argument. If the individuals passed to --acc argument are in the vcf passed to --vcf, repeat the name of the vcf file in --VCF argument.
---out: Prefix for the output files.
+    --With: A list of accessions with the searched haplotype. Individuals should be listed in one column.
+    --Without: A list of accessions without the searched haplotype. Individuals should be listed in one column.
+    --acc: (optional) A list of accessions in which we want to draw the allelic read ratio. Individuals should be listed in one column.
+    --vcf: A vcf file containing individuals passed to --With and --Without arguments
+    --VCF: A vcf file containing individuals passed to --acc argument. If the individuals passed to --acc argument are in the vcf passed to --vcf, repeat the name of the vcf file in --VCF argument.
+    --out: Prefix for the output files.
+
 
 *Output:*
+
  **\*.png:** A list of png files containing consensus accessions specific group alleles proportions along the studied chromosome. At most 15 individuals were reported per png file.
 <br><br>
