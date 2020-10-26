@@ -36,6 +36,12 @@ import matplotlib.patches as mpatches
 from scipy.interpolate import spline
 from textwrap import wrap
 
+def is_number(s):
+	try:
+		float(s)
+		return True
+	except ValueError:
+		return False
 
 def draw_chr(DICO_INFO, CHR_INFO, DICO_GROUP, OUT, MEAN_COV, PLOIDY, DCURVE, halfWindow, PSIZE, LSIZE, VERT, VERTREG, DICOCOLOR):
 	
@@ -236,6 +242,7 @@ def __main__():
 	parser.add_option( '',  '--dcurve',			dest='dcurve',		default='n',			help='Draw mean curve for ratio. Possible values: y or n [Default: %default]')
 	parser.add_option( '',  '--psize',			dest='psize',		default='1.5',			help='Dot size in graph. [Default: %default]')
 	parser.add_option( '',  '--lsize',			dest='lsize',		default='1',			help='Size of the line of the mean value curve. [Default: %default]')
+	parser.add_option( '',  '--prop',			dest='prop',		default='n',			help='Proportion of occurrence of the allele. This options can only be applied when --all option is set to "y". Possible values: n or a value comprised between 0 and 1. A value of 1 means that all accessions from the group must be homozygous to attribute this allele to a group. [Default: %default]')
 	parser.add_option( '',  '--win',			dest='halfwin',		default='10',			help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 	parser.add_option( '',  '--loc',			dest='loc',			default='',				help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
 	parser.add_option( '',  '--col',			dest='col',			default=None,			help='A color file with 4 columns: col1=group and the three last column corresponded to RGB code. [Default: %default]')
@@ -251,6 +258,12 @@ def __main__():
 		sys.exit('Please provide a accession name to --acc argument')
 	if options.ploidy == None:
 		sys.exit('Please provide a ploidy level to --ploidy argument')
+	
+	if options.prop != 'n':
+		if is_number(options.prop):
+			PROPVALUE = float(options.prop)
+		else:
+			sys.exit('Oups, the program exited without finishing: please provide either "n" or a number comprised between 0 and 1 to --prop options\n')
 	
 	VERT = {}
 	VERTREG = {}
@@ -435,29 +448,50 @@ def __main__():
 								for ACC in dico_group[gp]:
 									if not (ACC in dicoIntro):
 										ACCESSION = data[header.index(ACC)].split(':')
-										GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
+										GENOList = ACCESSION[FORMAT.index("GT")].replace('|','/').split('/')
+										GENOTYPE = set(GENOList)
 										if not('.' in  GENOTYPE):
-											DICO_ACC[gp] += 1
-											for geno in GENOTYPE:
-												if not(geno in DICO_ALL_IN_ACC_COUNT):
-													DICO_ALL_IN_ACC_COUNT[geno] = 0
-												DICO_ALL_IN_ACC_COUNT[geno] += 1
-							
+											if options.prop == 'n':
+												DICO_ACC[gp] += 1
+												for geno in GENOTYPE:
+													if not(geno in DICO_ALL_IN_ACC_COUNT):
+														DICO_ALL_IN_ACC_COUNT[geno] = 0
+													DICO_ALL_IN_ACC_COUNT[geno] += 1
+											else: # allele should be present in a certain proportion in ancestral accessions
+												DICO_ACC[gp] += len(GENOList)
+												if len(GENOTYPE) == 1:
+													for geno in GENOList:
+														if not(geno in DICO_ALL_IN_ACC_COUNT):
+															DICO_ALL_IN_ACC_COUNT[geno] = 0
+														DICO_ALL_IN_ACC_COUNT[geno] += 1
+												else:
+													for geno in GENOTYPE:
+														if not(geno in DICO_ALL_IN_ACC_COUNT):
+															DICO_ALL_IN_ACC_COUNT[geno] = 0
 							# Selecting allele to work with
-							dico_allele = {}
-							for gp in dico_allele_specific:
-								dico_allele[gp] = set()
-								ExpectedGpNumber = DICO_ACC[gp]
-								for allele in dico_allele_specific[gp]:
-									if DICO_ALL_IN_ACC_COUNT[allele] == ExpectedGpNumber:
-										dico_allele[gp].add(allele)
+							if options.prop == 'n':
+								dico_allele = {}
+								for gp in dico_allele_specific:
+									dico_allele[gp] = set()
+									ExpectedGpNumber = DICO_ACC[gp]
+									for allele in dico_allele_specific[gp]:
+										if DICO_ALL_IN_ACC_COUNT[allele] == ExpectedGpNumber:
+											dico_allele[gp].add(allele)
+							else:
+								dico_allele = {}
+								for gp in dico_allele_specific:
+									dico_allele[gp] = set()
+									for allele in dico_allele_specific[gp]:
+										if DICO_ALL_IN_ACC_COUNT[allele]/DICO_ACC[gp] >= PROPVALUE:
+											dico_allele[gp].add(allele)
+								
 
 						###################################################################################################################
 						
 						elif options.all == 'n':
 							pass
 						else:
-							sys.exit('Oups, the program exited without finishing: please provide either "y" ot "n" to --all options\n')
+							sys.exit('Oups, the program exited without finishing: please provide either "y" or "n" to --all options\n')
 						
 						ACCESSION = data[header.index(ACCESS)].split(':')
 						GENOTYPE = set(ACCESSION[FORMAT.index("GT")].replace('|','/').split('/'))
