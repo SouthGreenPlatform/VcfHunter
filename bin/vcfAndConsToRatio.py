@@ -73,13 +73,13 @@ def __main__():
 	file.close()
 	
 	# Loading accessions to work with
-	ACCTOTREAT = set()
+	ACCTOTREAT = []
 	if options.acc != None:
 		file = open(options.acc)
 		for line in file:
 			data = line.split()
 			if data:
-				ACCTOTREAT.add(data[0])
+				ACCTOTREAT.append(data[0])
 		file.close()
 	
 	# Selecting marker present in accessions from the group, and absent from the other group
@@ -174,7 +174,7 @@ def __main__():
 					for acc in data[FormatPos+1:]:
 						dicoAccPos[acc] = data.index(acc)
 						dicoAccStat[acc] = [[],[],[]]
-						ACCTOTREAT.add(acc)
+						ACCTOTREAT.append(acc)
 			elif data[0][0] != "#":
 				Chr = data[ChrPos]
 				if Chr in NewDicoMarker:
@@ -256,9 +256,11 @@ def __main__():
 	fig = plt.figure(figsize=(10.5, 14.85))
 	fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 	
-	AccToPlot=list(sorted(dicoAccStat.keys()))
+	# AccToPlot=list(sorted(dicoAccStat.keys()))
 	
-	for i, acc in enumerate(AccToPlot):
+	outfile = open(options.out+'.tab','w')
+	
+	for i, acc in enumerate(ACCTOTREAT):
 		ax = plt.subplot2grid((NB,15),(POSSPAN,1), colspan=14, rowspan=1)
 		ax.set_ylim(0, 1.1)
 		ax.set_xlim(0, MAXI)
@@ -280,10 +282,13 @@ def __main__():
 			fig = plt.figure(figsize=(10.5, 14.85))
 			fig.subplots_adjust(left=0.015, right=0.985, top=0.98, bottom=0.05)
 		j=i
+		outfile.write(acc+'\t'+str(numpy.nanmean(dicoAccStat[acc][0]))+'\t'+str(numpy.nanmedian(dicoAccStat[acc][0]))+'\t'+str(numpy.count_nonzero(~numpy.isnan(dicoAccStat[acc][0])))+'\n')
 	
 	if (i+1)%15 != 0:
 		fig.savefig(options.out+'_'+Chromosome+'_'+str(int(j/15)+1)+'_Ratio.png')
 		plt.close(fig)
+	
+	outfile.close()
 
 
 if __name__ == "__main__": __main__()
