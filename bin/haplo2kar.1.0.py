@@ -101,7 +101,7 @@ def get_centro(CENTRO, dico_centro):
 		if data:
 			dico_centro[data[0]] = [int(data[1]), int(data[2])]
 
-def draw_plot(DICO, GCOL, GROUPS, ACC, LIST_CHR, CENTRO, PLOIDY):
+def draw_plot(DICO, GCOL, GROUPS, ACC, LIST_CHR, CENTRO, PLOIDY, GRAPH):
 	
 	# recording centromere position
 	dico_centro = {}
@@ -236,7 +236,7 @@ def draw_plot(DICO, GCOL, GROUPS, ACC, LIST_CHR, CENTRO, PLOIDY):
 				y0 -= short_space
 		y0 -= (large_space - short_space)
 	
-	fig.savefig(ACC+'.pdf')
+	fig.savefig(ACC+'.'+GRAPH)
 	plt.close(fig)
 	sys.exit()
 
@@ -261,7 +261,7 @@ def get_haplotype(ACC, LIST_CHR, dico_haplotype, ploidy):
 					dico_haplotype[chr]['length'] = int(data[3])
 			file.close()
 
-def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PLOIDY):
+def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PLOIDY, GRAPH):
 	
 	# recording chromosome to draw
 	list_chr = CHR.split(':')
@@ -273,7 +273,7 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PLOIDY):
 	dico_haplotype = {}
 	get_haplotype(ACC, list_chr, dico_haplotype, PLOIDY)
 	
-	draw_plot(dico_haplotype, GCOL, groups, ACC, list_chr, CENTRO, PLOIDY)
+	draw_plot(dico_haplotype, GCOL, groups, ACC, list_chr, CENTRO, PLOIDY, GRAPH)
 
 def __main__():
 	#Parse Command Line
@@ -285,6 +285,7 @@ def __main__():
 	parser.add_option( '',	'--dg',				dest='dg',			default=None, 			help='Groups to draw, separated by ":". [Default: %default]')
 	parser.add_option( '',	'--centro',			dest='centro',		default=None, 			help='(Peri)centromere positions. [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default='2', 			help='Ploidy level. Possible values: 2, 3 [Default: %default]')
+	parser.add_option( '',  '--graph',			dest='graph',		default='pdf',			help='graphic output. possible options: pdf, png, svg [Default: %default]')
 
 	(options, args) = parser.parse_args()
 	
@@ -300,6 +301,6 @@ def __main__():
 		sys.exit('Please provide a dg string to --dg argument')
 	if options.centro == None:
 		sys.exit('Please provide a centro file to --centro argument')
-	draw_chromosome(options.acc, options.chr, options.gcol, options.dg, options.centro, int(options.ploidy))
+	draw_chromosome(options.acc, options.chr, options.gcol, options.dg, options.centro, int(options.ploidy), options.graph)
 		
 if __name__ == "__main__": __main__()
