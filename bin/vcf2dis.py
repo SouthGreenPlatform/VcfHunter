@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 #  Copyright 2014 CIRAD
 #
@@ -19,6 +20,7 @@
 #
 #
 # -*- coding: utf-8 -*-
+
 import sys
 sys.stdout.write('loading modules\n')
 import optparse
