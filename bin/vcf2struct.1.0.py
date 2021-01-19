@@ -681,6 +681,78 @@ def get_genotype(VCF, NAME, PREFIX):
 						mot.append('/'.join(genotype[2:]))
 				outfile.write('\t'.join(mot)+'\n')
 	outfile.close()
+	
+def get_HapMap(VCF, NAME, PREFIX):
+	
+	"""
+		Return a file containing the required genotypes in a hapmap format
+		
+		:param VCF: A vcf file.
+		:type VCF: vcf
+		:param NAME: genotype names.
+		:type NAME: string
+		:param PREFIX: Prefix of the output file.
+		:type PREFIX: str
+		:return: A tab file containing genotype for each position.
+		:rtype: void
+	"""
+	
+	# creating output file
+	outfile = open(PREFIX+'.hapmap','w')
+	
+	# creating list of accession to output
+	names = []
+	file = open(NAME)
+	mot = ['rs#','alleles','chrom','pos','strand','assembly#','center','protLSID','assayLSID','panelLSID','QCcode']
+	for line in file:
+		data = line.split()
+		if len(data) > 1:
+			sys.exit('There is a problem in '+NAME+' file format. This file must contain per line only one accession name')
+		if data:
+			names.append(data[0])
+			mot.append(data[0])
+	outfile.write('\t'.join(mot)+'\n')
+	
+	# Reading and recording informations
+	if VCF[-3:] == '.gz':
+		file = gzip.open(VCF,'rt')
+	else:
+		file = open(VCF)
+	for line in file:
+		data = line.split()
+		if data:
+			# recording header
+			if data[0] == '#CHROM':
+				header = list(data)
+				chrPos = header.index('#CHROM')
+				PosPos = header.index('POS')
+				PosREF = header.index('REF')
+				PosALT = header.index('ALT')
+			# not working on headers of the file
+			elif data[0][0] != '#':
+				mot = []
+				CHR = data[chrPos]
+				POS = data[PosPos]
+				AlleleList = [data[PosREF]]+data[PosALT].split(',')
+				mot.append('S'+CHR+'_'+POS)
+				mot.append('/'.join(AlleleList))
+				mot.append(CHR)
+				mot.append(POS)
+				mot.append('+')
+				mot.append('NA')
+				mot.append('NA')
+				mot.append('NA')
+				mot.append('NA')
+				mot.append('NA')
+				mot.append('NA')
+				for acc in names:
+					genotype = recup_geno(data, header, acc)
+					subMot = ''
+					for n in genotype[2:]:
+						subMot += n.replace('NA', 'N')
+					mot.append(subMot)
+				outfile.write('\t'.join(mot)+'\n')
+	outfile.close()
 
 def get_genotype_and_group(VCF, MAT, DGROUP, NAME, PREFIX):
 	
@@ -4026,7 +4098,7 @@ def __main__():
 	parser.add_option( '',	'--vcf2',			dest='vcf2',			default=None,			help='A second vcf file. If COMPARE is passed in --type argument: can be used to compare two variant calling in two vcf file. [Default: %default]')
 	parser.add_option( '',	'--names',			dest='names',			default=None,			help='A one column file containing accession names to treat. [Default: %default]')
 	parser.add_option( '',	'--outgroup',		dest='outgroup',		default=None,			help='A one column file containing accession names that will not be used for filtering but will remain in the output file. [Default: %default]')
-	parser.add_option( '',	'--type',			dest='type',			default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST-Kmean, SNP_CLUST-MeanShift, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP. [Default: %default]')
+	parser.add_option( '',	'--type',			dest='type',			default=None,			help='Type of treatment to perform: STAT, GENE_STAT, FILTER, COMPARE, ADD_REF, AL_IDENTITY, FACTORIAL, RANDOM_SUB_SET, VISUALIZE_VAR_3D, VISUALIZE_VAR_2D, SNP_CLUST-Kmean, SNP_CLUST-MeanShift, FILTER_ON_MAX_GP_PROP, ALLELIC_STRUCT, GENOME_BLOCS, MERGE_VCF, GET_GENOTYPE, ALL_PROP, GET_HAPMAP. [Default: %default]')
 	parser.add_option( '',	'--fasta',			dest='fasta',			default=None,			help='A fasta file containing reference sequence. Not needed if standard vcf file (with sequence length). [Default: %default]')
 	parser.add_option( '',	'--gff3',			dest='gff3',			default=None,			help='A gff3 file containing gene annotation. [Default: %default]')
 	parser.add_option( '',	'--RmType',			dest='RmType',			default=None,			help='Variant status to filter out (several values can be passed in this case they should be separated by :). Values: PASS, DP_FILTER, QD_FILTER, SnpCluster, INDELS, SNP, AUTAPO [Default: %default]')
@@ -4187,6 +4259,13 @@ def __main__():
 		if options.vcf == None:
 			sys.exit('Please provide a vcf file to --vcf argument')
 		get_genotype(options.vcf, options.names, options.prefix)
+	
+	# Get genotype from VCF
+	if options.type == 'GET_HAPMAP':
+		sys.stdout.write('Associated parameters:\n\t--vcf\n\t--names\n\t--prefix\n')
+		if options.vcf == None:
+			sys.exit('Please provide a vcf file to --vcf argument')
+		get_HapMap(options.vcf, options.names, options.prefix)
 	
 	# Calculate allele group proportions
 	if options.type == 'ALL_PROP':
