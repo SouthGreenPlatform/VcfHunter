@@ -2687,7 +2687,7 @@ def cluster_around_centroid(DIS_MAT):
 def calc_euclid_dist(INDI, CENTROID):
 	
 	"""
-		Calculate euclidiane distance between individuals and centroids
+		Calculate euclidean distance between individuals and centroids
 		
 		:param INDI: An array containing by line dot coordinate.
 		:type INDI: array
