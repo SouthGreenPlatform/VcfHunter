@@ -321,7 +321,7 @@ def __main__():
 			dico_group[data[1]].append(data[0])
 	file.close()
 	
-	outfile = open(PREFIX+ACCESS+'_AlleleOriginAndRatio.tab','w')
+	outfile = gzip.open(PREFIX+ACCESS+'_AlleleOriginAndRatio.tab','wt')
 	outfile1 = open(PREFIX+ACCESS+'_stats.tab','w')
 	
 	# Preparing color file
