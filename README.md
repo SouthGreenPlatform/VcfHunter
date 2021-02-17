@@ -42,7 +42,11 @@ How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
 
-**Martin et al., 2020.** Martin G; Cardi C; Sarah G; Ricci S; Jenny C; Fondi E; Perrier X; Glaszmann J-C; D'Hont A; Yahiaoui N. 2020. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana** Accepted in *The Plant Journal* https://onlinelibrary.wiley.com/doi/abs/10.1111/tpj.14683
+**Martin et al., 2020b.** Martin G, Baurens F-C, Hervouet C, Salmon F, Delos J-M, Labadie K, Perdereau A, Mournet P, Blois L, Dupouy M, et al. 2020. **Chromosome reciprocal translocations have accompanied subspecies evolution in bananas.** *Plant J. 104:1698–1711* https://doi.org/10.1111/tpj.15031
+
+or
+
+**Martin et al., 2020a.** Martin G, Cardi C, Sarah G, Ricci S, Jenny C, Fondi E, Perrier X, Glaszmann J-C, D’Hont A, Yahiaoui N. 2020. **Genome ancestry mosaics reveal multiple and cryptic contributors to cultivated banana.** *Plant J. 102:1008–1025.* https://doi.org/10.1111/tpj.14683
 
 or
 
@@ -58,7 +62,7 @@ Description
 
 The package provided comprised 23 programs listed here:
 
--   process_RNAseq.1.0.py (Martin et al., 2020)
+-   process_RNAseq.1.0.py (Martin et al., 2020a)
 -   process_reseq.1.0.py (Garsmeur et al., 2018)
 -   VcfPreFilter.1.0.py (Garsmeur et al., 2018)
 -   vcfFilter.1.0.py (Garsmeur et al., 2018)
@@ -68,19 +72,19 @@ The package provided comprised 23 programs listed here:
 -   Draw_dot_plot.py (Baurens et al., 2019)
 -   vcf2allPropAndCov.py (Baurens et al., 2019)
 -   vcf2allPropAndCovByChr.py (Baurens et al., 2019)
--   vcf2struct.1.0.py (Martin et al., 2020)
--   vcf2linear.1.0.py (Martin et al., 2020)
--   haplo2kar.1.0.py (Martin et al., 2020)
--   haplo2karByChr.1.0.py (Martin et al., 2020)
--   haplo2Circos.1.0.py (Martin et al., 2020)
--   vcfIdent.1.0.py (Martin et al., 2020)
--   vcfRemove.1.0.py (Martin et al., 2020)
--   vcf2cov.py
--   CaReRa.py
--   VcfAndCarto2haplo.py
--   HaploProp.py
--   vcf2dis.py
--   vcfAndConsToRatio.py
+-   vcf2struct.1.0.py (Martin et al., 2020a)
+-   vcf2linear.1.0.py (Martin et al., 2020a)
+-   haplo2kar.1.0.py (Martin et al., 2020a)
+-   haplo2karByChr.1.0.py (Martin et al., 2020a)
+-   haplo2Circos.1.0.py (Martin et al., 2020a)
+-   vcfIdent.1.0.py (Martin et al., 2020a)
+-   vcfRemove.1.0.py (Martin et al., 2020a)
+-   vcf2cov.py (Martin et al., 2020b)
+-   CaReRa.py (Martin et al., 2020b)
+-   VcfAndCarto2haplo.py (Martin et al., 2020b)
+-   HaploProp.py (Martin et al., 2020b)
+-   vcf2dis.py (Martin et al., 2020b)
+-   vcfAndConsToRatio.py (Martin et al., 2020b)
 
 
 All 23 programs run using the following command: python program-name <--options-name value>

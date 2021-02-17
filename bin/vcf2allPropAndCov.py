@@ -233,7 +233,7 @@ def __main__():
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program count allele ratio based on two origins")
 	# Wrapper options. 
 	parser.add_option( '',	'--conf',			dest='conf',		default=None,			help='Conf file containing vcf location (one per chromosome). [Default: %default]')
-	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='Path to single vcf file on vcf for all chromosomes is available. [Default: %default]')
+	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='Path to a vcf file. [Default: %default]')
 	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 2 column file containing accession name (col1) origin/group (Col2). [Default: %default]')
 	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='Accession to work with. [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
