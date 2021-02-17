@@ -553,6 +553,9 @@ def __main__():
 		outfile1.write('\n')
 	outfile1.close()
 	# It's time to draw
-	draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG, DicoColor)
-	
+	if total:
+		draw_chr(dico_draw, dico_chr, dico_group, PREFIX+ACCESS, sum(total)/len(total), int(options.ploidy), options.dcurve, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG, DicoColor)
+	else:
+		pass
+	sys.stdout.write('Finished without major problem\n')
 if __name__ == "__main__": __main__()
