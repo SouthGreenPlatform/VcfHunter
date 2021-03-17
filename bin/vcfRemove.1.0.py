@@ -83,6 +83,9 @@ def __main__():
 	ACC = options.acc
 	REMOVE = options.remove
 	
+	OK = 0
+	NoOk = 0
+	
 	# recording informations in a dictionary
 	if options.vcf[-3:] == '.gz':
 		file = gzip.open(options.vcf,'rt')
@@ -102,6 +105,8 @@ def __main__():
 			elif data[0][0] != "#":
 				geno_acc = recup_geno(data, header, ACC)
 				geno_remove = recup_geno(data, header, REMOVE)
+				ExpectedPlo = len(geno_acc)-len(geno_remove)
+				# print(geno_acc, geno_remove, ExpectedPlo)
 				genotype = geno_acc[2:]
 				for allele in geno_remove[2:]:
 					if allele in genotype:
@@ -113,14 +118,19 @@ def __main__():
 					else:
 						list_to_print.append(data[n])
 				outfile.write('\t'.join(list_to_print+['\n']))
-				if len(genotype) == 1:
+				if len(genotype) == ExpectedPlo:
 					outfile1.write('\t'.join(list_to_print+['\n']))
+					OK += 1
 				else:
 					outfile2.write('\t'.join(list_to_print+['\n']))
+					NoOk += 1
 			else:
 				outfile.write(line)
 				outfile1.write(line)
 				outfile2.write(line)
+	print('Total sites:', OK+NoOk)
+	print('OK sites:', OK, str(OK/(OK+NoOk)))
+	print('NoOK sites:', NoOk, str(NoOk/(OK+NoOk)))
 	
 	
 					

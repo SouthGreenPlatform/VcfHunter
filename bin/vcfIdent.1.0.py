@@ -114,12 +114,17 @@ def calcul_ident(LISTE1, LISTE2):
 				LISTE1.remove(n)
 	return float(ident)/float(min_ploidy)
 		
-def draw_density_plot(CHR, SIZE, DICO, PDF):
-
+def draw_density_plot(CHR, SIZE, DICO, PDF, DICOVAL):
+	
+	COLOR = []
+	cmap = matplotlib.cm.get_cmap('gist_rainbow')
+	for i in range(len(DICOVAL)):
+		COLOR.append(cmap(i/(len(DICOVAL))))
+	
 	fig = plt.figure(figsize=(14.85, 10.5))
 	taille = len(DICO)
 	i = 0
-	COLOR = ((0,0,1),(0,1,0),(1,0,0))
+	
 	
 	for n in DICO:
 		if i%5 == 0 and i != 0:
@@ -158,6 +163,7 @@ def __main__():
 	parser.add_option( '-a',	'--acc',			dest='acc',			default=None,			help='Accession to compare to others. [Default: %default]')
 	parser.add_option( '-c',	'--comp',			dest='comp',		default=None,			help='Accessions to be compared separated by ":". [Default: %default]')
 	parser.add_option( '-w',	'--win',			dest='win',			default=0,				help='Half window (unit = variant site) to compute density along chromosomes. [Default: %default]')
+	parser.add_option( '-d',	'--draw',			dest='draw',		default='y',			help='Draw a pdf presenting sites scoring along chromosomes. [Default: %default]')
 	parser.add_option( '-o',	'--out',			dest='out',			default=None,			help='Prefix for output file names. [Default: %default]')
 
 	(options, args) = parser.parse_args()
@@ -171,7 +177,7 @@ def __main__():
 	for accession in liste_acc:
 		dico_acc_geno[accession] = {}
 	
-	# recording informations in a dictionnary
+	# recording informations in a dictionary
 	dico_chr = {}
 	if options.vcf[-3:] == '.gz':
 		file = gzip.open(options.vcf,'rt')
@@ -248,8 +254,8 @@ def __main__():
 						debut_value = dico_final[accession]['values'][values][0]
 						fin_value = dico_final[accession]['values'][values][-1]
 						dico_final[accession]['values'][values] = [debut_value]*WINDOW + dico_final[accession]['values'][values] + [fin_value]*WINDOW
-					
-				draw_density_plot(chr, dico_chr[chr], dico_final, pdf)
+				if options.draw == 'y':
+					draw_density_plot(chr, dico_chr[chr], dico_final, pdf, dico_values)
 				
 				for acc in options.comp.split(':'):
 					outfile = open(options.out+'-'+acc+'.scatter.txt','a')
