@@ -642,7 +642,7 @@ def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
 #          Process ReSeq Only
 ##############################################
 
-def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED):
+def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT):
 
 	sys.stdout.write('Working on '+ACC_ID+' accession\n')
 	
@@ -701,7 +701,6 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 		run_qsub(QUEUE, mapping_stat, 1, 'stats-'+ACC_ID, "4G", PREFIX)
 	
 	# doing plots
-	PLOTBAMSTAT = '/'.join(SAMTOOLS.split('/')[0:-1]+['plot-bamstats'])
 	mapping_stat = []
 	for n in LIB_DIC:
 		stats = '%s -p %s %s' % (PLOTBAMSTAT, ACC_ID+'/STATS/', ACC_ID+'/'+n+'.sam.stat')
@@ -1492,6 +1491,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 	# recording VCF headers
 	dico_header = {}
 	accessions = []
+	FinalCHROMHeader = ''
 	for pos in LIST:
 		POS = '-'.join(map(str,pos))
 		file = gzip.open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf.gz','rt')
@@ -1505,6 +1505,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 					dico_header['header'].append(line)
 				elif data[0] == "#CHROM":
 					dico_header[POS] = data
+					FinalCHROMHeader = data
 					for acc in data[9:]:
 						accessions.append(acc)
 					break
@@ -1515,6 +1516,13 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 					dico_header[POS] = data
 					break
 		file.close()
+	
+	# Validating that accessions in headers have the same order
+	for pos in dico_header:
+		if pos != 'header':
+			if dico_header[pos] != FinalCHROMHeader:
+				print('There is a bug: sub vcf headers do not match')
+				return 1
 	
 	# recording chromosome order
 	chromosome_order = []
@@ -1537,12 +1545,12 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 		POS = '-'.join(map(str,pos))
 		file = gzip.open(PREFIX+'_'+CHR+'_'+str(pos[0])+'_'+str(pos[1])+'_allele_count.vcf.gz','rt')
 		for line in file:
-			data = line.split()
-			if data[0][0] != "#":
-				liste2print = data[0:9]
-				for acc in accessions:
-					liste2print.append(data[dico_header[POS].index(acc)])
-				outfile.write('\t'.join(liste2print)+'\n')
+			if line[0] != "#":
+				outfile.write(line)
+				# liste2print = data[0:9]
+				# for acc in accessions:
+					# liste2print.append(data[dico_header[POS].index(acc)])
+				# outfile.write('\t'.join(liste2print)+'\n')
 		file.close()
 	outfile.close()
 	

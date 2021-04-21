@@ -58,6 +58,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	GATK = LOCA_PROGRAMS.get('Programs','gatk')
 	UseUnifiedGenotyperForBaseRecal =  'no'
 	PYTHON = LOCA_PROGRAMS.get('Programs','python')
+	PLOTBAMSTAT = LOCA_PROGRAMS.get('Programs','plotbamstats')
 	PREFIX = OPTIONS.prefix
 	if CONFIG.has_section('Variant'):
 		if CONFIG.has_option('Variant', 'UseUnifiedGenotyperForBaseRecal'):
@@ -66,7 +67,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	if 'a' in OPTIONS.steps:
 		#1 Mapping
 		#2 Merging
-		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED)
+		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT)
 	
 	if 'b' in OPTIONS.steps:
 		#3 removing duplicates
