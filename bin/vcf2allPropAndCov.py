@@ -226,7 +226,7 @@ def get_chr_size(LINE):
 	
 	split_on_eq = split_on_chev.split('=')
 	
-	return [split_on_eq[2].split(',')[0], int(split_on_eq[3])]
+	return [split_on_eq[2].split(',')[0], int(split_on_eq[3].split(',')[0])]
 
 def __main__():
 	#Parse Command Line
