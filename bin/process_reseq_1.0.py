@@ -248,13 +248,14 @@ def __main__():
 		sys.stdout.write('.dict found for the reference sequence.\n')
 	sys.stdout.flush()
 	
-	# Obtaining chromosome informations
-	dico_chr = {}
+	# Obtaining chromosome order in multifasta
 	if 'e' in options.steps or 'f' in options.steps or 'g' in options.steps or 'E' in options.steps or 'F' in options.steps:
-		# calculating sequence length
-		sequence_dict = SeqIO.index(ref, "fasta")
-		for n in sequence_dict:
-			dico_chr[n] = len(str(sequence_dict[n].seq))
+		dico_chr = {}
+		list_chr_order = []
+		sequence_dict = list(SeqIO.parse(ref, "fasta"))
+		for i in range(len(sequence_dict)):
+			list_chr_order.append([sequence_dict[i].id, len(str(sequence_dict[i].seq))])
+			dico_chr[sequence_dict[i].id] = len(str(sequence_dict[i].seq))
 		del sequence_dict
 	
 	# Running analysis
@@ -307,7 +308,7 @@ def __main__():
 		listJobs = []
 		for chr in dicoWindow:
 			for pos in dicoWindow[chr]:
-				listJobs.append([liste_accessions, ref, options.prefix, dico_ploidy, dico_chr, chr, pos[0], pos[1]])
+				listJobs.append([liste_accessions, ref, options.prefix, dico_ploidy, list_chr_order, chr, pos[0], pos[1]])
 		
 		pool = mp.Pool(processes=nbProcs)
 		results = pool.map(main_combine, listJobs)
@@ -396,7 +397,7 @@ def __main__():
 		listJobs = []
 		for chr in dicoWindow:
 			for pos in dicoWindow[chr]:
-				listJobs.append([liste_accessions, ref, options.prefix, dico_ploidy, dico_chr, chr, pos[0], pos[1]])
+				listJobs.append([liste_accessions, ref, options.prefix, dico_ploidy, list_chr_order, chr, pos[0], pos[1]])
 		
 		# for n in listJobs:
 			# utils.create_pseudo_VCF_Large(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])

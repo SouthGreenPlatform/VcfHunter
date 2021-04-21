@@ -1172,7 +1172,7 @@ def create_pseudo_VCF(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, START, 
 	outfile.write('##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">\n')
 	outfile.write('##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">\n')
 	for n in DICO_CHR:
-		outfile.write("##contig=<ID="+n+",length="+str(DICO_CHR[n])+">\n")
+		outfile.write("##contig=<ID="+n[0]+",length="+str(n[1])+">\n")
 	liste2print = ["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"]
 	for acc in LIST_ACC:
 		ACC = acc.split('/')[-1]
@@ -1353,7 +1353,7 @@ def create_pseudo_VCF_Large(LIST_ACC, REF, PREFIX, DICO_PLOIDY, DICO_CHR, CHR, S
 	outfile.write('##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">\n')
 	outfile.write('##FORMAT=<ID=AD,Number=.,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">\n')
 	for n in DICO_CHR:
-		outfile.write("##contig=<ID="+n+",length="+str(DICO_CHR[n])+">\n")
+		outfile.write("##contig=<ID="+n[0]+",length="+str(n[1])+">\n")
 	liste2print = ["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"]
 	for acc in LIST_ACC:
 		ACC = acc.split('/')[-1]
@@ -1547,10 +1547,7 @@ def merge_sub_vcf(PREFIX, CHR, LIST, GZIP):
 		for line in file:
 			if line[0] != "#":
 				outfile.write(line)
-				# liste2print = data[0:9]
-				# for acc in accessions:
-					# liste2print.append(data[dico_header[POS].index(acc)])
-				# outfile.write('\t'.join(liste2print)+'\n')
+		
 		file.close()
 	outfile.close()
 	
