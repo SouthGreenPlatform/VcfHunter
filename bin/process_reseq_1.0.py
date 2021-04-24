@@ -249,8 +249,8 @@ def __main__():
 	sys.stdout.flush()
 	
 	# Obtaining chromosome order in multifasta
+	dico_chr = {}
 	if 'e' in options.steps or 'f' in options.steps or 'g' in options.steps or 'E' in options.steps or 'F' in options.steps:
-		dico_chr = {}
 		list_chr_order = []
 		sequence_dict = list(SeqIO.parse(ref, "fasta"))
 		for i in range(len(sequence_dict)):

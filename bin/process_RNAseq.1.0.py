@@ -204,9 +204,11 @@ def __main__():
 	dico_chr = {}
 	if 'j' in options.steps or 'k' in options.steps or 'l' in options.steps:
 		# calculating sequence length
-		sequence_dict = SeqIO.index(REF, "fasta")
-		for n in sequence_dict:
-			dico_chr[n] = len(str(sequence_dict[n].seq))
+		list_chr_order = []
+		sequence_dict = list(SeqIO.parse(REF, "fasta"))
+		for i in range(len(sequence_dict)):
+			list_chr_order.append([sequence_dict[i].id, len(str(sequence_dict[i].seq))])
+			dico_chr[sequence_dict[i].id] = len(str(sequence_dict[i].seq))
 		del sequence_dict
 	
 	# Reference indexation
@@ -275,7 +277,7 @@ def __main__():
 		listJobs = []
 		for chr in dicoWindow:
 			for pos in dicoWindow[chr]:
-				listJobs.append([liste_accessions, REF, PREFIX, dico_ploidy, dico_chr, chr, pos[0], pos[1]])
+				listJobs.append([liste_accessions, REF, PREFIX, dico_ploidy, list_chr_order, chr, pos[0], pos[1]])
 		
 		pool = mp.Pool(processes=nbProcs)
 		results = pool.map(main_combine, listJobs)
