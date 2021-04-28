@@ -1,8 +1,7 @@
 Tutorial for VcfHunter chromosome painting and data visualization with GEMO
 ===========================================================================
 
-** This tutorial point to tools that are not yet available but that will **
-**come soon**
+** This tutorial point to tools that are not yet available but that will come soon**
 
 This tutorial aimed at showing how data should be processed to be then 
 visualized with GEMO tool (http://dev.visusnp.southgreen.fr/gemo/).
@@ -164,6 +163,3 @@ zcat step4/Kunnan_win_ratio.tab.gz | awk '{$2=""; print $0}' | sed 's/CHR/chr/' 
 sed 's/$/\t9000000\t11000000/' ../data/reference/chromosome.tab | sed 's/chr01/chr\tlen\tcentromereInf\tcentromereSup\nchr01/' | sed 's/chr09/chr05/' > step5/ChromosomeSize.tab
 grep -wv 'un' step5/Kunnan_color.tab > step5/Kunnan_color_OK.tab
 ```
-
-
-grep -v name ../data/config/color.conf | cut -f 1,3,4,5 -d ' ' > ../data/config/colorWithoutHead.conf
