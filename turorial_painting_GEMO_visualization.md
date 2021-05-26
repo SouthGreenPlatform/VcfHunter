@@ -4,7 +4,7 @@ Tutorial for VcfHunter chromosome painting and data visualization with GEMO
 **This tutorial point to tools that are not yet available but that will come soon**
 
 This tutorial aimed at showing how data should be processed to be then 
-visualized with GEMO tool (http://dev.visusnp.southgreen.fr/gemo/).
+visualized with the [GEMO tool](https://github.com/SouthGreenPlatform/GeMo).
 
 **Go to the VcfHunter/TestTools/ folder** (Scripts can be run from any
 folder but the command lines in this tutorial assume you are in this
