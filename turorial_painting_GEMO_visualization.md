@@ -150,16 +150,38 @@ python ../bin/convertForIdeo.py --name Kunnan --dir step4 --col ../data/config/c
 This command generate several files. A file named **Kunnan_ideo.tab** that 
 contained block that could be drawn with GEMO (data section), a file named 
 **Kunnan_chrom.tab** that contained information required to draw chromosomes.
-A third file named **Kunnan_color.tab** contained color information that, 
-after some editing, could be used to draw curve with custom color with the 
-GEMO tool that allowed refinement of blocks. For this we reorder and select 
-columns of the file generated in previous step. We also had a header to this 
-file. We also prepare a chromosome file that contained the chromosome name, 
-size and centromere position. We also reformat the color file so that the 
-color "un" corresponding to unknown ancestor color is removed.
+A third file named **Kunnan_color.tab** contained color information that 
+could be used to draw blocks with custom color. 
+
+
+
+For blocks refinement using custom and adjustable parameters. The file of 
+normalized ratio should be reformatted with this simple command line to 
+obtain a file named **Kunnan_win_ratio.tab**: 
 
 ```{bash}
 zcat step4/Kunnan_win_ratio.tab.gz | awk '{$2=""; print $0}' | sed 's/CHR/chr/' | sed 's/Start/start/' | sed 's/End/end/' | sed 's/  / /g' | sed 's/ /\t/g' | sort -k1,1 -k2n,2 | sed 's/chr09/chr05/' > step5/Kunnan_win_ratio.tab
-sed 's/$/\t9000000\t11000000/' ../data/reference/chromosome.tab | sed 's/chr01/chr\tlen\tcentromereInf\tcentromereSup\nchr01/' | sed 's/chr09/chr05/' > step5/ChromosomeSize.tab
-grep -wv 'un' step5/Kunnan_color.tab > step5/Kunnan_color_OK.tab
 ```
+
+
+#### 6 - Visualization and block refinement with GEMO
+
+To visualize the blocks, go to GEMO tool and select **Block positions** 
+by clicking on **(1)** as in the Figure 1. Then load the block by choosing 
+**Kunnan_ideo.tab** file in **(2)**. Load the chromosome information file 
+by choosing the **Kunnan_chrom.tab** in **(3)**. You can optionally load 
+a color file by choosing the **Kunnan_color.tab** in **(4)**. Then click
+on **Submit** to draw the picture **(5)**.
+
+![](/images/GEMO1.png)
+
+
+To refine blocks, go to GEMO tool and select **Normalized curves** 
+by clicking on **(1)** as in the Figure 2. Then load the curves by choosing 
+**Kunnan_win_ratio.tab** file in **(2)**. Load the chromosome information file 
+by choosing the **Kunnan_chrom.tab** in **(3)**. You can optionally load 
+a color file by choosing the **Kunnan_color.tab** in **(4)**. Then click
+on **Submit** to draw the picture **(5)**.
+
+![](/images/GEMO2.png)
+
