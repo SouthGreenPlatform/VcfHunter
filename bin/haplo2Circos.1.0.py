@@ -33,6 +33,7 @@ import random
 import math
 import datetime
 import traceback
+import configparser
 import multiprocessing as mp
 from inspect import currentframe, getframeinfo
 from operator import itemgetter
@@ -443,7 +444,12 @@ def __main__():
 		sys.exit('Please provide a centro file to --centro argument')
 	draw_chromosome(options.acc, options.chr, options.gcol, options.dg, options.centro, options.prefix)
 	
-	qs=os.popen('circos -conf '+options.prefix+'.conf -noparanoid')
+	pathname = os.path.dirname(sys.argv[0])
+	loca_programs = configparser.RawConfigParser()
+	loca_programs.read(pathname+'/loca_programs.conf')
+	CIRCOS = loca_programs.get('Programs','circos')
+	
+	qs=os.popen(CIRCOS+' -conf '+options.prefix+'.conf -noparanoid')
 	
 	for n in qs:
 		sys.stdout.write(n.replace("\n","\r\n"))
