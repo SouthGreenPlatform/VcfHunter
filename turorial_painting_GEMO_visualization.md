@@ -19,10 +19,13 @@ Chromosome painting using non admixed ancestral accessions
 *../data/config/Origin.tab* is a file which contained two column: a first
 column containing ancestral accession names and a second column containing
 their ancestral origin (this program can work until 8 distinct origins).
+
 *../data/config/Vcf.conf* is a file which contained path to vcf files which
 will be used for e-chromosome painting.
+
 *../data/vcf/* is a folder containing the vcf for 5 chromosomes on 15 accessions
 which will be used in this tutorial.
+
 *../data/config/Intogression.tab* is a 8 column file that locate regions in some 
 accessions that should not be used to detect ancestral origin in specific 
 accessions (because these regions are introgressed in these accessions). 
