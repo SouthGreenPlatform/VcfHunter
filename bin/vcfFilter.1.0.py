@@ -135,6 +135,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 			if data[0] == '#CHROM':
 				header = list(data)
 				list_to_print_in_output = []
+				DICOACCPOS = {}
 				for n in header:
 					list_to_print_in_output.append(n)
 					if n == 'FORMAT':
@@ -142,6 +143,7 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 				for n in header:
 					if (n in DICO_OUTGROUP) or (n in DICO_NAME):
 						list_to_print_in_output.append(n)
+						DICOACCPOS[n] = header.index(n)
 				outfile.write('\t'.join(list_to_print_in_output)+'\n')
 				FILTERpos = header.index('FILTER')
 				REFpos = header.index('REF')
@@ -178,7 +180,8 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 					for accession in header:
 						# working on accession to treat
 						if accession in DICO_NAME:
-							filtered_accession = filter_accession(accession, data, header, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)
+							ACCinfo = data[DICOACCPOS[accession]]
+							filtered_accession = filter_accession(ACCinfo, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)
 							nb_alt.update(filtered_accession[2])
 							list_to_print_in_output.append(filtered_accession[0])
 							if filtered_accession[1]:
@@ -190,7 +193,8 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 									dico_autapo[z] = 1
 						# working on outgroup (not taken in acount for variant filtering)
 						elif accession in DICO_OUTGROUP:
-							list_to_print_in_output.append(filter_accession(accession, data, header, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)[0])
+							ACCinfo = data[DICOACCPOS[accession]]
+							list_to_print_in_output.append(filter_accession(ACCinfo, flag_format, GTpos, DPpos, ADpos, MINCOV, MINAL, MAXCOV, MINFREQ)[0])
 					# Recording allele
 					dic_snp = set()
 					for allele in nb_alt:
@@ -236,17 +240,13 @@ def filter_vcf(VCF, NAMES, OUTGROUP, PREFIX, RMTYPE, MINCOV, MINAL, NMISS, RMALA
 	sys.stdout.write('\tRemoved variant (bad allele number): '+str(nb_allele_remove)+'\n')
 	sys.stdout.write('Kept variant: '+str(nb_kept)+'\n')
 
-def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, GTPOS, DPPOS, ADPOS, MINCOV, MINAL, MAXCOV, MINFREQ):
+def filter_accession(ACCINFO, FLAG_FORMAT, GTPOS, DPPOS, ADPOS, MINCOV, MINAL, MAXCOV, MINFREQ):
 	
 	"""
 		Filter accession based on MINCOV and MINAL parameters
 		
-		:param ACCESSION: Accession to treat.
-		:type ACCESSION: str
-		:param DATA: A list corresponding to a vcf line.
-		:type DATA: list
-		:param HEADER: A list corresponding to the vcf header line.
-		:type HEADER: list
+		:param ACCINFO: A list corresponding to a vcf line.
+		:type ACCINFO: list
 		:param MINCOV: Minimal coverage to keep a genotype.
 		:type MINCOV: int
 		:param MINAL: Minimal allele coverage to keep a genotype.
@@ -266,17 +266,15 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, GTPOS, DPPOS, ADPOS, 
 		:param MINFREQ: Maximal coverage to keep a genotype
 		:type MINFREQ: float
 	"""
-	
-	ACCinfo = DATA[HEADER.index(ACCESSION)]
-	
+		
 	missing = False
 	to_print = ''
-	accession_var = ACCinfo.split(':')
+	accession_var = ACCINFO.split(':')
 	# Looking if a genotype has been called
 	geno = accession_var[GTPOS].replace('/','|').split('|')
 	if '.' in geno:
 		missing = True
-		to_print = ACCinfo
+		to_print = ACCINFO
 		forautapo = set()
 	else:
 		# Looking if site coverage is sufficient
@@ -310,7 +308,7 @@ def filter_accession(ACCESSION, DATA, HEADER, FLAG_FORMAT, GTPOS, DPPOS, ADPOS, 
 			to_print = ':'.join(accession_var)
 			forautapo = set()
 		else:
-			to_print = ACCinfo
+			to_print = ACCINFO
 			# Recording alleles found for autapomorphy search
 			forautapo = set(geno)
 	
