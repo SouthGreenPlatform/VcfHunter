@@ -1628,7 +1628,10 @@ def generate_pseudo_vcf(TAB, REF, OUT):
 					liste_mot.append(str(0))
 					outfile.write('\t' . join([data[0], data[1], Reference_allele, data[3], ':'.join(liste_allele), ':'.join(liste_mot)]))
 				outfile.write('\n')
-	outfile.close()
+	try:
+		outfile.close()
+	except UnboundLocalError:
+		sys.stdout.write("Warning for individual "+TAB.split('/')[-1].replace('.temp.gz','')+" there are no data so in the vcf file this individual will contain only missing genotype\n")
 	os.remove(TAB+'.gz')
 	
 	for n in dico_chr:
