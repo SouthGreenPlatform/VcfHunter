@@ -416,7 +416,7 @@ def __main__():
 	parser.add_option( '-p', '--phased', dest='phased', default='n', help='The matrix has been phased (y or n), [default: %default]')
 	parser.add_option( '-s', '--steps', dest='steps', default=None, help='Analysis to perform\t\t\t\t\t\t'
 	'R: Calculate recombination rate\t\t\t\t\t'
-	'S: Calculate segregation distortions (-log10(X² test))\t\t\t\t'
+	'S: Calculate segregation distortions (-log10(Chi-square test))\t\t\t\t'
 	's: Calculate segregation distortions (as proportion of individuals deviating from expectation)\t\t\t\t'
 	'P: Phase markers based on their order\t\t\t\t')
 	
