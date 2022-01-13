@@ -166,7 +166,7 @@ def draw_plot(DICO, GCOL, GROUPS, ACC, LIST_CHR, CENTRO, PLOIDY, GRAPH):
 	for gp in GROUPS:
 		ax.plot([],[], color=dico_color[gp][0:3], label=gp, linewidth=10)
 	ax.plot([],[], color=(0.6,0.6,0.6), label='unknown', linewidth=10)
-	ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=len(GROUPS)+1, fontsize=15)
+	ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.02), fancybox=True, shadow=True, ncol=min(8, len(GROUPS)+1), fontsize=15)
 	
 	# Drawing chromosomes shape
 	y0 = ymax-short_space
