@@ -85,6 +85,7 @@ def __main__():
 	
 	OK = 0
 	NoOk = 0
+	Missing = 0
 	
 	# recording informations in a dictionary
 	if options.vcf[-3:] == '.gz':
@@ -106,31 +107,35 @@ def __main__():
 				geno_acc = recup_geno(data, header, ACC)
 				geno_remove = recup_geno(data, header, REMOVE)
 				ExpectedPlo = len(geno_acc)-len(geno_remove)
-				# print(geno_acc, geno_remove, ExpectedPlo)
-				genotype = geno_acc[2:]
-				for allele in geno_remove[2:]:
-					if allele in genotype:
-						genotype.remove(allele)
-				list_to_print = []
-				for n in range(len(header)):
-					if header[n] == ACC:
-						list_to_print.append(':'.join(['/'.join(list(map(str, genotype)))]+data[n].split(':')[1:]))
-					else:
-						list_to_print.append(data[n])
-				outfile.write('\t'.join(list_to_print+['\n']))
-				if len(genotype) == ExpectedPlo:
-					outfile1.write('\t'.join(list_to_print+['\n']))
-					OK += 1
+				if 'NA' in geno_acc or 'NA' in geno_remove:
+					Missing += 1
 				else:
-					outfile2.write('\t'.join(list_to_print+['\n']))
-					NoOk += 1
+					# print(geno_acc, geno_remove, ExpectedPlo)
+					genotype = geno_acc[2:]
+					for allele in geno_remove[2:]:
+						if allele in genotype:
+							genotype.remove(allele)
+					list_to_print = []
+					for n in range(len(header)):
+						if header[n] == ACC:
+							list_to_print.append(':'.join(['/'.join(list(map(str, genotype)))]+data[n].split(':')[1:]))
+						else:
+							list_to_print.append(data[n])
+					outfile.write('\t'.join(list_to_print+['\n']))
+					if len(genotype) == ExpectedPlo:
+						outfile1.write('\t'.join(list_to_print+['\n']))
+						OK += 1
+					else:
+						outfile2.write('\t'.join(list_to_print+['\n']))
+						NoOk += 1
 			else:
 				outfile.write(line)
 				outfile1.write(line)
 				outfile2.write(line)
-	print('Total sites:', OK+NoOk)
-	print('OK sites:', OK, str(OK/(OK+NoOk)))
-	print('NoOK sites:', NoOk, str(NoOk/(OK+NoOk)))
+	print('Total sites without missing:', OK+NoOk)
+	print('OK sites without missing:', OK, str(OK/(OK+NoOk)))
+	print('NoOK sites without missing:', NoOk, str(NoOk/(OK+NoOk)))
+	print('Missing sites:', Missing, str(Missing/(OK+NoOk+Missing)))
 	
 	
 					
