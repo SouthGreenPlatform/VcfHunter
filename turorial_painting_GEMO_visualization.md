@@ -1,10 +1,8 @@
 Tutorial for VcfHunter chromosome painting and data visualization with GEMO
 ===========================================================================
 
-**This tutorial point to tools that are not yet available but that will come soon**
-
 This tutorial aimed at showing how data should be processed to be then 
-visualized with the [GEMO tool](https://github.com/SouthGreenPlatform/GeMo).
+visualized with the [GEMO tool](https://gemo.southgreen.fr/).
 
 **Go to the VcfHunter/TestTools/ folder** (Scripts can be run from any
 folder but the command lines in this tutorial assume you are in this
@@ -19,10 +17,13 @@ Chromosome painting using non admixed ancestral accessions
 *../data/config/Origin.tab* is a file which contained two column: a first
 column containing ancestral accession names and a second column containing
 their ancestral origin (this program can work until 8 distinct origins).
+
 *../data/config/Vcf.conf* is a file which contained path to vcf files which
 will be used for e-chromosome painting.
+
 *../data/vcf/* is a folder containing the vcf for 5 chromosomes on 15 accessions
 which will be used in this tutorial.
+
 *../data/config/Intogression.tab* is a 8 column file that locate regions in some 
 accessions that should not be used to detect ancestral origin in specific 
 accessions (because these regions are introgressed in these accessions). 
@@ -140,7 +141,13 @@ tool. GEMO tool performs two tasks, the first one consists in drawing ancestral
 block identified at step 4. The second one also draw these blocks but allowed 
 refinement of these block using custom and adjustable parameters. For block 
 drawing of step 4 we will reformat block files so that they match expectation 
-with GEMO. For this run the following command line:
+with GEMO. In addition, block identified at step 4 were identified based on 
+pseudo-likelyhood of genotype based binomial distribution. As for The second 
+tool of GEMO that allowed to adjust parameters to refine block the statistics 
+of attribution of block is different from the one based on pseudo-likelyhood, 
+the same algorythm as the one for GEMO was applied on data so that obtained 
+block are identical to the one obtained in GEMO with default parameters. For 
+this run the following command line:
 
 ```{bash}
 mkdir step5
@@ -148,40 +155,43 @@ python ../bin/convertForIdeo.py --name Kunnan --dir step4 --col ../data/config/c
 ```
 
 This command generate several files. A file named **Kunnan_ideo.tab** that 
-contained block that could be drawn with GEMO (data section), a file named 
-**Kunnan_chrom.tab** that contained information required to draw chromosomes.
-A third file named **Kunnan_color.tab** contained color information that 
-could be used to draw blocks with custom color. 
-
-
-
-For blocks refinement using custom and adjustable parameters. The file of 
-normalized ratio should be reformatted with this simple command line to 
-obtain a file named **Kunnan_win_ratio.tab**: 
-
-```{bash}
-zcat step4/Kunnan_win_ratio.tab.gz | awk '{$2=""; print $0}' | sed 's/CHR/chr/' | sed 's/Start/start/' | sed 's/End/end/' | sed 's/  / /g' | sed 's/ /\t/g' | sort -k1,1 -k2n,2 | sed 's/chr09/chr05/' > step5/Kunnan_win_ratio.tab
-```
-
+contained block determined with algorithm of GEMO with default parameters 
+that could be drawn with GEMO (data section), a file named **Kunnan_ideoProb.tab** 
+that contained blocks determined at step4 with probalistic approach, a file 
+named **Kunnan_chrom.tab** that contained information required to draw 
+chromosomes. A third file named **Kunnan_color.tab** contained color 
+information that could be used to draw blocks with custom color. 
 
 #### 6 - Visualization and block refinement with GEMO
 
-To visualize the blocks, go to GEMO tool and select **Block positions** 
-by clicking on **(1)** as in the Figure 1. Then load the block by choosing 
-**Kunnan_ideo.tab** file in **(2)**. Load the chromosome information file 
-by choosing the **Kunnan_chrom.tab** in **(3)**. You can optionally load 
-a color file by choosing the **Kunnan_color.tab** in **(4)**. Then click
-on **Submit** to draw the picture **(5)**.
+To visualize the blocks, go to GEMO tool and load the block by choosing 
+**Kunnan_ideo.tab** or **Kunnan_ideoProb.tab** file in **(1)** depending 
+if you want to visualize ancestral origins deduced from probabilistic 
+approach or algorithm of GEMO repectively. Important remark: the ancestral 
+block generated from GEMO algorithm are not optimal and will require 
+parameter adjustment proposed in next section. Load the chromosome 
+information file by choosing the **Kunnan_chrom.tab** in **(2)**. You 
+can optionally load a color file by choosing the **Kunnan_color.tab** in **(4
+3)**. Then click on **Submit** **(4)** to draw the picture **(5)**.
 
 ![](/images/GEMO1.png)
 
 
-To refine blocks, go to GEMO tool and select **Normalized curves** 
-by clicking on **(1)** as in the Figure 2. Then load the curves by choosing 
-**Kunnan_win_ratio.tab** file in **(2)**. Load the chromosome information file 
-by choosing the **Kunnan_chrom.tab** in **(3)**. You can optionally load 
-a color file by choosing the **Kunnan_color.tab** in **(4)**. Then click
-on **Submit** to draw the picture **(5)**.
+To refine blocks, go to GEMO tool and load the curves by choosing 
+**Kunnan_win_ratio.tab** file in **(1)**. Load the chromosome information 
+file by choosing the **Kunnan_chrom.tab** in **(2)**. You can optionally 
+load a color file by choosing the **Kunnan_color.tab** in **(3)**. Then 
+click on **Submit** **(4)** to draw the pictures. In **(5)** appears the 
+statistics representing the "proportion of haplotypes" having each origins 
+(one color per origin) along chromosomes. Multiplying the observed value 
+by the ploidy level of the studied accessions give the number of haplotype 
+of the given origin at the studied position. The position of these curves 
+relative to threshold arbitrarily set to 0.5 for diploid accession 
+(1/ploidy = 1/2=0.5), 1/3 for triploid (1/ploidy=1/3), 0.25 for tetraploid 
+(1/ploidy=1/4=0.25), etc... allowed to deduce number of haplotypes of each 
+origin in accession that is drawn under the curves **(5)**. These thresholds 
+can be adjusted in **(6)** in order to improve ancestral identification of 
+blocks.
 
 ![](/images/GEMO2.png)
 
