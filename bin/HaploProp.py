@@ -78,15 +78,22 @@ def __main__():
 					Pos = data[PosPos]
 					if Pos in DicoMarker[Chr]:
 						Allele = [data[RefPos]]+data[AltPos].split(',')
-						GoodAllele = str(Allele.index(DicoMarker[Chr][Pos]))
-						FORMAT = data[FormatPos].split(':')
-						GTPos = FORMAT.index('GT')
-						for acc in dicoAccPos:
-							AccGeno = data[dicoAccPos[acc]].split(':')[GTPos].split('/')
-							if not('.' in AccGeno):
-								if GoodAllele in AccGeno:
-									dicoAccStat[acc][0] += 1
-								dicoAccStat[acc][1] += 1
+						if DicoMarker[Chr][Pos] in Allele: ## If the diagnostic allele is in the vcf
+							GoodAllele = str(Allele.index(DicoMarker[Chr][Pos]))
+							FORMAT = data[FormatPos].split(':')
+							GTPos = FORMAT.index('GT')
+							for acc in dicoAccPos:
+								AccGeno = data[dicoAccPos[acc]].split(':')[GTPos].split('/')
+								if not('.' in AccGeno):
+									if GoodAllele in AccGeno:
+										dicoAccStat[acc][0] += 1
+									dicoAccStat[acc][1] += 1
+						else: # The diagnostic allele is not in vcf, thus individuals do not have this allele
+							for acc in dicoAccPos:
+								AccGeno = data[dicoAccPos[acc]].split(':')[GTPos].split('/')
+								if not('.' in AccGeno):
+									dicoAccStat[acc][1] += 1
+							
 	file.close()
 	
 	outfile = open(options.out,'w')
