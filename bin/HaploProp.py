@@ -64,6 +64,7 @@ def __main__():
 			if data[0] == "#CHROM":
 				dicoAccPos = {}
 				dicoAccStat = {}
+				dicoAccReadStat = {}
 				ChrPos = data.index("#CHROM")
 				PosPos = data.index("POS")
 				RefPos = data.index("REF")
@@ -72,6 +73,7 @@ def __main__():
 				for acc in data[FormatPos+1:]:
 					dicoAccPos[acc] = data.index(acc)
 					dicoAccStat[acc] = [0,0]
+					dicoAccReadStat[acc] = [0,0]
 			elif data[0][0] != "#":
 				Chr = data[ChrPos]
 				if Chr in DicoMarker:
@@ -82,24 +84,34 @@ def __main__():
 							GoodAllele = str(Allele.index(DicoMarker[Chr][Pos]))
 							FORMAT = data[FormatPos].split(':')
 							GTPos = FORMAT.index('GT')
+							ADPos = FORMAT.index('AD')
+							DPPos = FORMAT.index('DP')
 							for acc in dicoAccPos:
 								AccGeno = data[dicoAccPos[acc]].split(':')[GTPos].split('/')
+								ADGeno = data[dicoAccPos[acc]].split(':')[ADPos].split(',')
+								DPGeno = data[dicoAccPos[acc]].split(':')[DPPos]
 								if not('.' in AccGeno):
 									if GoodAllele in AccGeno:
 										dicoAccStat[acc][0] += 1
 									dicoAccStat[acc][1] += 1
+									dicoAccReadStat[acc][0] += int(ADGeno[int(GoodAllele)])
+									dicoAccReadStat[acc][1] += int(DPGeno)
 						else: # The diagnostic allele is not in vcf, thus individuals do not have this allele
 							for acc in dicoAccPos:
 								AccGeno = data[dicoAccPos[acc]].split(':')[GTPos].split('/')
 								if not('.' in AccGeno):
 									dicoAccStat[acc][1] += 1
+									dicoAccReadStat[acc][0] += int(ADGeno[int(GoodAllele)])
+									dicoAccReadStat[acc][1] += int(DPGeno)
 							
 	file.close()
 	
 	outfile = open(options.out,'w')
+	outfile.write('\t'.join(["name", "SiteRatio", "SiteWithSpecAllele", "TotalSites", "ReadRatio", "ReadWithSpecAllele", "TotalReads"]))
+	outfile.write('\n')
 	for acc in dicoAccStat:
 		if dicoAccStat[acc][1] != 0:
-			outfile.write('\t'.join([acc, str(dicoAccStat[acc][0]/dicoAccStat[acc][1]), str(dicoAccStat[acc][0]), str(dicoAccStat[acc][1])]))
+			outfile.write('\t'.join([acc, str(dicoAccStat[acc][0]/dicoAccStat[acc][1]), str(dicoAccStat[acc][0]), str(dicoAccStat[acc][1]), str(dicoAccReadStat[acc][0]/dicoAccReadStat[acc][1]), str(dicoAccReadStat[acc][0]), str(dicoAccReadStat[acc][1])]))
 			outfile.write('\n')
 	outfile.close()
 	exit()
