@@ -33,6 +33,7 @@ def __main__():
 	# Wrapper options.
 	parser.add_option( '-c',	'--haplo',	dest='haplo',	default=None,				help='A three column file containing on column 1: chromosome, column 2 : position, column 3 : allele')
 	parser.add_option( '-v',	'--vcf',	dest='vcf',		default=None,				help='A vcf file containing accessions to treat')
+	parser.add_option( '-l',	'--loc',	dest='loc',		default=None,				help='Optional: locate specific region in which alleles will be searched. Should be formated as follows: chr,start,end')
 	parser.add_option( '-o',	'--out',	dest='out',		default='HaploProp.tab',	help='Output file name')
 	
 	(options, args) = parser.parse_args()
@@ -42,15 +43,31 @@ def __main__():
 	if options.vcf == None:
 		sys.exit('Please provide a vcf file to --vcf argument')
 	
+	
+	
 	DicoMarker = {}
 	file = open(options.haplo, 'r')
-	for line in file:
-		data = line.split()
-		if data:
-			if not(data[0]) in DicoMarker:
-				DicoMarker[data[0]] = {}
-			DicoMarker[data[0]][data[1]] = data[2]
-	
+	if options.loc != None:
+		CHR, Start, End = options.loc.split(',')
+		Start = int(Start)
+		End = int(End)
+		for line in file:
+			data = line.split()
+			if data:
+				if data[0] == CHR:
+					position = int(data[1])
+					if Start <= position and position <= End:
+						if not(data[0]) in DicoMarker:
+							DicoMarker[data[0]] = {}
+						DicoMarker[data[0]][data[1]] = data[2]
+						# print(data[0], data[1])
+	else:
+		for line in file:
+			data = line.split()
+			if data:
+				if not(data[0]) in DicoMarker:
+					DicoMarker[data[0]] = {}
+				DicoMarker[data[0]][data[1]] = data[2]
 	file.close()
 	
 	if options.vcf[-3:] == '.gz':
