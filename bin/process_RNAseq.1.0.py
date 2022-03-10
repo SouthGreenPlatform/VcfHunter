@@ -52,45 +52,46 @@ def run_D_to_J(STEPS, LIB, ACC, STAR, OUT_REF2, PROC, STAR_OPT, PREFIX, JAVA, PI
 	if 'd' in STEPS:
 		to_return = utils.run_step_D_RNAseq(LIB, ACC, STAR, OUT_REF2, PROC, STAR_OPT, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'e' in STEPS:
 		to_return = utils.run_step_E_RNAseq(LIB, ACC, PREFIX, JAVA, PICARD, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'f' in STEPS:
 		to_return = utils.run_step_F_RNAseq(ACC, JAVA, PICARD, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'g' in STEPS:
 		to_return = utils.run_step_G_RNAseq(JAVA, PICARD, ACC, REF, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'h' in STEPS:
 		to_return = utils.run_step_H_RNAseq(JAVA, GATK, ACC, REF, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'i' in STEPS:
 		to_return = utils.run_step_I_RNAseq(ACC, JAVA, GATK, REF, PLOIDY, PREFIX, UseUnifiedGenotyperForBaseRecal, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	if 'j' in STEPS:
 		to_return = utils.run_step_E(ACC, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
+	return to_return
 
 def main_run_analysis(job):
 

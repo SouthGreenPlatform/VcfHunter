@@ -69,7 +69,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#2 Merging
 		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	
@@ -77,7 +77,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#3 removing duplicates
 		to_return = utils.run_step_B(JAVA, PICARD, ACC_ID, TMP, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	
@@ -85,7 +85,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#4 indel realignment
 		to_return = utils.run_step_C(ACC_ID, JAVA, GATK, REF, CONFIG, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	
@@ -93,7 +93,7 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#5 Base recalibration
 		to_return = utils.run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF, PLOIDY, PREFIX, QUEUE)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
 	
@@ -101,9 +101,10 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#6 GVCF generation
 		to_return = utils.run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME)
 		if to_return == 0:
-			return 0
+			pass
 		else:
 			return to_return
+	return to_return
 	
 def main_run_analysis(job):
 
