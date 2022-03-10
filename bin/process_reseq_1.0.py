@@ -68,27 +68,43 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 		#1 Mapping
 		#2 Merging
 		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT)
+		if to_return == 0:
+			return 0
+		else:
+			return to_return
 	
 	if 'b' in OPTIONS.steps:
 		#3 removing duplicates
 		to_return = utils.run_step_B(JAVA, PICARD, ACC_ID, TMP, PREFIX, QUEUE)
+		if to_return == 0:
+			return 0
+		else:
+			return to_return
 	
 	if 'c' in OPTIONS.steps:
 		#4 indel realignment
 		to_return = utils.run_step_C(ACC_ID, JAVA, GATK, REF, CONFIG, PREFIX, QUEUE)
+		if to_return == 0:
+			return 0
+		else:
+			return to_return
 	
 	if 'd' in OPTIONS.steps:
 		#5 Base recalibration
 		to_return = utils.run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF, PLOIDY, PREFIX, QUEUE)
+		if to_return == 0:
+			return 0
+		else:
+			return to_return
 	
 	if 'e' in OPTIONS.steps:
 		#6 GVCF generation
 		to_return = utils.run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME)
-	if to_return == 0:
-		return 0
-	else:
-		return to_return
-
+		if to_return == 0:
+			return 0
+		else:
+			return to_return
+	
 def main_run_analysis(job):
 
 	try:
@@ -271,7 +287,13 @@ def __main__():
 		
 		for n in results:
 			if n != 0:
-				sys.stdout.write(str(n)+'\n')
+				sys.stderr.write('*******************************\n\n')
+				sys.stderr.write(str(n[1])+'\n')
+				sys.stderr.write('*******************************\n')
+		
+		for n in results:
+			if n != 0:
+				sys.stdout.write('A problem occured in '+n[0]+' accession. See error log for more information.\n')
 	
 	# Creating pseudo VCF
 	if 'f' in options.steps:

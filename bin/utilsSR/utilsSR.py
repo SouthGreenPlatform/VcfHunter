@@ -34,9 +34,8 @@ from inspect import currentframe, getframeinfo
 from Bio.Seq import Seq
 from Bio import SeqIO
 
-def stop_err( msg ):
-	sys.stderr.write( "%s\n" % msg )
-	sys.exit()
+# def stop_err( msg ):
+	# sys.stderr.write( "%s\n" % msg )
 
 def run_job (frameinfo, cmd_line, ERROR):
 	try:
@@ -61,8 +60,10 @@ def run_job (frameinfo, cmd_line, ERROR):
 			raise Exception
 		# elif stderr:
 			# raise Exception
+		return 0
 	except Exception:
-		stop_err( 'Line : '+str(frameinfo.lineno)+' - '+ERROR + str( stderr ) )
+		# stop_err( 'Line : '+str(frameinfo.lineno)+' - '+ERROR + str( stderr ) )
+		return 'Line : '+str(frameinfo.lineno)+' - '+ERROR + str( stderr )
 
 def hold_job(ID_liste):
 	time.sleep(10)
@@ -196,14 +197,18 @@ def calcul_cov(LOCA_PROGRAMS, SAM, TYPE, OUT):
 	if TYPE == 'sam':
 		#Convert the sam file to the bam format
 		sam2bam = '%s view -bSh %s -o %s' % (LOCA_PROGRAMS.get('Programs','samtools'), SAM, SAM+'_BAM.bam')
-		run_job(getframeinfo(currentframe()), sam2bam, 'Error in sam2bam (calcul_cov):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), sam2bam, 'Error in sam2bam (calcul_cov):\n')
+		if run_job_error:
+			return run_job_error
 		SAM = SAM+'_BAM.bam'
 	elif TYPE != 'bam':
 		mot = TYPE+' argument passed in --type is not recognized'
 		sys.exit(mot)
 	
 	cal_cov = ('%s depth %s > %s') % (LOCA_PROGRAMS.get('Programs','samtools'), SAM, OUT)
-	run_job(getframeinfo(currentframe()), cal_cov, 'Error in calculating coverage:\n')
+	run_job_error = run_job(getframeinfo(currentframe()), cal_cov, 'Error in calculating coverage:\n')
+	if run_job_error:
+		return run_job_error
 	
 	#remove the intermediate bam file.
 	if TYPE == 'sam':
@@ -211,7 +216,9 @@ def calcul_cov(LOCA_PROGRAMS, SAM, TYPE, OUT):
 
 def calculate_annotation_coverage(OUT, dico_GFF3, BAM, REF, LOCA_PROGRAMS):
 	# calculating coverage
-	calcul_cov(LOCA_PROGRAMS, BAM, 'bam', BAM+'.cov')
+	run_job_error = calcul_cov(LOCA_PROGRAMS, BAM, 'bam', BAM+'.cov')
+	if run_job_error:
+		return run_job_error
 	
 	# recording in dictionnary covered sites
 	dico_cov = {}
@@ -246,7 +253,9 @@ def calculate_annotation_coverage(OUT, dico_GFF3, BAM, REF, LOCA_PROGRAMS):
 def run_step_A_RNAseq(STAR, PROC, OUT_REF1, REF, SJDBO, JID, QUEUE):
 	index = '%s --runThreadN %s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s' %	(STAR, PROC, OUT_REF1, REF)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), index, 'Error in step A:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), index, 'Error in step A:\n')
+		if run_job_error:
+			return ("Not applicable", run_job_error)
 	else:
 		run_qsub(QUEUE, [index], PROC, JID+'-INDEX1', "12G", JID)
 	sys.stdout.write("Step a: reference indexation done\n")
@@ -283,7 +292,9 @@ def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUE
 		
 		mappP = '%s --runThreadN %s --genomeDir %s --readFilesIn %s %s --outFileNamePrefix %s %s' % (STAR, PROC, OUT_REF1, TMP+'/mate1.fq', TMP+'/mate2.fq', PREFIX+'_JUNC_ESTIMATION_pair', STAR_OPT)
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), mappP, 'Error in step B:\n')
+			run_job_error = run_job(getframeinfo(currentframe()), mappP, 'Error in step B:\n')
+			if run_job_error:
+				return ("Not applicable", run_job_error)
 		else:
 			run_qsub(QUEUE, [mappP], PROC, PREFIX+'-MapP1', "12G", PREFIX)
 		# checking step
@@ -297,7 +308,10 @@ def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUE
 		fichier_final.close()
 		mappS = '%s --runThreadN %s --genomeDir %s --readFilesIn %s --outFileNamePrefix %s %s' % (STAR, PROC, OUT_REF1, TMP+'/single.fq', PREFIX+'_JUNC_ESTIMATION_single', STAR_OPT)
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), mappS, 'Error in step B:\n')
+			run_job_error = run_job(getframeinfo(currentframe()), mappS, 'Error in step B:\n')
+			if run_job_error:
+				return ("Not applicable", run_job_error)
+			
 		else:
 			run_qsub(QUEUE, [mappS], PROC, PREFIX+'-MapS1', "12G", PREFIX)
 		# checking step
@@ -392,7 +406,9 @@ def run_step_B_RNAseq(TMP, DICO_LIB, STAR, PROC, PREFIX, STAR_OPT, OUT_REF1, QUE
 def run_step_C_RNAseq(STAR, PROC, OUT_REF2, REF, SJDBO, JID, SJDBFCSE, QUEUE):
 	index = '%s --runThreadN %s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s --sjdbOverhang %s --sjdbFileChrStartEnd %s' % (STAR, PROC, OUT_REF2, REF, SJDBO, SJDBFCSE)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), index, 'Error in step C:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), index, 'Error in step C:\n')
+		if run_job_error:
+			return ("Not applicable", run_job_error)
 	else:
 		run_qsub(QUEUE, [index], PROC, JID+'-INDEX2', "12G", JID)
 	sys.stdout.write("Step c: reference indexation done\n")
@@ -410,7 +426,9 @@ def run_step_D_RNAseq (LIBS, ACC, STAR, OUT_REF2, PROC, STAR_OPT, PREFIX, QUEUE)
 		else:
 			return 'Problem in the configuration file in libraries section for accession '+ACC+'\n'
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), mapp2, 'Error in step D:\n')
+			run_job_error = run_job(getframeinfo(currentframe()), mapp2, 'Error in step D:\n')
+			if run_job_error:
+				return (ACC, run_job_error)
 		else:
 			run_qsub(QUEUE, [mapp2], PROC, ACC+'-Map2', "12G", PREFIX)
 		# checking step
@@ -483,7 +501,9 @@ def run_step_E_RNAseq(LIB, ACC, PREFIX, JAVA, PICARD, QUEUE):
 		to_merge = to_merge + 'INPUT='+ACC+'/'+n+'Aligned.out.sam '
 	merge = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s MergeSamFiles %s OUTPUT=%s MERGE_SEQUENCE_DICTIONARIES=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate TMP_DIR=%s' % (JAVA, PICARD, to_merge, ACC+'/'+ACC+'_merged.bam', ACC+'/'+TMP)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), merge, 'Error in step E:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), merge, 'Error in step E:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [merge], 1, ACC+'-Merge', "12G", PREFIX)
 	# checking step
@@ -501,7 +521,9 @@ def run_step_F_RNAseq(ACC, JAVA, PICARD, PREFIX, QUEUE):
 	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
 	rmdup = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s MarkDuplicates INPUT=%s OUTPUT=%s METRICS_FILE=%s REMOVE_DUPLICATES=true QUIET=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 VERBOSITY=WARNING TMP_DIR=%s' % (JAVA, PICARD, ACC+'/'+ACC+'_merged.bam', ACC+'/'+ACC+'_rmdup.bam', ACC+'/'+ACC+'_duplicate', ACC+'/'+TMP)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), rmdup, 'Error in step F:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), rmdup, 'Error in step F:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [rmdup], 1, ACC+'-RmDup', "12G", PREFIX)
 	# checking step
@@ -531,7 +553,9 @@ def run_step_G_RNAseq(JAVA, PICARD, ACC, REF, PREFIX, QUEUE):
 	TMP = tempfile.NamedTemporaryFile().name.split('/')[-1]
 	reorder = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s ReorderSam INPUT=%s OUTPUT=%s REFERENCE=%s CREATE_INDEX=true TMP_DIR=%s' % (JAVA, PICARD, ACC+'/'+ACC+'_rmdup.bam',  ACC+'/'+ACC+'_reorder.bam', REF, ACC+'/'+TMP)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), reorder, 'Error in step G:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), reorder, 'Error in step G:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [reorder], 1, ACC+'-Reord', "12G", PREFIX)
 	# checking step
@@ -547,7 +571,9 @@ def run_step_G_RNAseq(JAVA, PICARD, ACC, REF, PREFIX, QUEUE):
 def run_step_H_RNAseq(JAVA, GATK, ACC, REF, PREFIX, QUEUE):
 	trim = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T SplitNCigarReads -I %s -o %s -rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 -R %s -U ALLOW_N_CIGAR_READS' % (JAVA, GATK, ACC+'/'+ACC+'_reorder.bam', ACC+'/'+ACC+'_trim.bam', REF)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), trim, 'Error in step H:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), trim, 'Error in step H:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [trim], 1, ACC+'-Trim', "12G", PREFIX)
 	# checking step
@@ -564,7 +590,9 @@ def run_step_I_RNAseq(ACC, JAVA, GATK, REF, PLOIDY, PREFIX, UseUnifiedGenotyperF
 	
 	realTC = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T RealignerTargetCreator -o %s -I %s -R %s' % (JAVA, GATK, ACC+'/'+ACC+'_RTC.intervals', ACC+'/'+ACC+'_trim.bam', REF)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), realTC, 'Error in step I:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), realTC, 'Error in step I:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [realTC], 1, ACC+'-realTC', "12G", PREFIX)
 	if not(os.path.isfile(ACC+'/'+ACC+'_RTC.intervals')):
@@ -572,7 +600,9 @@ def run_step_I_RNAseq(ACC, JAVA, GATK, REF, PLOIDY, PREFIX, UseUnifiedGenotyperF
 
 	Ireal = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T IndelRealigner -o %s -I %s -targetIntervals %s -R %s' % (JAVA, GATK, ACC+'/'+ACC+'_realigned.bam', ACC+'/'+ACC+'_trim.bam', ACC+'/'+ACC+'_RTC.intervals', REF)
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), Ireal, 'Error in step I:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), Ireal, 'Error in step I:\n')
+		if run_job_error:
+			return (ACC, run_job_error)
 	else:
 		run_qsub(QUEUE, [Ireal], 1, ACC+'-Ireal', "12G", PREFIX)
 	if not(os.path.isfile(ACC+'/'+ACC+'_realigned.bam')):
@@ -610,7 +640,9 @@ def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
 		else:
 			return 'ERROR : Neither '+ACC_ID+'/'+ACC_ID+'_real_recal.bam or '+ACC_ID+'/'+ACC_ID+'_realigned.bam were found.\n'
 		list_lib.append(ACC_ID)
-		calculate_annotation_coverage(ACC_ID+'/'+ACC_ID+'_exon_coverage.cov', dico_gene_gff3, bam, REF, LOCA_PROGRAMS)
+		run_job_error = calculate_annotation_coverage(ACC_ID+'/'+ACC_ID+'_exon_coverage.cov', dico_gene_gff3, bam, REF, LOCA_PROGRAMS)
+		if run_job_error:
+			return run_job_error
 
 	
 	# Loading final dictionary
@@ -674,7 +706,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if QUEUE == None:
 		for comd in to_mapp:
 			sys.stdout.write(comd+'\n')
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (bwa-mem):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (bwa-mem) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, to_mapp, 4, 'mapp-'+ACC_ID, "4G", PREFIX)
 	sys.stdout.write('done\n')
@@ -696,7 +730,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if QUEUE == None:
 		for comd in mapping_stat:
 			sys.stdout.write(comd+'\n')
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (Map Stat):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (Map Stat) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, mapping_stat, 1, 'stats-'+ACC_ID, "4G", PREFIX)
 	
@@ -709,7 +745,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if QUEUE == None:
 		for comd in mapping_stat:
 			sys.stdout.write(comd+'\n')
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (Plot stat):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (Plot stat) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, mapping_stat, 1, 'stats-'+ACC_ID, "4G", PREFIX)
 		
@@ -727,7 +765,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if QUEUE == None:
 		for comd in to_filter:
 			sys.stdout.write(comd+'\n')
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, to_filter, 2, 'filter-'+ACC_ID, "12G", PREFIX)
 	sys.stdout.write('done\n')
@@ -748,7 +788,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	if QUEUE == None:
 		for comd in to_merge:
 			sys.stdout.write(comd+'\n')
-			run_job(getframeinfo(currentframe()), comd, 'Error in step A (picard tools):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (picard tools) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, to_merge, 1, 'merge-'+ACC_ID, "12G", PREFIX)
 	sys.stdout.write('done\n')
@@ -769,7 +811,9 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 		if QUEUE == None:
 			for comd in to_filter:
 				sys.stdout.write(comd+'\n')
-				run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools):\n')
+				run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools) for accession '+ACC_ID+':\n')
+				if run_job_error:
+					return (ACC_ID, run_job_error)
 		else:
 			run_qsub(QUEUE, to_filter, 2, 'filter-'+ACC_ID, "12G", PREFIX)
 		sys.stdout.write('done\n')
@@ -798,7 +842,9 @@ def run_step_B(JAVA, PICARD, ACC_ID, TMP, PREFIX, QUEUE):
 	
 	if QUEUE == None:
 		for comd in to_rmdup:
-			run_job(getframeinfo(currentframe()), comd, 'Error in step B (picard tools):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step B (picard tools) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, to_rmdup, 1, 'rmdup-'+ACC_ID, "20G", PREFIX)
 	
@@ -847,7 +893,9 @@ def run_step_C(ACC_ID, JAVA, GATK, REF, CONFIG, PREFIX, QUEUE):
 		realTC = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T RealignerTargetCreator -o %s -I %s -R %s' % (JAVA, GATK, ACC_ID+'/'+ACC_ID+'_RTC.intervals', bam, REF)
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), realTC, 'Error in step C (GATK realTC):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), realTC, 'Error in step C (GATK realTC) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [realTC], 1, 'realTC-'+ACC_ID, "12G", PREFIX)
 	
@@ -859,7 +907,10 @@ def run_step_C(ACC_ID, JAVA, GATK, REF, CONFIG, PREFIX, QUEUE):
 	Ireal = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T IndelRealigner -o %s -I %s -targetIntervals %s -R %s' % (JAVA, GATK, ACC_ID+'/'+ACC_ID+'_realigned.bam', bam, ACC_ID+'/'+ACC_ID+'_RTC.intervals', REF)
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), Ireal, 'Error in step C (GATK Ireal):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), Ireal, 'Error in step C (GATK Ireal) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
+
 	else:
 		run_qsub(QUEUE, [Ireal], 1, 'Ireal-'+ACC_ID, "12G", PREFIX)
 	
@@ -916,7 +967,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 			hapcall = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T HaplotypeCaller -I %s -o %s -R %s -dontUseSoftClippedBases -stand_call_conf 100 -stand_emit_conf 100 --output_mode EMIT_VARIANTS_ONLY --genotyping_mode DISCOVERY --sample_ploidy %s' % (JAVA, GATK, bam, ACC_ID+'/'+ACC_ID+'.vcf', REF, PLOIDY)
 		
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), hapcall, 'Error in step D (GATK HCreal):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), hapcall, 'Error in step D (GATK HCreal) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 		else:
 			run_qsub(QUEUE, [hapcall], 1, 'HCreal-'+ACC_ID, "12G", PREFIX)
 		sys.stdout.write('done\n')
@@ -926,7 +979,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 		varflt = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T VariantFiltration -V %s --out %s -R %s --clusterSize 3 --filterExpression "MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)" --filterExpression "QD < 1.5" --filterExpression "DP < 20" --maskExtension 0 --filterName HARD_TO_VALIDATE --filterName QD_FILTER --filterName DP_FILTER --maskName Mask --clusterWindowSize 10' % (JAVA, GATK, ACC_ID+'/'+ACC_ID+'.vcf', ACC_ID+'/'+ACC_ID+'_filtered.vcf', REF)
 		
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), varflt, 'Error in step D (GATK varflt):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), varflt, 'Error in step D (GATK varflt) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 		else:
 			run_qsub(QUEUE, [varflt], 1, 'VFreal-'+ACC_ID, "12G", PREFIX)
 		sys.stdout.write('done\n')
@@ -938,7 +993,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 		file_known_snp = ACC_ID+'/'+ACC_ID+'_selected.vcf'
 		
 		if QUEUE == None:
-			run_job(getframeinfo(currentframe()), selvar, 'Error in step D (GATK selvar):\n')
+			run_job_error = run_job(getframeinfo(currentframe()), selvar, 'Error in step D (GATK selvar) for accession '+ACC_ID+':\n')
+			if run_job_error:
+				return (ACC_ID, run_job_error)
 		else:
 			run_qsub(QUEUE, [selvar], 1, 'SVreal-'+ACC_ID, "12G", PREFIX)
 		sys.stdout.write('done\n')
@@ -956,7 +1013,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	baserecal = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T BaseRecalibrator -I %s -knownSites %s -o %s -R %s' % (JAVA, GATK, bam, knownsites, ACC_ID+'/'+ACC_ID+'_BR_recal.grp', REF)
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), baserecal, 'Error in step D (GATK baserecal 1):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), baserecal, 'Error in step D (GATK baserecal 1) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [baserecal], 1, 'BR1real-'+ACC_ID, "12G", PREFIX)
 	sys.stdout.write('done\n')
@@ -974,7 +1033,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	baserecal = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T BaseRecalibrator -I %s -knownSites %s -BQSR %s -R %s -o %s' % (JAVA, GATK, bam, knownsites, ACC_ID+'/'+ACC_ID+'_BR_recal.grp', REF, ACC_ID+'/'+ACC_ID+'_BR_post_recal.grp')
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), baserecal, 'Error in step D (GATK baserecal 2):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), baserecal, 'Error in step D (GATK baserecal 2) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [baserecal], 1, 'BR2real-'+ACC_ID, "12G", PREFIX)
 	
@@ -983,7 +1044,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	anacov = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T AnalyzeCovariates -R %s -before %s -after %s -plots %s' % (JAVA, GATK, REF, ACC_ID+'/'+ACC_ID+'_BR_recal.grp', ACC_ID+'/'+ACC_ID+'_BR_post_recal.grp', ACC_ID+'/'+ACC_ID+'_recalibration_plot.pdf')
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), anacov, 'Error in step D (GATK anacov):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), anacov, 'Error in step D (GATK anacov) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [anacov], 1, 'ACreal-'+ACC_ID, "12G", PREFIX)
 	sys.stdout.write('done\n')
@@ -993,7 +1056,9 @@ def run_step_D(CONFIG, ACC_ID, UseUnifiedGenotyperForBaseRecal, JAVA, GATK, REF,
 	printread = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s -T PrintReads -BQSR %s -I %s -o %s -R %s' % (JAVA, GATK, ACC_ID+'/'+ACC_ID+'_BR_recal.grp', bam, ACC_ID+'/'+ACC_ID+'_real_recal.bam', REF)
 	
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), printread, 'Error in step D (GATK printread):\n')
+		run_job_error = run_job(getframeinfo(currentframe()), printread, 'Error in step D (GATK printread) for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [printread], 1, 'PRreal-'+ACC_ID, "12G", PREFIX)
 	sys.stdout.write('done\n')
@@ -1040,7 +1105,9 @@ def run_step_E(ACC_ID, PYTHON, REF, DICO_CHR, PREFIX, QUEUE, PATHNAME):
 	sys.stdout.write('Initiating allele count\n')
 	allele_count = '%s %s/count_allele_number.py -r %s -b %s -o %s' % (PYTHON, PATHNAME, REF, bam, ACC_ID+'/'+ACC_ID+'_allele_count')
 	if QUEUE == None:
-		run_job(getframeinfo(currentframe()), allele_count, 'Error in step E:\n')
+		run_job_error = run_job(getframeinfo(currentframe()), allele_count, 'Error in step E for accession '+ACC_ID+':\n')
+		if run_job_error:
+			return (ACC_ID, run_job_error)
 	else:
 		run_qsub(QUEUE, [allele_count], 1, 'AlCount-'+ACC_ID, "12G", PREFIX)
 	
