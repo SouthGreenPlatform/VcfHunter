@@ -177,6 +177,7 @@ def __main__():
 	for accession in liste_acc:
 		dico_acc_geno[accession] = {}
 	
+	print("Loading vcf information")
 	# recording informations in a dictionary
 	dico_chr = {}
 	if options.vcf[-3:] == '.gz':
@@ -200,6 +201,7 @@ def __main__():
 						dico_acc_geno[accession][genotype[0]][genotype[1]] = list(genotype[2:])
 	file.close()
 	
+	print("Done. Calculating identity")
 	# Now it's time to calculate identity
 	dico_ident = {}
 	dico_values = set()
@@ -214,59 +216,82 @@ def __main__():
 						dico_ident[accession][chr][pos] = identity
 						dico_values.add(identity)
 	
-	# Now it's time to plot identity along chromosomes
+	print("Done. Parsing, calculating on sliding windows and printing results")
+	# Preparing output files
 	for acc in liste_acc:
 		if acc != options.acc:
 			outfile = open(options.out+'-'+acc+'.scatter.txt','w')
+			outfile.close()
+			outfile = open(options.out+'-'+acc+'_OK_prop.tab','wt')
+			outfile.close()
+			outfile = open(options.out+'-'+acc+'_NoOK_prop.tab','wt')
 			outfile.close()
 			for i in dico_values:
 				outfile = open(options.out+'-'+acc+'.density'+str(i)+'.txt','w')
 				outfile.close()
 	
-	
+	# Now it's time to plot identity along chromosomes
 	list_chromosomes = sorted(dico_chr.keys())
-	with PdfPages(options.out+'.pdf') as pdf:
-		for chr in list_chromosomes:
-			if len(dico_acc_geno[options.acc][chr].keys()) < WINDOW*2 + 1:
-				sys.stdout.write("Chromosome "+chr+" is removed from statistics because of insufficient marker number\n")
-			else:
-				dico_final = {}
-				for accession in dico_ident:
-					dico_final[accession] = {}
-					dico_final[accession]['pos'] = list(map(str, sorted(list(map(int, dico_ident[accession][chr].keys())))))
-					dico_final[accession]['ident'] = []
-					dico_final[accession]['values'] = {}
-					for values in dico_values:
-						dico_final[accession]['values'][values] = []
-					liste_value = []
-					for pos in dico_final[accession]['pos']:
-						liste_value.append(dico_ident[accession][chr][pos])
-						dico_final[accession]['ident'].append(dico_ident[accession][chr][pos])
-						if len(liste_value) == (WINDOW*2 + 1):
-							# dico_final[accession]['ident'].append(sum(liste_value)/float(len(liste_value)))
-							for values in dico_values:
-								dico_final[accession]['values'][values].append(liste_value.count(values)/float(len(liste_value)))
-							
-							del liste_value[0]
-				
-					# Finalizing data
-					for values in dico_values:
-						debut_value = dico_final[accession]['values'][values][0]
-						fin_value = dico_final[accession]['values'][values][-1]
-						dico_final[accession]['values'][values] = [debut_value]*WINDOW + dico_final[accession]['values'][values] + [fin_value]*WINDOW
-				if options.draw == 'y':
-					draw_density_plot(chr, dico_chr[chr], dico_final, pdf, dico_values)
-				
-				for acc in options.comp.split(':'):
-					outfile = open(options.out+'-'+acc+'.scatter.txt','a')
-					for i in range(len(dico_final[acc]['pos'])):
-						outfile.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['ident'][i]])))
-						outfile.write('\n')
-						for k in dico_values:
-							outfile2 = open(options.out+'-'+acc+'.density'+str(k)+'.txt','a')
-							outfile2.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['values'][k][i]])))
-							outfile2.write('\n')
-							outfile2.close()
-					outfile.close()
+	if options.draw == 'y':
+		pdf=PdfPages(options.out+'.pdf')
+	
+	for chr in list_chromosomes:
+		print("Working on chromosome "+chr)
+		if len(dico_acc_geno[options.acc][chr].keys()) < WINDOW*2 + 1:
+			sys.stdout.write("Chromosome "+chr+" is removed from statistics because of insufficient marker number\n")
+		else:
+			dico_final = {}
+			for accession in dico_ident:
+				print("---Working on accession "+accession)
+				dico_final[accession] = {}
+				dico_final[accession]['pos'] = list(map(str, sorted(list(map(int, dico_ident[accession][chr].keys())))))
+				dico_final[accession]['ident'] = []
+				dico_final[accession]['values'] = {}
+				for values in dico_values:
+					dico_final[accession]['values'][values] = []
+				liste_value = []
+				for pos in dico_final[accession]['pos']:
+					liste_value.append(dico_ident[accession][chr][pos])
+					dico_final[accession]['ident'].append(dico_ident[accession][chr][pos])
+					if len(liste_value) == (WINDOW*2 + 1):
+						for values in dico_values:
+							dico_final[accession]['values'][values].append(liste_value.count(values)/float(len(liste_value)))
+						
+						del liste_value[0]
+				# Finalizing data
+				for values in dico_values:
+					debut_value = dico_final[accession]['values'][values][0]
+					fin_value = dico_final[accession]['values'][values][-1]
+					dico_final[accession]['values'][values] = [debut_value]*WINDOW + dico_final[accession]['values'][values] + [fin_value]*WINDOW
+			if options.draw == 'y':
+				print("--Drawing plot for chromosome"+chr)
+				draw_density_plot(chr, dico_chr[chr], dico_final, pdf, dico_values)
+			
+			print("--Outputing results for "+chr)	
+			for acc in options.comp.split(':'):
+				outfile = open(options.out+'-'+acc+'.scatter.txt','a')
+				outfile3 = open(options.out+'-'+acc+'_OK_prop.tab','a')
+				outfile4 = open(options.out+'-'+acc+'_NoOK_prop.tab','a')
+				for i in range(len(dico_final[acc]['pos'])):
+					outfile.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['ident'][i]])))
+					outfile.write('\n')
+					for k in dico_values:
+						outfile2 = open(options.out+'-'+acc+'.density'+str(k)+'.txt','a')
+						outfile2.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['values'][k][i]])))
+						outfile2.write('\n')
+						outfile2.close()
+					if i%WINDOW == 0:
+						outfile3.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['values'][1][i]])))
+						outfile3.write('\n')
+						outfile4.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], (1-dico_final[acc]['values'][1][i])])))
+						outfile4.write('\n')
+				if i%WINDOW != 0:
+					outfile3.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], dico_final[acc]['values'][1][i]])))
+					outfile3.write('\n')
+					outfile4.write('\t'.join(map(str,[chr, dico_final[acc]['pos'][i], dico_final[acc]['pos'][i], (1-dico_final[acc]['values'][1][i])])))
+					outfile4.write('\n')
+				outfile.close()
+				outfile3.close()
+				outfile4.close()
 					
 if __name__ == "__main__": __main__()
