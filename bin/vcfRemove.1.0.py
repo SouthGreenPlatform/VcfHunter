@@ -119,14 +119,15 @@ def __main__():
 				REFPOS = data.index('REF')
 				ALTPOS = data.index('ALT')
 				QUALPOS = data.index('QUAL')
+				FILTERPOS = data.index('FILTER')
 				INFOPOS = data.index('INFO')
 				FORMATPOS = data.index('FORMAT')
 				ACCPOS = data.index(ACC)
 				REMOVEPOS = data.index(REMOVE)
 				if options.onlyAcc == 'y':
-					outfile.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
-					outfile1.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
-					outfile2.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+					outfile.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[FILTERPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+					outfile1.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[FILTERPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+					outfile2.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[FILTERPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
 				else:
 					outfile.write(line)
 					outfile1.write(line)
@@ -158,7 +159,7 @@ def __main__():
 					GENOACC[FORMAT.index('DP')] = str(TotalDP)
 					
 					if options.onlyAcc == 'y':
-						list_to_print += [data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS]]
+						list_to_print += [data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[FILTERPOS], data[INFOPOS], data[FORMATPOS]]
 						list_to_print.append(':'.join(GENOACC))
 					else:
 						list_to_print = data[:]
