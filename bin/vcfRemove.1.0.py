@@ -26,17 +26,25 @@ sys.stdout.write('loading modules\n')
 import gzip
 import optparse
 
-def recup_geno(LINE, HEADER, ACCESSION):
+def recup_geno(LINE, ACCESSION, FORMAT, REF, ALT, CHROM, POS):
 	
 	"""
 		Return the genotype of an accession from a vcf line
 		
 		:param LINE: A list corresponding to a vcf line
 		:type LINE: list
-		:param HEADER: A list containing the header of the vcf
-		:type HEADER: list
-		:param ACCESSION: ACCESSION name to return the genotype
-		:type ACCESSION: str
+		:param ACCESSION: Acession position in LINE to return the genotype
+		:type ACCESSION: int
+		:param FORMAT: Position of the FORMAT column in LINE
+		:type FORMAT: int
+		:param REF: Position of the REF column in LINE
+		:type REF: int
+		:param ALT: Position of the ALT column in LINE
+		:type ALT: int
+		:param CHROM: Position of the CHROM column in LINE
+		:type CHROM: int
+		:param POS: Position of the POS column in LINE
+		:type POS: int
 		:return: A list with [0] --> chromosome, [1] --> position (integer), [2] --> allele 1, [3] --> allele 2, ... [n] --> allele [n-1]
 		:rtype: list
 	"""
@@ -44,25 +52,29 @@ def recup_geno(LINE, HEADER, ACCESSION):
 	# Getting possible alleles
 	liste_allele = []
 	# Getting reference allele
-	liste_allele.append(LINE[HEADER.index('REF')])
+	liste_allele.append(LINE[REF])
 	# Getting alternative alleles
-	alt_all = LINE[HEADER.index('ALT')].split(',')
+	alt_all = LINE[ALT].split(',')
 	for n in alt_all:
 		liste_allele.append(n)
 	
 	# Getting accession format
-	format_col = LINE[HEADER.index('FORMAT')].split(':')
+	format_col = LINE[FORMAT].split(':')
 	
 	# Getting genotypes
-	geno = LINE[HEADER.index(ACCESSION)].split(':')[format_col.index('GT')].replace('/', '|').split('|')
+	geno = LINE[ACCESSION].split(':')[format_col.index('GT')].replace('/', '|').split('|')
 	
 	# Preparing the list to return
-	list2return = [LINE[HEADER.index('#CHROM')], LINE[HEADER.index('POS')]]
+	list2return = [LINE[CHROM], LINE[POS],[], []]
 	for n in geno:
 		if n == '.':
-			list2return.append('NA')
+			list2return[2].append('.')
 		else:
-			list2return.append(int(n))
+			list2return[2].append(int(n))
+	
+	# Obtaining allele coverage
+	AllDp = list(map(int, LINE[ACCESSION].split(':')[format_col.index('AD')].split(',')))
+	list2return[3] = AllDp
 	
 	# returning list
 	return list2return
@@ -75,6 +87,7 @@ def __main__():
 	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-a',	'--acc',			dest='acc',			default=None,			help='Accession name in which alleles will be removed. [Default: %default]')
 	parser.add_option( '-r',	'--remove',			dest='remove',		default=None,			help='Accession used to remove alleles. [Default: %default]')
+	parser.add_option( '-A',	'--onlyAcc',		dest='onlyAcc',		default='n',			help='Output only accession passed to --acc argument. Possible values: "y" or "n". [Default: %default]')
 	parser.add_option( '-o',	'--out',			dest='out',			default=None,			help='Prefix for output files names. [Default: %default]')
 
 	(options, args) = parser.parse_args()
@@ -100,27 +113,56 @@ def __main__():
 		if data:
 			if data[0] == '#CHROM':
 				header = data
-				outfile.write(line)
-				outfile1.write(line)
-				outfile2.write(line)
+				CHRPOS = data.index('#CHROM')
+				POSPOS = data.index('POS')
+				IDPOS = data.index('ID')
+				REFPOS = data.index('REF')
+				ALTPOS = data.index('ALT')
+				QUALPOS = data.index('QUAL')
+				INFOPOS = data.index('INFO')
+				FORMATPOS = data.index('FORMAT')
+				ACCPOS = data.index(ACC)
+				REMOVEPOS = data.index(REMOVE)
+				if options.onlyAcc == 'y':
+					outfile.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+					outfile1.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+					outfile2.write('\t'.join([data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS], data[ACCPOS]])+'\n')
+				else:
+					outfile.write(line)
+					outfile1.write(line)
+					outfile2.write(line)
 			elif data[0][0] != "#":
-				geno_acc = recup_geno(data, header, ACC)
-				geno_remove = recup_geno(data, header, REMOVE)
-				ExpectedPlo = len(geno_acc)-len(geno_remove)
-				if 'NA' in geno_acc or 'NA' in geno_remove:
+				geno_acc = recup_geno(data, ACCPOS, FORMATPOS, REFPOS, ALTPOS, CHRPOS, POSPOS)
+				geno_remove = recup_geno(data, REMOVEPOS, FORMATPOS, REFPOS, ALTPOS, CHRPOS, POSPOS)
+				ExpectedPlo = len(geno_acc[2])-len(geno_remove[2])
+				if '.' in geno_acc or '.' in geno_remove:
 					Missing += 1
 				else:
-					# print(geno_acc, geno_remove, ExpectedPlo)
-					genotype = geno_acc[2:]
-					for allele in geno_remove[2:]:
+					genotype = geno_acc[2][:]
+					removed = []
+					for allele in geno_remove[2]:
 						if allele in genotype:
 							genotype.remove(allele)
+							removed.append(allele)
 					list_to_print = []
-					for n in range(len(header)):
-						if header[n] == ACC:
-							list_to_print.append(':'.join(['/'.join(list(map(str, genotype)))]+data[n].split(':')[1:]))
-						else:
-							list_to_print.append(data[n])
+					
+					for n in set(geno_acc[2]):
+						if n != '.':
+							geno_acc[3][n] = round(geno_acc[3][n] * (1-(removed.count(n)/geno_acc[2].count(n))))
+					TotalDP = sum(geno_acc[3])
+					
+					FORMAT = data[FORMATPOS].split(':')
+					GENOACC = data[ACCPOS].split(':')
+					GENOACC[FORMAT.index('GT')] = '/'.join(list(map(str, genotype)))
+					GENOACC[FORMAT.index('AD')] = ','.join(list(map(str, geno_acc[3])))
+					GENOACC[FORMAT.index('DP')] = str(TotalDP)
+					
+					if options.onlyAcc == 'y':
+						list_to_print += [data[CHRPOS], data[POSPOS], data[IDPOS], data[REFPOS], data[ALTPOS], data[QUALPOS], data[INFOPOS], data[FORMATPOS]]
+						list_to_print.append(':'.join(GENOACC))
+					else:
+						list_to_print = data[:]
+						list_to_print[ACCPOS] = ':'.join(GENOACC)
 					outfile.write('\t'.join(list_to_print+['\n']))
 					if len(genotype) == ExpectedPlo:
 						outfile1.write('\t'.join(list_to_print+['\n']))
