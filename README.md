@@ -85,6 +85,7 @@ The package provided comprised 23 programs listed here:
 -   HaploProp.py (Martin et al., 2020b)
 -   vcf2dis.py (Martin et al., 2020b)
 -   vcfAndConsToRatio.py (Martin et al., 2020b)
+-   vcfFormatForVcftools.py (Martin et al., 2020b)
 
 
 All 23 programs run using the following command: python program-name <--options-name value>
