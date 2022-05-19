@@ -34,7 +34,7 @@ Dependencies
 7.  gnuplot, http://www.gnuplot.info/
 8.  circos-0.67 or greater, http://circos.ca/software/download/circos/
 
-Python3, Java and Biopython are also required.
+Python3 (tested with 3.4.10), Java and Biopython are also required.
 <br><br><br>
 
 
@@ -211,7 +211,7 @@ computation time. This program must be used in conjunction with**
 a variant calling on a selected set of polymorph markers based on user
 specification.**
 
-![](/images/AllelePropAndCov_Fig1.png)
+![](/images/Process_ReSeq_Fig1.png)
 
 #### Options:
 
