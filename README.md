@@ -1460,3 +1460,23 @@ passed in the consensus.
 
  **\*.png:** A list of png files containing consensus accessions specific group alleles proportions along the studied chromosome. At most 15 individuals were reported per png file.
 <br><br>
+
+### vcfFormatForVcftools.py
+
+This program reformat the vcf file in order to remove variant alleles that are not found in the individual. 
+REF allele can be changed is the allele of reference sequence is not found in genotypes in the vcf. In this 
+case, the REF allele become the first allele (ASCII sorted) found in individuals of the vcf. Coverage of 
+removed allele is also removed from the AD section but not from the DP section of the individual. Monomorphous 
+sites are also removed.
+
+*Options:*
+
+    --vcf: The vcf file containing genotyped individuals.
+    --out: Name for the output file.
+    --outgzip: Output file in gzip format. Possible values: 'y' or 'n'.
+
+
+*Output:*
+
+ **\*.vcf** or **\*.vcf.gz:** A vcf file in which alleles that are not found in the vcf are removed.\
+<br><br>
