@@ -3739,7 +3739,10 @@ def MergeVcf(VCF, VCF2, COMP1, PREFIX):
 	
 	# loading informations to add to vcf1
 	dico_acc = {}
-	file = open(VCF2)
+	if VCF2[-3:] == '.gz':
+		file = gzip.open(VCF2,'rt')
+	else:
+		file = open(VCF2)
 	for line in file:
 		data = line.split()
 		if data:
@@ -3768,7 +3771,7 @@ def MergeVcf(VCF, VCF2, COMP1, PREFIX):
 	# printing the new vcf file
 	found = 0
 	not_found = 0
-	outfile = open(PREFIX+'_merged.vcf','w')
+	outfile = gzip.open(PREFIX+'_merged.vcf.gz','wt')
 	if VCF[-3:] == '.gz':
 		file = gzip.open(VCF,'rt')
 	else:
