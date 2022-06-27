@@ -164,7 +164,7 @@ information that could be used to draw blocks with custom color.
 
 #### 6 - Visualization and block refinement with GEMO
 
-To visualize the blocks, go to [GEMO tool] (https://gemo.southgreen.fr/) and 
+To visualize the blocks, go to [GEMO tool](https://gemo.southgreen.fr/) and 
 load the block by choosing **Kunnan_ideo.tab** or **Kunnan_ideoProb.tab** 
 file in **(1)** depending if you want to visualize ancestral origins deduced 
 from probabilistic approach or algorithm of GEMO repectively. Important 
