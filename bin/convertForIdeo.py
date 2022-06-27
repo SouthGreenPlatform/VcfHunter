@@ -53,8 +53,6 @@ def __main__():
 		sys.exit('Please provide an directory to --dir argument')
 	if options.size == None:
 		sys.exit('Please provide an size file to --size argument')
-	# if options.mat == None:
-		# sys.exit('Please provide a marker matrix file to --mat argument')
 	
 	# Recording color
 	DicoFiles = {}

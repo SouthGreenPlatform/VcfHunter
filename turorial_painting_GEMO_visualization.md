@@ -164,15 +164,15 @@ information that could be used to draw blocks with custom color.
 
 #### 6 - Visualization and block refinement with GEMO
 
-To visualize the blocks, go to GEMO tool and load the block by choosing 
-**Kunnan_ideo.tab** or **Kunnan_ideoProb.tab** file in **(1)** depending 
-if you want to visualize ancestral origins deduced from probabilistic 
-approach or algorithm of GEMO repectively. Important remark: the ancestral 
-block generated from GEMO algorithm are not optimal and will require 
-parameter adjustment proposed in next section. Load the chromosome 
-information file by choosing the **Kunnan_chrom.tab** in **(2)**. You 
-can optionally load a color file by choosing the **Kunnan_color.tab** in **(4
-3)**. Then click on **Submit** **(4)** to draw the picture **(5)**.
+To visualize the blocks, go to [GEMO tool] (https://gemo.southgreen.fr/) and 
+load the block by choosing **Kunnan_ideo.tab** or **Kunnan_ideoProb.tab** 
+file in **(1)** depending if you want to visualize ancestral origins deduced 
+from probabilistic approach or algorithm of GEMO repectively. Important 
+remark: the ancestral block generated from GEMO algorithm are not optimal and 
+will require parameter adjustment proposed in next section. Load the 
+chromosome information file by choosing the **Kunnan_chrom.tab** in **(2)**. 
+You can optionally load a color file by choosing the **Kunnan_color.tab** in 
+**(43)**. Then click on **Submit** **(4)** to draw the picture **(5)**.
 
 ![](/images/GEMO1.png)
 
