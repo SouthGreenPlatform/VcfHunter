@@ -78,9 +78,6 @@ def Recal(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, ACCESSION_START, CHRpos, POSp
 	REF = DATA[REFpos]
 	ALT = DATA[ALTpos].split(",")
 	FORMAT = DATA[FORMATpos].split(":")
-	DPPOS = FORMAT.index('DP')
-	ADPOS = FORMAT.index('AD')
-	GTPOS = FORMAT.index('GT')
 	
 	dico_allele = set(range(len([REF]+ALT)))
 	# dico_allele = set() #####
@@ -88,6 +85,9 @@ def Recal(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, ACCESSION_START, CHRpos, POSp
 	
 	# Cheking if Flags are present in the FORMAT tag
 	if 'AD' in FORMAT and 'DP' in FORMAT and 'GT' in FORMAT:
+		DPPOS = FORMAT.index('DP')
+		ADPOS = FORMAT.index('AD')
+		GTPOS = FORMAT.index('GT')
 	
 		# Identification of accessions that pass MINCOV an MAXCOV (This is not optimized but it use same bloc as VcfPrefilter. Modified section of this bloc was identified with "#####")
 		for acc in range(len(DATA)):
@@ -112,7 +112,7 @@ def Recal(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, ACCESSION_START, CHRpos, POSp
 									dico_acc.add(acc)
 									# dico_allele.add(n) #####
 				else:
-					pass
+					print('WARNING, the line', CHR, POS, 'is omited as accession', DICOACCPOS[acc], 'information does not match FORMAT information')
 		# Now we are going to work on line with at least 1 variant site different from the reference
 		if len(dico_allele) > 1 or (not(0 in dico_allele) and len(dico_allele) == 1):
 			list_allele = list(dico_allele)
@@ -145,17 +145,29 @@ def Recal(DATA, MINCOV, MAXCOV, MINALCOV, MINFREQ, ACCESSION_START, CHRpos, POSp
 						for allele in list_allele:
 							coverage2print.append(allele_cov_info[allele])
 						
+						if 'GC' in FORMAT:
+							code = ['.']*len(FORMAT)
+						else:
+							code = ['.']*(len(FORMAT)+1)
+							FORMAT = FORMAT+['GC']
+						GCPOS = FORMAT.index('GC')
+						code[ADPOS] = ','. join(list(map(str, coverage2print)))
+						code[DPPOS] = str(sum(coverage2print))
+						
 						if acc in dico_acc: # Testing if accession pass min and max coverage threshold
 							genotype = utils.genotype_accession(coverage2print, list_allele_select, 0.001, str(ploidy), True, ALLCOMB)
-							code = ':'.join([genotype[0], ','. join(list(map(str, coverage2print))), str(sum(coverage2print)), str(genotype[1])])
+							code[GTPOS] = genotype[0]
+							code[GCPOS] = str(genotype[1])
 						else:
 							# No enough coverage to genotype
-							code = ':'.join(['/'.join(['.']*ploidy), ','.join(list(map(str, coverage2print))), str(sum(coverage2print)), '.'])
+							code[GTPOS] = '/'.join(['.']*ploidy)
+							code[GCPOS] = '.'
+						code = ':'.join(code)
 					else:
 						code = DATA[acc]
 					
 					genotype_coding.append(code)
-			list2print = [CHR, POS, '.', REF, AltAllele, '.', '.', '.', ':'.join(FORMAT+['GC'])] + genotype_coding
+			list2print = [CHR, POS, '.', REF, AltAllele, '.', '.', '.', ':'.join(FORMAT)] + genotype_coding
 			return list2print
 		else:
 			return 0
