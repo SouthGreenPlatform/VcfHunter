@@ -59,8 +59,11 @@ or
 Authors of scripts
 -----------
 Guillaume Martin (CIRAD)
+
 Olivier Garsmeur (CIRAD)
+
 Franc-Christophe Baurens (CIRAD)
+
 
 License
 -----------
