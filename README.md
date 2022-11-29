@@ -56,19 +56,15 @@ or
 
 **Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
 
-Authors of scripts
+Referring person of the deposit
 -----------
 Guillaume Martin (CIRAD)
-
-Olivier Garsmeur (CIRAD)
-
-Franc-Christophe Baurens (CIRAD)
-
+<br>
 
 License
 -----------
 Licencied under GPLv3
-
+<br>
 
 Description
 -----------
