@@ -6,7 +6,7 @@ DNA and RNAseq data onto reference genome sequence, perform variant calling,
 manipulate vcf files, perform chromosome painting of accessions based
 on the contribution of ancestral groups, select marker for genetic
 map analysis and perform pairwise chromosome linkage of ordered markers.
-<br><br><br>
+<br>
 
 Installation
 ------------
@@ -20,7 +20,7 @@ environment (available in $PATH), the complete path is not required and
 then only program name can be set in loca_programs.conf.
 For example if bwa is already loaded in the environment, put ***bwa = bwa***.
 If bam-readcound is not loaded in the environment put ***bamreadcount = /toto/tartenpion/programmes/bam-readcount/bin/bam-readcount***
-<br><br><br>
+<br>
 
 Dependencies
 ------------
@@ -35,7 +35,7 @@ Dependencies
 8.  circos-0.67 or greater, http://circos.ca/software/download/circos/
 
 Python3 (tested with 3.4.10), Java and Biopython are also required.
-<br><br><br>
+<br>
 
 
 How to cite
@@ -56,12 +56,16 @@ or
 
 **Garsmeur et al., 2018.** Garsmeur O, Droc G, Antonise R, Grimwood J, Potier B, Aitken K, Jenkins J, Martin G, Charron C, Hervouet C, et al. 2018. **A mosaic monoploid reference sequence for the highly complex genome of sugarcane.** *Nat. Commun.* 9:2638. https://www.nature.com/articles/s41467-018-05051-5
 
+Authors of scripts
+-----------
+Guillaume Martin (CIRAD)
+Olivier Garsmeur (CIRAD)
+Franc-Christophe Baurens (CIRAD)
 
 License
 -----------
 Licencied under GPLv3
 
-<br><br>
 
 Description
 -----------
