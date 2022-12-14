@@ -246,7 +246,7 @@ def __main__():
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program count allele ratio based on two origins")
 	# Wrapper options. 
 	parser.add_option( '',	'--chr',			dest='chr',			default=None,			help='Path to a file containing chromosome information. Two columns are required: col1 -> chromosome, col2 -> size.')
-	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 5 column file containing chromosome (col1), position (Col2), allele (Col3), origin (Col4) and allele ratio (Col 5).')
+	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='Either a 5 column file containing chromosome (col1), position (Col2), allele (Col3), origin (Col4) and allele ratio (Col 5) or the output file of allele_ratio_per_acc.py.')
 	parser.add_option( '',	'--NormOri',		dest='NormOri',		default=None,			help='A 4+n column file containing chromosome name chromosome (CHR), median position (POS), start region (Start), end region (End) and after one column for each origin.')
 	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='Accession to work with. [Default: %default]')
 	parser.add_option( '',	'--ploidy',			dest='ploidy',		default=None,			help='Accession ploidy')
@@ -304,21 +304,31 @@ def __main__():
 		file = gzip.open(options.origin, 'rt')
 	else:
 		file = open(options.origin, 'r')
+	header = False
 	for line in file:
 		data = line.split()
 		if data:
-			chr = data[0]
-			pos = int(data[1])
-			allele = data[2]
-			Origin = data[3]
-			if not(chr in dico_origin):
-				dico_origin[chr] = {}
-			if not(pos in dico_origin[chr]):
-				dico_origin[chr][pos] = {}
-			if allele in dico_origin[chr][pos]:
-				sys.exit('Oups, there is a problem, the allele '+allele+' at position '+str(pos)+' on chromosome '+chr+' has more than one origin... this is not allowed\n')
-			dico_origin[chr][pos][allele] = Origin
-			dico_group.add(Origin)
+			if data == ['chr', 'pos', 'allele', 'obs_ratio', 'exp_ratio', 'grp']:
+				header = True
+			else:
+				if header:
+					chr = data[0]
+					pos = int(data[1])
+					allele = data[2]
+					Origin = data[5]
+				else:
+					chr = data[0]
+					pos = int(data[1])
+					allele = data[2]
+					Origin = data[3]
+				if not(chr in dico_origin):
+					dico_origin[chr] = {}
+				if not(pos in dico_origin[chr]):
+					dico_origin[chr][pos] = {}
+				if allele in dico_origin[chr][pos]:
+					sys.exit('Oups, there is a problem, the allele '+allele+' at position '+str(pos)+' on chromosome '+chr+' has more than one origin... this is not allowed\n')
+				dico_origin[chr][pos][allele] = Origin
+				dico_group.add(Origin)
 	file.close()
 	
 	# Preparing color file
@@ -365,14 +375,23 @@ def __main__():
 		file = gzip.open(options.origin, 'rt')
 	else:
 		file = open(options.origin, 'r')
+	header = False
 	for line in file:
 		data = line.split()
 		if data:
-			chr = data[0]
-			pos = int(data[1])
-			ori = data[3]
-			value = float(data[4])
-			if chr == CHR and START <= pos and pos <= END:
+			if data == ['chr', 'pos', 'allele', 'obs_ratio', 'exp_ratio', 'grp']:
+				header = True
+			else:
+				if header:
+					chr = data[0]
+					pos = int(data[1])
+					ori = data[5]
+					value = float(data[3])
+				else:
+					chr = data[0]
+					pos = int(data[1])
+					ori = data[3]
+					value = float(data[4])
 				if value == 1:
 					value = random.uniform(VARIATION[0], VARIATION[1])
 				if not (chr in dico_draw):
