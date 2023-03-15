@@ -1627,6 +1627,6 @@ This program run ***vcf2allPropAndCov*** in chain in order to identify specific 
 
 *Output:*
 
-A folder, by default ***step1*** that contains a sub folder per accession with the outputs of ***vcf2allPropAndCov*** (**Cov.png**, **Ratio.png**, **_stats.tab**) and a **_ratio.tab.gz** file corresponding to **\*_AlleleOriginAndRatio.tab**.\
+A folder, by default ***step1*** that contains a sub folder per accession with the outputs of ***vcf2allPropAndCov*** (**Cov.png**, **Ratio.png**, **_stats.tab** and a **_ratio.tab.gz** file corresponding to **\*_AlleleOriginAndRatio.tab**).\
 <br><br>
 
