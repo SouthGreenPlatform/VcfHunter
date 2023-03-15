@@ -1615,14 +1615,14 @@ This program run ***vcf2allPropAndCov*** in chain in order to identify specific 
 
 *Options:*
 
-  --conf: Path to a file containing path to one or multiple vcf files (one per line)
-  --group: A two column file with accession in the first column and group tag (i.e. origin) in the second column
-  --outdir: Path to the output directory, where the program will put the subdirectories per accession [Default: step1]
-  --thread: Number of processors available. [Default: 1]
-  --param_v2apac_all: vcf2allPropAndCov parameter --all: allele should be present in all accessions of the group. Possible values "y", or "n". [Default: n]
-  --param_v2apac_introg: vcf2allPropAndCov parameter --excl: a tabulated file locating introgression in ancestral accessions
-  --param_v2apac_prop: vcf2allPropAndCov parameter --prop: allele proportion in ancestral accessions. Value comprised between 0 and 1 or "n" if not using this parameter. [Default: n]
-  --param_v2apac_NoMiss: vcf2allPropAndCov parameter --NoMiss: No missing data are allowed in accessions used to group alleles. Value "y" for not allowing missing data, "n" for allowing missing data. [Default: y]
+    --conf: Path to a file containing path to one or multiple vcf files (one per line)
+    --group: A two column file with accession in the first column and group tag (i.e. origin) in the second column
+    --outdir: Path to the output directory, where the program will put the subdirectories per accession [Default: step1]
+    --thread: Number of processors available. [Default: 1]
+    --param_v2apac_all: vcf2allPropAndCov parameter --all: allele should be present in all accessions of the group. Possible values "y", or "n". [Default: n]
+    --param_v2apac_introg: vcf2allPropAndCov parameter --excl: a tabulated file locating introgression in ancestral accessions
+    --param_v2apac_prop: vcf2allPropAndCov parameter --prop: allele proportion in ancestral accessions. Value comprised between 0 and 1 or "n" if not using this parameter. [Default: n]
+    --param_v2apac_NoMiss: vcf2allPropAndCov parameter --NoMiss: No missing data are allowed in accessions used to group alleles. Value "y" for not allowing missing data, "n" for allowing missing data. [Default: y]
 
 
 *Output:*
