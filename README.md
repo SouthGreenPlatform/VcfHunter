@@ -1545,20 +1545,20 @@ be added to figure.
 
 *Options:*
 
-  --chr: Path to a file containing chromosome information. Two columns are required: col1 -> chromosome, col2 -> size.
-  --origin: Either a 5 column file containing chromosome (col1), position (Col2), allele (Col3), origin (Col4) and allele ratio (Col 5) or the output file of allele_ratio_per_acc.py.
-  --NormOri: A 4+n column file containing chromosome name chromosome (CHR), median position (POS), start region (Start), end region (End) and after one column for each origin.
-  --acc: Accession to work with.
-  --ploidy: Accession ploidy
-  --dcurve: Draw mean curve for ratio. Possible values: y or n [Default: n]
-  --psize: Dot size in graph. [Default: 1.5]
-  --lsize: Size of the line of the mean value curve. [Default: 1]
-  --win: Size of half sliding window that allow to draw mean value curve [Default: 10]
-  --loc: Regions to locate by vertical line. This should be formated this way: Chromosome_name,position:chromosome_name,position: ...
-  --col: A color file with 4 columns: col1=group and the three last column corresponded to RGB code.
-  --figsize: Figure size (in inches). [Default: 10.5,14.85]
-  --MinMax: Additional variations added to values equal to 1 to have a better idea of dot density. Do not exceed 1.1 in maximal value. Example: 0.9,1.1 [Default: 1,1]
-  --reg: Region to draw. This could be a chromosome or a chromosome region. To specify a chromosome, just put the name. If it is a region, it should be formated as follows: name,start,end. [Default: none]
+    --chr: Path to a file containing chromosome information. Two columns are required: col1 -> chromosome, col2 -> size.
+    --origin: Either a 5 column file containing chromosome (col1), position (Col2), allele (Col3), origin (Col4) and allele ratio (Col 5) or the output file of allele_ratio_per_acc.py.
+    --NormOri: A 4+n column file containing chromosome name chromosome (CHR), median position (POS), start region (Start), end region (End) and after one column for each origin.
+    --acc: Accession to work with.
+    --ploidy: Accession ploidy
+    --dcurve: Draw mean curve for ratio. Possible values: y or n [Default: n]
+    --psize: Dot size in graph. [Default: 1.5]
+    --lsize: Size of the line of the mean value curve. [Default: 1]
+    --win: Size of half sliding window that allow to draw mean value curve [Default: 10]
+    --loc: Regions to locate by vertical line. This should be formated this way: Chromosome_name,position:chromosome_name,position: ...
+    --col: A color file with 4 columns: col1=group and the three last column corresponded to RGB code.
+    --figsize: Figure size (in inches). [Default: 10.5,14.85]
+    --MinMax: Additional variations added to values equal to 1 to have a better idea of dot density. Do not exceed 1.1 in maximal value. Example: 0.9,1.1 [Default: 1,1]
+    --reg: Region to draw. This could be a chromosome or a chromosome region. To specify a chromosome, just put the name. If it is a region, it should be formated as follows: name,start,end. [Default: none]
 
 
 *Output:*
@@ -1573,20 +1573,40 @@ distance from calculated centroids.
 
 *Options:*
 
-  --centroid: The centroid coordinate file
-  --centcores: The centroid correspondence with group
-  --VarCoord: The tabulated file of variables coordinates in new axis. (The --prefix + _variables_coordinates.tab file generated when running this script with PCA type)
-  --MaxDist: Maximal distance between allele and centroid
-  --Axes: Axes to use. Axis should be separated by ":".
-  --groups: Groups to keep. Groups should be separated ":".
-  --mat: Allele file in which group will be re-attributed.
-  --eval: If yes this program only calculate mean distances between centroids. Possible values: "y", or "n". [Default: n]
-  --prefix: Prefix for output files. [Default: Clustered]
+    --centroid: The centroid coordinate file
+    --centcores: The centroid correspondence with group
+    --VarCoord: The tabulated file of variables coordinates in new axis. (The --prefix + _variables_coordinates.tab file generated when running this script with PCA type)
+    --MaxDist: Maximal distance between allele and centroid
+    --Axes: Axes to use. Axis should be separated by ":".
+    --groups: Groups to keep. Groups should be separated ":".
+    --mat: Allele file in which group will be re-attributed.
+    --eval: If yes this program only calculate mean distances between centroids. Possible values: "y", or "n". [Default: n]
+    --prefix: Prefix for output files. [Default: Clustered]
 
 
 *Output:*
 
- **\*._Clust.tab:** A tabulated file in which alleles were grouped according to their maximal distance to centroids.\
+ **\*_Clust.tab:** A tabulated file in which alleles were grouped according to their maximal distance to centroids.\
+<br><br>
+
+### IdentOtherAncestry.py
+
+This program look for the proportion of allele present on a studied accession that are not present 
+in set of accessions identified as ancestor. It also look for the proportion of these alleles not 
+present defined ancestors in potential other (new) ancestors.
+
+*Options:*
+
+  --vcf: The vcf file.
+  --name: Accession name in which alleles will be compared
+  --ancestor: A tabulated file that contain on column 1 the name of accessions used to look for unspecific alleles
+  --newancestor: A tabulated file that contain on column 1 the name of accessions in which specific alleles from the searched accession will be compared
+  --out: The output file. [Default: Specific.tab]
+
+
+*Output:*
+
+ **\*.tab:** A tabulated file counting the total number of alleles in the accession, the number of alleles not found in ancestors and their number in tested potential other (new ancestors).\
 <br><br>
 
 
