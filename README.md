@@ -73,7 +73,7 @@ Licencied under GPLv3
 Description
 -----------
 
-The package provided comprised 39 programs listed here:
+The package provided comprised 38 programs listed here:
 
 -   Draw_dot_plot.py (Baurens et al., 2019)
 -   RecombCalculatorDDose.py (Baurens et al., 2019)
@@ -108,7 +108,6 @@ The package provided comprised 39 programs listed here:
 -   PhaseInVcf.py (Martin et al., 2023)
 -   PhaseInVcfToFasta.2.0.py (Martin et al., 2023)
 -   ReformatTree.py (Martin et al., 2023)
--   SelectForTraceAncestor.py (Martin et al., 2023)
 -   TotalRecal.1.0.py (Martin et al., 2023)
 -   allele_ratio_group.py (Martin et al., 2023)
 -   allele_ratio_per_acc.py (Martin et al., 2023)
@@ -1738,5 +1737,67 @@ that could be loaded to FigTree (tested on FigTree_v1.4.4).
 *Output:*
 
  **(\-\-tree)**\-**(\-\-layout)**.tree: A tree file that could be read and drawn with FigTree (https://github.com/rambaut/figtree).
+<br><br>
+
+### TotalRecal.1.0.py
+
+This program recalculate genotype calling in specified regions of specified accessions according to given ploidy.
+
+*Options:*
+
+    --vcf: The VCF file
+    --table: A table file with column1: accession name, column2: chromosome name; column3: start region, column4: end region, column 5: ploidy
+    --MinCov: Minimal read coverage for site. [Default: 10]
+    --MaxCov: Maximal read coverage for site. [Default: 1000]
+    --minFreq: Minimal allele frequency in an accession to keep the allele for calling in the row. [Default: 0.05]
+    --MinAlCov: Minimal read number of minor allele to call variant heterozygous (between 1 and infinity). [Default: 3]
+    --dial:  only a diallelic calling. i.e Only two allele are possible in a genotype if "y" is passed to this argument. Possible values "y" or "n". [Default: y]
+    --out: Prefix for output files. [Default: Pop]
+    --outgzip: Output files in gzip format. [Default: n]
+
+
+*Output:*
+
+ **(\-\-out)**: A vcf file in which the genotype calling was recalculated accoring to new ploidy in specified accession regions.
+<br><br>
+
+### allele_ratio_group.py
+
+This program use the outputs of ***IdentPrivateAllele*** to calculate, for each allele attributed 
+too a genetic group, the mean proportion of reads supporting this allele in accessions from this 
+genetic group. The obtained value can be seen as the allele fixation level in the genetic group.
+
+*Options:*
+
+    --group-file: A two column file with accession in the first column and group tag (i.e. origin) in the second column
+    --stat-file-pattern: pattern of the statistics file from vcf2allPropAndCov
+    --input-dir: input directory. [Default: ./step1]
+    --excl: A file containing region to exclude for ancestry attribution in some introgressed accessions.
+    --output-dir: output directory. [Default: ./step2]
+
+
+*Output:*
+
+ A folder, by default ***step2*** that contains several **\_ratio.tab.gz** files (one per genetic group).
+<br><br>
+
+### allele_ratio_per_acc.py
+
+This program use the output of ***allele_ratio_group*** and a vcf to calculate, in one accession, 
+the allelic ratio of alleles attributed to genetic groups.
+
+*Options:*
+
+    --conf-file: conf file, list of vcf path, one per line
+    --group-file: group file, with a pair accession - group per line
+    --input-dir: input directory. [Default: ./step2]
+    --output-dir: output directory. [Default: ./step3]
+    --accession: accession to scan from vcf
+    --depth: Minimal depth to consider a site. value comprised between 1 to infinite. If only considering sites with genotype, omit this argument.
+
+
+*Output:*
+
+ A folder, by default ***step3*** that contains a **\_ratio.tab.gz** file (one per genetic group). If the folder already exists, it will not be erased.
 <br><br>
 
