@@ -1712,10 +1712,12 @@ fasta file(s) should be generated anyway.
  **\*_Phase.fasta:** A multifasta file (corresponding to a succession of sites from the vcf) containing 
  phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
  trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
- several files named **\*\_Phase*Start\_End*.fasta** are generated.\
+ several files named **\*\_Phase*XXX\_XXX*.fasta** are generated (XXX\_XXX corresponding to the region along 
+ reference sequence).\
  **\*_Phase.phy:** A  phylip file (corresponding to a succession of sites from the vcf) containing 
  phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
  trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
- several files named \*\_Phase***Start***\_***End***.phy are generated
+ several files named **\*\_Phase*XXX\_XXX*.phy** are generated (XXX\_XXX corresponding to the region along 
+ reference sequence).
 <br><br>
 
