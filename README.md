@@ -1737,6 +1737,6 @@ that could be loaded to FigTree (tested on FigTree_v1.4.4).
 
 *Output:*
 
- **\-\-tree**\-**\-\-layout**.tree: A tree file that could be read and drawn with FigTree (https://github.com/rambaut/figtree).
+ **(\-\-tree)**\-**(\-\-layout)**.tree: A tree file that could be read and drawn with FigTree (https://github.com/rambaut/figtree).
 <br><br>
 
