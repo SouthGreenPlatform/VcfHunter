@@ -1712,12 +1712,31 @@ fasta file(s) should be generated anyway.
  **\*_Phase.fasta:** A multifasta file (corresponding to a succession of sites from the vcf) containing 
  phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
  trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
- several files named **\*\_Phase*XXX\_XXX*.fasta** are generated (XXX\_XXX corresponding to the region along 
+ several files named **\*\_Phase*XXX\_XXX*.fasta** are generated (***XXX\_XXX*** corresponding to the region along 
  reference sequence).\
  **\*_Phase.phy:** A  phylip file (corresponding to a succession of sites from the vcf) containing 
  phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
  trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
- several files named **\*\_Phase*XXX\_XXX*.phy** are generated (XXX\_XXX corresponding to the region along 
+ several files named **\*\_Phase*XXX\_XXX*.phy** are generated (***XXX\_XXX*** corresponding to the region along 
  reference sequence).
+<br><br>
+
+### ReformatTree.py
+
+This program reformat tree output from PHYML to generate a tree file with color
+that could be loaded to FigTree (tested on FigTree_v1.4.4).
+
+*Options:*
+
+    --tree: The tree file obtained from PhyMl.
+    --fasta: The corresponding fasta file.
+    --color: A color file with column 1 = accession name, column 2 = color in hexadecimal.
+    --layout: The layout of the tree. Possible values: "RECTILINEAR", "RADIAL" or "POLAR" [Default: RECTILINEAR]
+    --fsize: Labels font size. [Default: 12]
+
+
+*Output:*
+
+ **\-\-tree**\-**\-\-layout**.tree: A tree file that could be read and drawn with FigTree (https://github.com/rambaut/figtree).
 <br><br>
 
