@@ -1677,6 +1677,6 @@ performed appart from recombination events.
 *Output:*
 
  **\*_Phase.vcf.gz:** A gzipped vcf file containing phased individuals. Phased individuals are provided at the end of the vcf columns as a new individual per haplotypes and are named according to the trio (provided to --names argument) following the rule:
--   **Parent**-**Hx**-from-**child** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
--   **child**-**Hx**-**Parent1**\_X\_**Parent1** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
+-   **Parent-Hx-from-child** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
+-   ***child*-Hx-*Parent1*\_X\_y*Parent1*** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
 <br><br>
