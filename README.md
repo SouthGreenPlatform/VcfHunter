@@ -1660,3 +1660,23 @@ ratio in accession(s) representatives of a group).
  **\*_win_ratio.tab.gz:** A gzipped tabulated file containing, on slidding windows, the normalized values for each genetic group.
 <br><br>
 
+### PhaseInVcf.py
+
+This program phases the genotypic information contained in a vcf file. Phasing is performed on individuals 
+forming a parent-child trio (a child and its parents). With this approach, only sites that are not heterozygous 
+in all individuals can be phased, as well as those that are not consistent with the trio. Phasing is therefore 
+performed appart from recombination events. 
+
+*Options:*
+
+    --vcf: The vcf file.
+    --names: A 3 column file containing in this order F1 P1 P2 (F1=child, P1=parent1, P2=parent2).
+    --prefix: The prefix for output files. [Default: WorkOnVcf]
+
+
+*Output:*
+
+ **\*_Phase.vcf.gz:** A gzipped vcf file containing phased individuals. Phased individuals are provided at the end of the vcf columns as a new individual per haplotypes and are named according to the trio (provided to --names argument) following the rule:\
+ **Parent**-**Hx**-from-**child** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
+ **child**-**Hx**-from-**Parent1**_X_**Parent1** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
+<br><br>
