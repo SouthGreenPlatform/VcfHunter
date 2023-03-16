@@ -1654,8 +1654,9 @@ ratio in accession(s) representatives of a group).
 
 
 *Output:*
- Output are prefixed by the information provied to **--out** argument.
- **\*.tab:** Several tabulated files, one for each pseudo haplotypes of each chromosomes, containing identified segments ancestry along chromosomes.
+
+ Output are prefixed by the information provied to **--out** argument.\
+ **\*.tab:** Several tabulated files, one for each pseudo haplotypes of each chromosomes, containing identified segments ancestry along chromosomes.\
  **\*_win_ratio.tab.gz:** A gzipped tabulated file containing, on slidding windows, the normalized values for each genetic group.
 <br><br>
 
