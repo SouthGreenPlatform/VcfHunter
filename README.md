@@ -1663,9 +1663,9 @@ ratio in accession(s) representatives of a group).
 ### PhaseInVcf.py
 
 This program phases the genotypic information contained in a vcf file. Phasing is performed on individuals 
-forming a parent-child trio (a child and its parents). With this approach, only sites that are not heterozygous 
+forming a parents-child trio (a child and its parents). With this approach, only sites that are not heterozygous 
 in all individuals can be phased, as well as those that are not consistent with the trio. Phasing is therefore 
-performed appart from recombination events. 
+performed appart from recombination events. The output is individuals haplotypes into a vcf.
 
 *Options:*
 
@@ -1677,6 +1677,45 @@ performed appart from recombination events.
 *Output:*
 
  **\*_Phase.vcf.gz:** A gzipped vcf file containing phased individuals. Phased individuals are provided at the end of the vcf columns as a new individual per haplotypes and are named according to the trio (provided to \-\-names argument) following the rule:
--   ***Parent\-Hx\-from-\child*** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
+-   ***Parent\-Hx\-from\-child*** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
 -   ***child\-Hx\-Parent1\_X\_Parent1*** for parents (Hx = H1 or H2 for haplotype 1 or haplotype 2)
 <br><br>
+
+### PhaseInVcfToFasta.2.0.py
+
+This program phases the genotypic information contained in a vcf file. Phasing is performed on individuals 
+forming a parents-child trio (a child and its parents). With this approach, only sites that are not heterozygous 
+in all individuals can be phased, as well as those that are not consistent with the trio. Phasing is therefore 
+performed appart from recombination events. The output is a multifasta containing cumulated sites as sequence 
+for each individuals. Additional individuals for which no trio are available can be passed, a IUPAC code is 
+applied for heterozygous sites in these accessions. A IUPAC code is also applied for sites that could not be 
+phased in parents-child trios.
+
+
+REMARK: This program will also try to run PHYML using SLURM scheduler. This will probably return an error, but 
+fasta file(s) should be generated anyway.
+
+*Options:*
+
+  --vcf: The vcf file.
+  --names: A 3 column file containing in this order F1 P1 P2.
+  --prefix: The prefix for output files. [Default: WorkOnVcf]
+  --region: Region to work with. Region should be specified as follows : "chrX:start:end"
+  --outgp: Accessions for which parent child trio is not available but genotype should be obtained. Accessions should be passed in a one column file.
+  --win: If a value is passed, a multifasta will be generated for SNPs comprised in window size passed to argument. Window size for each sub fasta [Default: False]. 
+  --MinLength: Minimal length of the alignment (in bp) to keep the alignment for PHYML.
+  --maxIUP: Minimal proportion of IUPAC letters in a sequence to keep the sequence in the alignment. Values comprised between 0 and 1. [Default: 1]
+
+
+*Output:*
+
+ **\*_Phase.fasta:** A multifasta file (corresponding to a succession of sites from the vcf) containing 
+ phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
+ trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
+ several files named \*\_Phase***Start***\_***End***.fasta are generated.\
+ **\*_Phase.phy:** A  phylip file (corresponding to a succession of sites from the vcf) containing 
+ phased sequences from parents-child trios (only the parents haplotypes, that are identical to child, of the 
+ trios are reported) and consensus of additional individuals. In cases where the argument --win is filled 
+ several files named \*\_Phase***Start***\_***End***.phy are generated
+<br><br>
+
