@@ -1801,3 +1801,26 @@ the allelic ratio of alleles attributed to genetic groups.
  A folder, by default ***step3*** that contains a **\_ratio.tab.gz** file (one per genetic group). If the folder already exists, it will not be erased.
 <br><br>
 
+### convertForIdeo.py
+
+This program convert outputs from ***PaintArp*** or ***vcf2linear*** to inputs for GEMO (https://github.com/SouthGreenPlatform/GeMo).
+
+*Options:*
+
+  --name: The name of the accession. It corresponds to a pattern that will be searched to look for files.
+  --dir: The directory that contained the accession.
+  --col: A color file that will be used to paint accessions
+  --size: A file containing chromosome size. 2 columns are required: col1 : chromosome name, col2 : chromosome size
+  --plo: The ploidy of studied individual. [Default: 2]
+  --chro: List of chromosomes to draw separated by ",". If omitted, all chromosomes will be drawn. [Default: all]
+  --prefix: Prefix for the output files
+
+
+
+*Output:*
+
+ **\_ideo.tab:** A file that contained block determined with GEMO's algorithm with default parameters (parametric approach).\
+ **\_ideoProb.tab:** A file that contained blocks determined by ***PaintArp*** (probalistic approach).\
+ **\_chrom.tab:** A file that contained information required to draw chromosomes.\
+ **\_color.tab:** A file that contained color information that could be used to draw blocks with custom color.
+<br><br>
