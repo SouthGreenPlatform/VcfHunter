@@ -1611,7 +1611,7 @@ present defined ancestors in potential other (new) ancestors.
 
 ### IdentPrivateAllele.py
 
-This program run ***vcf2allPropAndCov*** in chain in order to identify specific alleles from distinct groups.
+This program run ***vcf2allPropAndCov*** in chain in order to identify specific alleles from distinct genetic groups.
 
 *Options:*
 
@@ -1628,5 +1628,34 @@ This program run ***vcf2allPropAndCov*** in chain in order to identify specific 
 *Output:*
 
 A folder, by default ***step1*** that contains a sub folder per accession with the outputs of ***vcf2allPropAndCov*** (**Cov.png**, **Ratio.png**, **_stats.tab** and a **_ratio.tab.gz** file corresponding to **\*_AlleleOriginAndRatio.tab**).\
+<br><br>
+
+### PaintArp.py
+
+This program use allele specific ratio calculated in one accession to characterize the ancestry along 
+chromosomes of studied accession. It also calculate normalized value for each group along chromosomes. 
+The normalization is calculated as follows: In a slidding windows and for each group, the total of 
+observed ratios is divided by the total of expected ratio (expected ratios being calculated on observed 
+ratio in accession(s) representatives of a group).
+
+*Options:*
+
+    --ratio: The ratio file. Tabulated file with 6 columns with headers. Col1: chr, col2: pos, col3: allele, col4: obs_ratio, col5: exp_ratio, col6: grp
+    --color: Color file name. Tabulated file with 5 columns with header. Col1: group, col2: name, col3: r, col4: g, col5: b
+    --ploidy: Ploidy of studied accession
+    --win: Half window size of markers
+    --overlap: Overlap between two windows (number of SNP positions). If not filled, the overlap between two windows of size n will be of n-1.
+    --noise: Maximal mean read proportion threshold in which absence of haplotype probability is put to 1
+    --threshold: Minimal mean read proportion threshold relative to the expected proportion in which haplotype probability is put to 1
+    --size: A file containing chromosome size. 2 columns are required: col1 : chromosome name, col2 : chromosome size
+    --MinAll: Minimal allele number of an origin to keep this region for prediction for the origin
+    --acc: Accession name
+    --out: Prefix for output files
+
+
+*Output:*
+
+ **\*.tab:** Several tabulated files, one for each pseudo haplotypes of each chromosomes, containing identified segments ancestry along chromosomes.\
+ **\*._win_ratio.tab.gz:** A gzipped tabulated file containing, on slidding windows, the normalized values for each genetic group.
 <br><br>
 
