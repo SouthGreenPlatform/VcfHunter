@@ -750,7 +750,7 @@ chromosomes, the genotype (first of the two columns) and allele grouping
 (second of the two columns).
 <br><br>
 
-### vcf2linear.1.1.py (python3)
+### vcf2linear.1.1.py
 
 This programs aims at performing a chromosome painting of accessions
 along chromosome based on the allele grouping corresponding to the
@@ -1824,3 +1824,22 @@ This program convert outputs from ***PaintArp*** or ***vcf2linear*** to inputs f
  **\*_color.tab:** A file that contained color information that could be used to draw blocks with custom color.
 <br><br>
 
+### plot_allele_normalized_mean_ratio_per_acc.py
+
+This program draw normalized origin ratio along chromosomes obtained after ***PaintArp***.
+
+*Options:*
+
+    --color: A color file, five columns: code, complete name, red, green, blue.
+    --chr: A chromosome file, two columns: chromosome, size.
+    --acc: An accession file, one columns: accession name.
+    --ratio: The ratio files containing on the four first column: chromosome (CHR), median position (POS), start region (Start), end region (End) and after one column for each origin.
+    --loc: Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ...
+    --prefix: Prefix for output files. [Default: Out]
+    graph: graphic output. possible options: pdf, png, svg [Default: png]
+
+
+*Output:*
+
+ **\*.png:** A png file drawing normalized ratio origins for an acession along chromosome of reference sequence.
+<br><br>
