@@ -158,8 +158,9 @@ def main_merging_sub_vcf(job):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"\n\nThis program go through all steps needed to call SNP from filtered fastq file (From mapping to SNP calling).")
+	parser = optparse.OptionParser(
+		description="This program go through all steps needed to call SNP from filtered fastq file (From mapping to SNP calling).",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options.
 	parser.add_option( '-c', '--conf',		dest='conf',		default=None,		help='A configuration file containing path to references fastq files.'
 	'The conf file should contain 2 sections ([Libraries] and [Reference]) and 2 additional ones ([Mapping], [Variant]).\t\t\t\t\t[Libraries] '

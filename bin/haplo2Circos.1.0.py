@@ -419,7 +419,10 @@ def draw_chromosome(ACC, CHR, GCOL, GP, CENTRO, PREFIX):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program perform a synthesis of the haplotypes reconstructed by vcf2linear.1.0.py by drawing"
+		" a circos representation of the chromosomal painting for all selected accessions and chromosomes.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '',	'--acc',			dest='acc',			default=None,			help='The Accessions names configuration file. Column1: accession name, column2: ploidy level. [Default: %default]')
 	parser.add_option( '',	'--chr',			dest='chr',			default=None, 			help='Chromosome(s) to draw, separated by ":". [Default: %default]')

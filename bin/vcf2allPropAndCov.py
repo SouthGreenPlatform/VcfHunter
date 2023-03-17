@@ -230,7 +230,12 @@ def get_chr_size(LINE):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program count allele ratio based on two origins")
+	parser = optparse.OptionParser(
+		description="This program perform two things based on a vcf. 1) It plots for an accession, "
+		"the allele coverage along its chromosomes. 2) It identify, based on known ancestral accessions "
+		"in the vcf, the alleles specific to each groups and plot the alleles proportion at a site in "
+		"the accession along chromosomes.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '',	'--conf',			dest='conf',		default=None,			help='Conf file containing vcf location (one per chromosome). [Default: %default]')
 	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='Path to a vcf file. [Default: %default]')

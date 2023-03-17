@@ -382,7 +382,9 @@ def cherche_autapo(DICO):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program filter a vcf file based on several criteria. This is a improved version of FILTER option of vcf2struct.1.0.py.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A one column file containing accession names to treat. [Default: %default]')

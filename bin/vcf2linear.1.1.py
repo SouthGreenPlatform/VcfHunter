@@ -1432,7 +1432,10 @@ def run_mutithread(job):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This programs aims at performing a painting of accessions along "
+		"chromosome based on the allele grouping corresponding to the ancestral groups.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',				default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-m',	'--mat',			dest='mat',				default=None,			help='Grouping information file. [Default: %default]')

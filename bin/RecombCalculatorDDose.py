@@ -408,8 +408,9 @@ def PhaseMarker(MATRIX, OUT):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"\n\n This program calculates pairwise recombination from a marker matrix file.")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program can calculates pairwise recombination from a marker matrix file,"
+	"\ncalculate segregation distortions and phase markers based on their order.")
 	# Wrapper options. 
 	parser.add_option( '-m', '--matrix', dest='matrix', default=None, help='The matrix marker file')
 	parser.add_option( '-o', '--output', dest='output', default=None, help='Output prefix name')

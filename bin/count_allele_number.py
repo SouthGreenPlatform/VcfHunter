@@ -30,7 +30,8 @@ import utilsSR.utilsSR as utils
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(description="This program count the number or read supporting alleles of each covered bases.",
+									epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options.
 	parser.add_option( '-r', '--ref', dest='ref', default=None, help='Reference multifasta file, [default: %default]')
 	parser.add_option( '-b', '--bam', dest='bam', default=None, help='The bam file, [default: %default]')

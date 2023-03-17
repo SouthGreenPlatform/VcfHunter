@@ -191,7 +191,7 @@ def draw_chr(DICONUM, DICOCURVE, DICO_INFO, CHR_INFO, DICO_GROUP, OUT, PLOIDY, D
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program draw allele ratios obtained by allele_ratio_per_acc.py program")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)\n\nThis program draw allele ratios obtained by 'allele_ratio_per_acc.py'.")
 	# Wrapper options. 
 	parser.add_option( '',	'--chr',			dest='chr',			default=None,			help='Path to single vcf file on vcf for all chromosomes is available. [Default: %default]')
 	parser.add_option( '',	'--origin',			dest='origin',		default=None,			help='A 5 column file containing chromosome (col1), position (Col2), allele (Col3), origin (Col4) and allele ratio (Col 5). [Default: %default]')

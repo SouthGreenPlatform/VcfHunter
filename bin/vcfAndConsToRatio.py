@@ -33,11 +33,12 @@ import optparse
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"\nThis program looks for specific alleles of a consensus haplotype found in one specific group of accessions and absent "
-	"from another group of accessions. The read allelic ratio of these specific alleles was then searched and plotted along "
-	"chromosome for each studied accession. This program only work on one chromosome and several chromosomes should not be "
-	"passed in the consensus.")
+	parser = optparse.OptionParser(
+		description="This program looks for specific alleles of a consensus haplotype found in one specific group of accessions and absent "
+		"from another group of accessions. The read allelic ratio of these specific alleles was then searched and plotted along "
+		"chromosome for each studied accession. This program only work on one chromosome and several chromosomes should not be "
+		"passed in the consensus.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options.
 	parser.add_option( '-H', '--haplo',		dest='haplo',	default=None, help='A three column file containing on column 1: chromosome, column 2 : position, column 3 : allele')
 	parser.add_option( '-W', '--With',		dest='With',	default=None, help='A one column file containing accessions with the haplotype')

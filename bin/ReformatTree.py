@@ -29,7 +29,9 @@ sys.stdout.write('modules loaded\n')
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program reformat tree output from PHYML to generate a tree file with"
+	"\ncolor that can be loaded to FigTree.")
 	# Wrapper options. 
 	parser.add_option( '',	'--tree',	dest='tree',	default=None,			help='The tree file obtained from PhyMl. [Default: %default]')
 	parser.add_option( '',	'--fasta',	dest='fasta',	default=None,			help='The corresponding fasta file. [Default: %default]')

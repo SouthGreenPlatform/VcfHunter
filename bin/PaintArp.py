@@ -38,7 +38,9 @@ def NormDens(n,p,q,x):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n\n")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program use allele specific ratios calculated in one accession to"
+	"\ncharacterize the ancestry along chromosomes of studied accession.")
 	# Wrapper options.
 	parser.add_option( '-r', '--ratio',		dest='ratio',		default=None,		help='The ratio file. Tabulated file with 6 columns with headers. Col1: chr, col2: pos, col3: allele, col4: obs_ratio, col5: exp_ratio, col6: grp')
 	parser.add_option( '-c', '--color',		dest='color',		default=None,		help='Color file name. Tabulated file with 5 columns with header. Col1: group, col2: name, col3: r, col4: g, col5: b')

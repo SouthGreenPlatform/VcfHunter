@@ -128,7 +128,11 @@ def CalcRatio(VCF, NAME, ANCESTOR, NEWANCESTOR, OUT):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program look for the proportion of allele present on a studied accession"
+	"\nthat are not present in set of accessions identified as ancestor. It also look"
+	"\nfor the proportion of these alleles not present in defined ancestors in potential"
+	"\nother (new) ancestors.")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file.')
 	parser.add_option( '-n',	'--name',			dest='name',		default=None,			help='Accession name in which alleles will be compared')

@@ -5,7 +5,9 @@
 
 import argparse
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="This program use the output of allele_ratio_group and a vcf to calculate,"
+	"in one accession, the allelic ratio of alleles attributed to genetic groups.",
+	epilog="Program designed by Aurelien Cottin and edited by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 parser.add_argument("-c","--conf-file",
                     help="conf file, list of vcf path, one per line",
                     type=str,required=True)

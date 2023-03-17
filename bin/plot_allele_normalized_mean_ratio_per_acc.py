@@ -40,7 +40,9 @@ from textwrap import wrap
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program count allele ratio based on two origins")
+	parser = optparse.OptionParser(
+		description="This program draw normalized origin ratio along chromosomes obtained after PaintArp.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '-c',	'--color',			dest='color',		default=None,			help='A color file, five columns: code, complete name, red, green, blue. [Default: %default]')
 	parser.add_option( '-C',	'--chr',			dest='chr',			default=None,			help='A chromosome file, two columns: chromosome, size. [Default: %default]')

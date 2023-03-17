@@ -82,7 +82,13 @@ def recup_geno(LINE, ACCESSION, FORMAT, REF, ALT, CHROM, POS):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program remove alleles in a given accession if they are shared by a "
+		"second accession. For Example, if an accession in which we will remove allele is A/A/T "
+		"and a second one which is the one that will be used to remove is A/A, the result for "
+		"the first accession will be T in the final vcf. If the accession used to remove is T/T, "
+		"the result will be A/A as only T is common between the two accessions.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-a',	'--acc',			dest='acc',			default=None,			help='Accession name in which alleles will be removed. [Default: %default]')

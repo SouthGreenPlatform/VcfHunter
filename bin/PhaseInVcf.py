@@ -266,7 +266,10 @@ def Phase(VCF, PCT, PREFIX):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program phases the genotypic information contained in a vcf file."
+	"\nPhasing is performed on individuals forming a parents-child trio (a child"
+	"\nand its parents). The outpout is a vcf with haplotypes as additional individuals.")
 	# Wrapper options. 
 	parser.add_option( '',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '',	'--names',			dest='names',		default=None,			help='A 3 column file containing in this order F1 P1 P2. [Default: %default]')

@@ -593,9 +593,9 @@ def get_tags(SEQ_DIC, CHR, POS, OUT, MNAME):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr),"
-	"Franc-Christophe BAURENS (franc-christophe.baurens@cirad.fr) and Olivier GARSMEUR (olivier.garsmeur@cirad.fr): \n\n"
-	"This script filter VCF file to create matrix which can be used for genetical mapping studies")
+	parser = optparse.OptionParser(
+		description="This script filter VCF file to create matrix that can be used for genetical mapping studies",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options.
 	parser.add_option( '-v', '--vcf',		dest='vcf',			default=None,		help='The VCF file')
 	parser.add_option( '-S', '--seg',		dest='seg',			default=None,		help='Segregation tested. Several segregations can be passed and should be separated by "/". A segregation should look like as follows:\t\t\t\t\t'

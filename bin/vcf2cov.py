@@ -156,7 +156,10 @@ def get_chr_size(LINE):
 
 def __main__():
 		#Parse Command Line
-		parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\nThis program draw coverage from accessions found in a vcf file and output figures in png format. Several options are available to custom figures.")
+		parser = optparse.OptionParser(
+		description="This program draw coverage from accessions found in a vcf file and output "
+		"figures in png format. Several options are available to custom figures.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 		# Wrapper options.
 		parser.add_option( '',  '--vcf',	dest='vcf',		default=None,	help='Vcf file. [Default: %default]')
 		parser.add_option( '',  '--acc',	dest='acc',		default=None,	help='Accession list in a 2 column file (c1 = acc name, c2 = ploidy). [Default: %default]')
@@ -172,7 +175,7 @@ def __main__():
 		if options.vcf == None:
 				sys.exit('Please provide a vcf file to --vcf argument')
 		if options.acc == None:
-				sys.exit('Please provide a accession name to --acc argument')
+				sys.exit('Please provide a accession file to --acc argument')
 		if options.out == None:
 				sys.exit('Please provide a output name to --out argument')
 

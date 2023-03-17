@@ -27,7 +27,9 @@ import gzip
 
 def __main__():
 	#Parse Command Line
-	parser = argparse.ArgumentParser("python VcfAndCarto2haplo.py [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\nThis program use a vcf file and a phased genotyping matrix to generate haplotypes of the parent of individuals used to create the genotyping matrix.")
+	parser = argparse.ArgumentParser("python VcfAndCarto2haplo.py [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program use a vcf file and a phased genotyping matrix to generate"
+	"\nhaplotypes of the parent of individuals used to create the genotyping matrix.\n")
 	# Wrapper options.
 	parser.add_argument( '-v', '--vcf',			dest='vcf',			default=None,		help='The vcf file')
 	parser.add_argument( '-m', '--matrix',		dest='matrix',		default=None,		help='The matrix file')

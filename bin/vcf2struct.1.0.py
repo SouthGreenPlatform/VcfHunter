@@ -4095,7 +4095,9 @@ def	get_allele_group_prop(VCF, MAT, PREFIX, NAMES, DGROUP, EXCLCHR):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program has been designed to perform statistics, filter, manipulate vcf files as well as analyzing the mosaic structure of genomes.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '',	'--vcf',			dest='vcf',				default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '',	'--vcf2',			dest='vcf2',			default=None,			help='A second vcf file. If COMPARE is passed in --type argument: can be used to compare two variant calling in two vcf file. [Default: %default]')

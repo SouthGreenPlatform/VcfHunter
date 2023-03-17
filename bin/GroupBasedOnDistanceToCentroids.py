@@ -113,7 +113,9 @@ def CreateNumpyArray(FILE, AXES, K, AP):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program use the outputs of 'vcf2struct.1.0.py' clustering to perform"
+	"\nadditionnal clustering based on maximal distance to centroids.")
 	# Wrapper options. 
 	parser.add_option( '',	'--centroid',		dest='centroid',		default=None,			help='The centroid coordinate file')
 	parser.add_option( '',	'--centcores',		dest='centcores',		default=None,			help='The centroid correspondence with group')

@@ -157,7 +157,17 @@ def draw_density_plot(CHR, SIZE, DICO, PDF, DICOVAL):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program test, along chromosome, the proportion of alleles shared by one "
+		"accession, against another one. For example when comparing a triploid accession against a "
+		"diploid one, if the diploid is A/T and the tetraploid one is A/T/T, the proportion of "
+		"shared alleles at the given position is 1. If the tetraploid is A/A/A, then the proportion "
+		"is equal to 0.5. A pdf of this statistic along chromosome is generated as well as a density "
+		"plot of these values over a given window size. In addition, for each potential values (0 and "
+		"1 for haploid comparison, 0, 1 and 2 for diploid comparison), a file summarizing the density "
+		"of this value on a given windows, that can be loaded to circos to perform a circular "
+		"representation of this statistics is generated.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',			default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-a',	'--acc',			dest='acc',			default=None,			help='Accession to compare to others. [Default: %default]')

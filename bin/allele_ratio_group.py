@@ -23,7 +23,7 @@
 
 print("---------------------------------------------------------------")
 print("WARNING:\n", 
-	  "this script don't handle missing allele ratio from each group,\n",
+	  "This script don't handle missing allele ratio from each group,\n",
 	  "and set them to '0'. With this we assume that there are no \n",
 	  "missing data in ancestral accession.")
 print("---------------------------------------------------------------")
@@ -34,7 +34,11 @@ print("---------------------------------------------------------------")
 #need one import
 import argparse
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="This program use the outputs of IdentPrivateAllele to calculate, for each allele"
+	"\nattributed too a genetic group, the mean proportion of reads supporting this allele"
+	"\nin accessions from this genetic group. The obtained value can be seen as the allele"
+	"\nfixation level in the genetic group.",
+	epilog="Program designed by Aurelien Cottin and edited by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 parser.add_argument("-g","--group-file",
 					help="group file, with a pair accession - group per line",
 					type=str,required=True)

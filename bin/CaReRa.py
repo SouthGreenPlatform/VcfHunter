@@ -273,7 +273,7 @@ def get_win(DICO, WIN):
 
 def __main__():
 		#Parse Command Line
-		parser = optparse.OptionParser(usage='python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program calculate, on a given window, the recombination rate observed\n')
+		parser = optparse.OptionParser(usage='python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)\n\nThis program calculate, on a given window, the observed recombination rate.\n')
 		# Wrapper options.
 		parser.add_option( '',  '--fasta',	dest='fasta',	default=None,			help='The multifasta file containing reference sequence on which tags were located.')
 		parser.add_option( '',  '--mat',	dest='mat',		default=None,			help='Phased and corrected matrix file. col 1 : markers name, col marker coding ("nn,np" or "hh,hk,kk" or "hh,k-" or "ll,lm"), 3, 4 necessary but not used by the program,'

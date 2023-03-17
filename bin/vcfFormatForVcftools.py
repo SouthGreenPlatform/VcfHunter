@@ -135,7 +135,12 @@ def Format(VCF, PREFIX, OUTGZIP):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr")
+	parser = optparse.OptionParser(
+		description="This program reformat the vcf file in order to remove variant alleles that are not found in individuals. "
+		"REF allele can be changed if the allele of reference sequence is not found in genotypes in the vcf. In this case, the "
+		"REF allele become the first allele (ASCII sorted) found in individuals of the vcf. Coverage of removed allele is also "
+		"removed from the AD section but not from the DP section of the individual. Monomorphous sites are also removed.",
+		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options. 
 	parser.add_option( '-v',	'--vcf',			dest='vcf',		default=None,			help='The vcf file. [Default: %default]')
 	parser.add_option( '-o',	'--out',			dest='out',		default='WorkOnVcf', 	help='Name for output files. [Default: %default]')

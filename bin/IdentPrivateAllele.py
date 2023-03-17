@@ -60,8 +60,9 @@ def Parallel(job):
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"\n\nThis program run vcf2allPropAndCov.py in chain in order to identify specific alleles.")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program run 'vcf2allPropAndCov.py' in chain in order to identify"
+	"\nspecific alleles of genetic groups.")
 	# Wrapper options.
 	
 	parser.add_option( '-c', '--conf',					dest='conf',					default=None,		help='Path to a file containing path to one or multiple vcf files (one per line)')

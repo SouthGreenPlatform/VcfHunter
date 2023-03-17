@@ -439,8 +439,8 @@ def draw_plot(MAT, DICO_ORDERED_LOCI, AGP, CHR, OUT, STAT, INVORD, PHYSICAL, STR
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"\n\n This program draw dot plot from a data matrix.")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program draw dot plot (heatmap way) from a data matrix.")
 	# Wrapper options. 
 	parser.add_option( '-m', '--matrix',	dest='matrix',		default=None, 	help='The matrix marker file')
 	parser.add_option( '-l', '--loc', 		dest='loc',			default=None, 	help='Loci to plot with their locations')

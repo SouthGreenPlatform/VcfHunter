@@ -36,7 +36,8 @@ import math
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage='python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr\n This program convert outputs from PaintArp.py or vcf2linear.1.1.py to inputs for GEMO\n')
+	parser = optparse.OptionParser(description="This program convert outputs from PaintArp.py or vcf2linear.1.1.py to inputs for GEMO.",
+									epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
 	# Wrapper options.
 	parser.add_option( '',  '--name',	dest='name',	default=None,			help='The name of the accession. It corresponds to a pattern that will be searched to look for files.')
 	parser.add_option( '',  '--dir',	dest='dir',		default=None,			help='The directory that contained the accession.')

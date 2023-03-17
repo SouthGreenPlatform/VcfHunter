@@ -28,8 +28,9 @@ import optparse
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN : guillaume.martin@cirad.fr"
-	"This program calculate the proportion of alleles of an haplotype found in an accession genotyped in a vcf file.")
+	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
+	"\n\nThis program calculate the proportion of alleles of an haplotype found"
+	"\nin an accession genotyped in a vcf file.")
 	# Wrapper options.
 	parser.add_option( '-c',	'--haplo',	dest='haplo',	default=None,				help='A three column file containing on column 1: chromosome, column 2 : position, column 3 : allele')
 	parser.add_option( '-v',	'--vcf',	dest='vcf',		default=None,				help='A vcf file containing accessions to treat')
