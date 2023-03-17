@@ -1806,7 +1806,7 @@ the allelic ratio of alleles attributed to genetic groups.
 
 *Output:*
 
- A folder, by default ***step3*** that contains a **\*_ratio.tab.gz** file (one per genetic group). If the folder already exists, it will not be erased.
+ A folder, by default ***step3*** that contains a **\*_ratio.tab.gz** file continaing counted allele ratio according to genetic group. If the folder already exists, it will not be erased.
 <br><br>
 
 ### convertForIdeo.py
@@ -1986,5 +1986,37 @@ files for circos representation.
 
 *Output:*
 
- **\*circos.\*.haplo\*.tab:** Several tabulated files (as much as the ploidy of the individuals) containing chromosome painting information for circos drawing.
+ **\circos.\*.haplo\*.tab:** Several tabulated files (as much as the ploidy of the individuals) containing chromosome painting information for circos drawing.
 <br><br>
+
+### SPRH.py
+
+This program remove the complete genome of a parent from a child, paint the 
+remaining haplotype/genotype and prepare files for circos visualization.
+
+*Required arguments:*
+
+    --parent1: Potential parent 1 its ploidy and ploidy of the generated gamete. Format should be as follows: ParentName,ParentPloidy,GametePloidy
+    --child: Potential child its ploidy. Format should be as follows: ParentName,ParentPloidy. A folder with the acession name will be generated.
+    --outfolder: Outfolder in which vcf and painting and circos will be put.
+    --vcf: Path to the vcf file containing parents and child studied.
+    --groupFile: Group file, with a pair accession - group per line.
+    --inputDir: Input directory containing grouped alleles and their expected ratio.
+    --color: Color file name. Tabulated file with 5 columns with header. Col1: group, col2: name, col3: r, col4: g, col5: b
+    --size: A file containing chromosome size. 2 columns are required: col1 : chromosome name, col2 : chromosome size.
+    --win: --win option of PaintArp.py: Half window size of markers to use for origin region attribution
+    --noise: --noise option of PaintArp.py: Maximal mean read proportion threshold in which absence of haplotype probability is put to 1.
+    --threshold: --threshold option of PaintArp.py: Minimal mean read proportion threshold relative to the expected proportion in which haplotype probability is put to 1.
+    --chro: Chromosome to work with. They should be separated by ":".
+    --centro: File locating (peri)centromeric positions. It contained 3 columns: col1 -> chromosome, col2 -> start, col3 -> end
+
+
+*Output:*
+
+-   A vcf (**.ss.\*_haplo.vcf.gz**) containing child genotype after removal of the parent genotype. Only with sites that **are congruents** with a complete genome of the parent into the child were reported (output of vcfRemove).
+-   A **\*_ratio.tab.gz** file continaing counted allele ratio in the remaining genotype/haplotype according to genetic group (output of ***allele_ratio_per_acc***).
+-   Several **\*.tab** tabulated files, one for each pseudo haplotypes of each chromosomes, containing identified segments ancestry along chromosomes (outputs of ***PaintArp***).
+-   A gzipped **\*_win_ratio.tab.gz:** tabulated file containing, on slidding windows, the normalized values for each genetic group (output of ***PaintArp***).
+-   A **\*_curves.png** file drawing normalized ratio origins along chromosome of reference sequence (output of ***plot_allele_normalized_mean_ratio_per_acc***).
+<br><br>
+
