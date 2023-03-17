@@ -1883,13 +1883,13 @@ and a child. This program does not work on phased vcf file.
 
 ### APAR.py
 
-This programme goes through all the steps of parent-child trio analysis. It
-includes a chromosomal analysis of SNPs validating the trio and the duos
-(child, parent), a search for the complete genome of the parent in the child
-if appropriate (ploidy of the parent gamete is equal to the ploidy of the
-parent), an attempt to remove the complete genome of the parent from the child
-if appropriate (ploidy of the parent gamete is equal to the ploidy of the
-parent) and a file preparation for circos visualisation.
+This programme goes through all the steps of parent-child trio analysis. It 
+includes a chromosomal analysis of SNPs validating the trio and the duos 
+(child, parent), a search for the complete genome of the parent in the child 
+if appropriate (ploidy of the parent gamete is equal to the ploidy of the 
+parent), an attempt to remove the complete genome of the parent from the child 
+if appropriate (ploidy of the parent gamete is equal to the ploidy of the 
+parent) and a file preparation for circos visualisation. 
 
 
 *Required arguments:*
@@ -1924,3 +1924,21 @@ parent) and a file preparation for circos visualisation.
 -   ***If applicable:*** three additional vcf with containing child genotype after removal of the genotype of parent that have the same ploidy of its gamete (a vcf **.ss.\*.vcf.gz** with all sites from the origin vcf \-ploidy of genotype can change\-, a vcf **.ss.\*_MoreThanHaplo.vcf.gz** with sites that **are not congruents** with a complete genome of the parent into the child and a vcf **.ss.\*_haplo.vcf.gz** with sites that **are congruents** with a complete genome of the parent into the child.).
 <br><br>
 
+### DrawCircos.py
+
+This program takes as input tile and curve files as well as karyotype file and generate 
+configuration files required to draw circos representation.
+
+*Required arguments:*
+
+    --Files: Files used in the circos, the type of layer their order from outer to inner they should appear in the circos. Argument should be formated as follows: File1,type,order:File2,type,order:... Where possible types are "tile" or "line" and order is an interger 1, 2, 3, ... Two files can have the same order, they will thus be drawn over each other.
+    --outfolder: The output folder that will contain circos files and pictures.
+    --prefix: Prefix for output files generated: "_housekeeping.conf", ".conf", ".png" and ".svg" files will be generated.
+    --karyotype: Path to karyotype file
+    --color: A file containing color code for painting.
+
+
+*Output:*
+
+ **\*.png:** A png file drawing normalized ratio origins for an acession along chromosome of reference sequence.
+<br><br>
