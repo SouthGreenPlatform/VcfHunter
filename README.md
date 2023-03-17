@@ -1878,5 +1878,49 @@ and a child. This program does not work on phased vcf file.
  **\*_OK_prop_NUCwin.tab:** A tabulated file containing the proportion of sites **in accordance** with tested parentage in slidding windows of size passed to ***\-\-WINDOW***.\
  **\*_NoOK_prop_NUCwin.tab:** A tabulated file containing the proportion of sites **not in accordance** with tested parentage in slidding windows of size passed to ***\-\-WINDOW***.\
  **\*_OK_prop_SNPwin.tab:** A tabulated file containing the proportion of sites **in accordance** with tested parentage in slidding windows of size 2\*(value passed to ***\-\-window***)\+1.\
- **\*_NoOK_prop_SNPwin.tab:** A tabulated file containing the proportion of sites **not in accordance** with tested parentage in slidding windows of size 2\*(value passed to ***\-\-window***)\+1.\
+ **\*_NoOK_prop_SNPwin.tab:** A tabulated file containing the proportion of sites **not in accordance** with tested parentage in slidding windows of size 2\*(value passed to ***\-\-window***)\+1.
 <br><br>
+
+### APAR.py
+
+This programme goes through all the steps of parent-child trio analysis. It
+includes a chromosomal analysis of SNPs validating the trio and the duos
+(child, parent), a search for the complete genome of the parent in the child
+if appropriate (ploidy of the parent gamete is equal to the ploidy of the
+parent), an attempt to remove the complete genome of the parent from the child
+if appropriate (ploidy of the parent gamete is equal to the ploidy of the
+parent) and a file preparation for circos visualisation.
+
+
+*Required arguments:*
+
+    --parent1: Potential parent 1 its ploidy and ploidy of the generated gamete. Format should be as follows: ParentName,ParentPloidy,GametePloidy
+    --parent2: Potential parent 2 its ploidy and ploidy of the generated gamete. Format should be as follows: ParentName,ParentPloidy,GametePloidy
+    --child: Potential child its ploidy. Format should be as follows: ParentName,ParentPloidy. A folder with the acession name will be generated.
+    --crossname: Name of the cross. All generated files will be prefixed with this name.
+    --vcf: Path to the vcf file containing parents and child studied.
+    --fasta: The multifasta reference file.
+    --painting: A folder containing chromosome painting for all accessions studied from vcfhunter tools.
+    --color: A file containing color code for painting.
+
+*Optional arguments:*
+
+    --chr: Chromosome to work with. They should be separated by ":". If omitted, all chromosomes will be used.
+    --window: Half window to calculate site proportion in accordance with tested parentage (unit = variant site). [Default: 100]
+    --WINDOW: The window to calculate site proportion in accordance with tested parentage (unit base pair). [Default: 100000]
+
+
+*Output:*
+
+-   Three **\*.name.tab** file required for vcf filtration.
+-   A vcf file containing polymorphic sites between and/or within individuals from the trio (***--crossname*****_filt.vcf.gz**).
+-   Two vcf file containing polymorphic sites between and/or within individuals of each duos (***--crossname*****.\*_filt.vcf.gz**).
+-   The outputs of ACRO.py testing the parentage of the parents-child trio (6 files: **\*2Parents_OK.tab.gz**, **\*2Parents_noOK.tab.gz**, **\*2Parents_OK_prop_NUCwin.tab**, **\*2Parents_NoOK_prop_NUCwin.tab**, **\*2Parents_OK_prop_SNPwin.tab**, **\*2Parents_NoOK_prop_SNPwin.tab**).
+-   The outputs of ACRO.py testing the parentage of each parent-child duos (12 files: **\*1Parents-\*_OK.tab.gz**, **\*1Parents-\*_noOK.tab.gz**, **\*1Parents-\*_OK_prop_NUCwin.tab**, **\*1Parents-\*_NoOK_prop_NUCwin.tab**, **\*1Parents-\*_OK_prop_SNPwin.tab**, **\*1Parents-\*_NoOK_prop_SNPwin.tab**).
+-   The outputs of vcfIdent.1.0.py testing the number of shared alleles between parent-child duos (4 types of files: **\_allele-\*.density\*.txt**, **\_allele-\*.scatter.txt**, **\_allele-\*_NoOK_prop.tab**, **\_allele-\*_OK_prop.tab**)
+-   Tabulated files required for circos drawing (**circos.\*.haplo\*.tab** and **\*karyotype.tab**). The number of file depends of the parents and child ploidy.
+-   Configuration files required for circos drawing (**\*housekeeping.conf** and **\*.circos.\*.conf**)
+-   ***If applicable:*** the outputs of ACRO.py testing the parentage of the parent-child duo with child genotype after removal of parent that have the same ploidy of its gamete (6 files: **\*haplo_OK.tab.gz**, **\*haplo_noOK.tab.gz**, **\*haplo_OK_prop_NUCwin.tab**, **\*haplo_NoOK_prop_NUCwin.tab**, **\*haplo_OK_prop_SNPwin.tab**, **\*haplo_NoOK_prop_SNPwin.tab**).
+-   ***If applicable:*** three additional vcf with containing child genotype after removal of the genotype of parent that have the same ploidy of its gamete (a vcf **.ss.\*.vcf.gz** with all sites from the origin vcf \-ploidy of genotype can change\-, a vcf **.ss.\*_MoreThanHaplo.vcf.gz** with sites that **are not congruents** with a complete genome of the parent into the child and a vcf **.ss.\*_haplo.vcf.gz** with sites that **are congruents** with a complete genome of the parent into the child.).
+<br><br>
+
