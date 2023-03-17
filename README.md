@@ -1986,7 +1986,7 @@ files for circos representation.
 
 *Output:*
 
- **\circos.\*.haplo\*.tab:** Several tabulated files (as much as the ploidy of the individuals) containing chromosome painting information for circos drawing.
+ **circos.\*.haplo\*.tab:** Several tabulated files (as much as the ploidy of the individuals) containing chromosome painting information for circos drawing.
 <br><br>
 
 ### SPRH.py
@@ -2018,5 +2018,25 @@ remaining haplotype/genotype and prepare files for circos visualization.
 -   Several **\*.tab** tabulated files, one for each pseudo haplotypes of each chromosomes, containing identified segments ancestry along chromosomes (outputs of ***PaintArp***).
 -   A gzipped **\*_win_ratio.tab.gz:** tabulated file containing, on slidding windows, the normalized values for each genetic group (output of ***PaintArp***).
 -   A **\*_curves.png** file drawing normalized ratio origins along chromosome of reference sequence (output of ***plot_allele_normalized_mean_ratio_per_acc***).
+-   A **\*.svg** file containing chromosome painting of remaining haplotype/genotype of the child (output of ***haplo2kar***).
+-   One or several **Removed.circos.\*.haplo\*.tab** files compatible with tile layer of circos to draw chromosome painting of remaining haplotype/genotype of the child.
+-   A **\*.color.conf** file required for ***haplo2kar***.
+-   A **\*.conf** file required for ***allele_ratio_per_acc***.
 <br><br>
 
+### ValPar.py
+
+This program look for direct parentage between genotyped individuals.
+
+*Options:*
+
+    --parent: Path to one column file containing parent names
+    --vcf: Path to the vcf file
+    --acc: Accession name to calculate parentage. Only one accession allowed
+    --output: Output file name
+
+
+*Output:*
+
+
+<br><br>
