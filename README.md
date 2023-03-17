@@ -1310,6 +1310,7 @@ given windows, that can be loaded to circos to perform a circular representation
     --acc: Accession name to compare to others.
     --comp: Accession name(s) to be compared. If several accessions should be compared, they should be separated by ":".
     --win: Half window (unit = variant site) to compute density along chromosomes. (Default value: 0)
+	--draw: Draw a pdf presenting sites scoring along chromosomes. (Default: y)
     --out: Prefix for output files names.
 
 
