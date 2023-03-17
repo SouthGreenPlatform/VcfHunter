@@ -1317,7 +1317,9 @@ given windows, that can be loaded to circos to perform a circular representation
 
  **\*_X-acc.densityY.txt:** Several tabulated file corresponding to the density value for each possible values (Y) resulting from the comparison of the given accession (X) to the one given by --acc option.\
  **\*_X-acc.scatter.txt:** Several files (one for each accession passed to --comp option) that contained the proportion of shared alleles at each compared sites of the vcf.\
- **\*.pdf:** A pdf file plotting the allele comparison along chromosome of each accessions passed to --comp option to the one passed to --acc option.
+ **\*.pdf:** A pdf file plotting the allele comparison along chromosome of each accessions passed to --comp option to the one passed to --acc option.\
+ **\*_OK_prop.tab:** A tabulated file containing the proportion of shared allele on slidding windows of 2x(***\-\-win***)+1.\
+ **\*_NoOK_prop.tab:** A tabulated file containing the proportion of not shared allele on slidding windows of 2x(***\-\-win***)+1.
 <br><br>
 
 
