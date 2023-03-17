@@ -1913,8 +1913,8 @@ parent) and a file preparation for circos visualisation.
 *Output:*
 
 -   Three **\*.name.tab** file required for vcf filtration.
--   A vcf file containing polymorphic sites between and/or within individuals from the trio (***--crossname*****_filt.vcf.gz**).
--   Two vcf file containing polymorphic sites between and/or within individuals of each duos (***--crossname*****.\*_filt.vcf.gz**).
+-   A vcf file containing polymorphic sites between and/or within individuals from the trio (**--crossname_filt.vcf.gz**).
+-   Two vcf file containing polymorphic sites between and/or within individuals of each duos (**--crossname.\*_filt.vcf.gz**).
 -   The outputs of ACRO.py testing the parentage of the parents-child trio (6 files: **\*2Parents_OK.tab.gz**, **\*2Parents_noOK.tab.gz**, **\*2Parents_OK_prop_NUCwin.tab**, **\*2Parents_NoOK_prop_NUCwin.tab**, **\*2Parents_OK_prop_SNPwin.tab**, **\*2Parents_NoOK_prop_SNPwin.tab**).
 -   The outputs of ACRO.py testing the parentage of each parent-child duos (12 files: **\*1Parents-\*_OK.tab.gz**, **\*1Parents-\*_noOK.tab.gz**, **\*1Parents-\*_OK_prop_NUCwin.tab**, **\*1Parents-\*_NoOK_prop_NUCwin.tab**, **\*1Parents-\*_OK_prop_SNPwin.tab**, **\*1Parents-\*_NoOK_prop_SNPwin.tab**).
 -   The outputs of vcfIdent.1.0.py testing the number of shared alleles between parent-child duos (4 types of files: **\_allele-\*.density\*.txt**, **\_allele-\*.scatter.txt**, **\_allele-\*_NoOK_prop.tab**, **\_allele-\*_OK_prop.tab**)
