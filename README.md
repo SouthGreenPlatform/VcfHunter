@@ -73,7 +73,7 @@ Licencied under GPLv3
 Description
 -----------
 
-The package provided comprised 38 programs listed here:
+The package provided comprised 46 programs listed here:
 
 -   Draw_dot_plot.py (Baurens et al., 2019)
 -   RecombCalculatorDDose.py (Baurens et al., 2019)
@@ -108,13 +108,21 @@ The package provided comprised 38 programs listed here:
 -   PhaseInVcf.py (Martin et al., 2023)
 -   PhaseInVcfToFasta.2.0.py (Martin et al., 2023)
 -   ReformatTree.py (Martin et al., 2023)
--   TotalRecal.1.0.py (Martin et al., 2023)
 -   allele_ratio_group.py (Martin et al., 2023)
 -   allele_ratio_per_acc.py (Martin et al., 2023)
 -   convertForIdeo.py (Martin et al., 2023)
 -   plot_allele_normalized_mean_ratio_per_acc.py (Martin et al., 2023)
+-   ACRO.py (no publication associated yet)
+-   APAR.py (no publication associated yet)
+-   DrawCircos.py (no publication associated yet)
+-   DrawStackedDensity.py (no publication associated yet)
+-   FormatHaplo.py (no publication associated yet)
+-   SPRH.py (no publication associated yet)
+-   TotalRecal.1.0.py (no publication associated yet)
+-   ValPar.py (no publication associated yet)
+-   vcfSelect.py (no publication associated yet)
 
-All 23 programs run using the following command: python program-name <--options-name value>
+All 46 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
 
 Programs
@@ -1842,4 +1850,33 @@ This program draw normalized origin ratio along chromosomes obtained after ***Pa
 *Output:*
 
  **\*.png:** A png file drawing normalized ratio origins for an acession along chromosome of reference sequence.
+<br><br>
+
+### ACRO.py
+
+This program calculated the number and proportion of sites in accordance with 
+parentage between two potential parents and a child or one potential parent 
+and a child. This program does not work on phased vcf file.
+
+*Options:*
+
+    --parent1: Potential parent 1 and ploidy of the generated gamete. Parent and ploidy should be separated by ","
+    --parent2: Potential parent 2 and ploidy of the generated gamete. Parent and ploidy should be separated by ","
+    --vcf: Path to the vcf file
+    --acc: Accession name to calculate parentage. Only one accession allowed
+    --window: Half window to calculate site proportion in accordance with tested parentage (unit = variant site)
+    --WINDOW: The window to calculate site proportion in accordance with tested parentage (unit base pair)
+    --fasta: The multifasta reference file
+    --chr: Chromosome to work with. They should be separated by ":". If omitted, all chromosomes will be used
+    --prefix: Prefix for output files
+
+
+*Output:*
+
+ **\*_OK.tab.gz:** A tabulated file containing the list of sites ("Chr", "Pos", "1") **in accordance** with tested parentage.\ 
+ **\*_noOK.tab.gz:** A tabulated file containing the list of sites ("Chr", "Pos", "1") **not in accordance** with tested parentage.\ 
+ **\*_OK_prop_NUCwin.tab:** A tabulated file containing the proportion of sites **in accordance** with tested parentage in slidding windows of size passed to ***\-\-WINDOW***.\
+ **\*_NoOK_prop_NUCwin.tab:** A tabulated file containing the proportion of sites **not in accordance** with tested parentage in slidding windows of size passed to ***\-\-WINDOW***.\
+ **\*_OK_prop_SNPwin.tab:** A tabulated file containing the proportion of sites **in accordance** with tested parentage in slidding windows of size 2\*(value passed to ***\-\-window***)\+1.\
+ **\*_NoOK_prop_SNPwin.tab:** A tabulated file containing the proportion of sites **not in accordance** with tested parentage in slidding windows of size 2\*(value passed to ***\-\-window***)\+1.\
 <br><br>
