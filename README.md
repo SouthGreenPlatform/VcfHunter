@@ -2038,5 +2038,21 @@ This program look for direct parentage between genotyped individuals.
 
 *Output:*
 
+ A tabulated file named according to \-\-output. First line contained name of tested parents and ploidy and second line contained the proportion of sites validating the trios.
+<br><br>
 
+### vcfSelect.py
+
+This program look for direct parentage between genotyped individuals.
+
+*Options:*
+
+    --vcf: Vcf file.
+    --sites: Sites to keep in a 2 column file (c1 = chromosome, c2 = position).
+    --out=OUT     Output file name. Output will be gzipped.
+
+
+*Output:*
+
+ A gzipped vcf file named according to \-\-out.
 <br><br>
