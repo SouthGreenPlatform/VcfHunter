@@ -1929,7 +1929,7 @@ parent) and a file preparation for circos visualisation.
 This program takes as input tile and curve files as well as karyotype file and generate 
 configuration files required to draw circos representation.
 
-*Required arguments:*
+*Options:*
 
     --Files: Files used in the circos, the type of layer their order from outer to inner they should appear in the circos. Argument should be formated as follows: File1,type,order:File2,type,order:... Where possible types are "tile" or "line" and order is an interger 1, 2, 3, ... Two files can have the same order, they will thus be drawn over each other.
     --outfolder: The output folder that will contain circos files and pictures.
@@ -1964,4 +1964,27 @@ stacked.
 *Output:*
 
  A figure named according to \-\-prefix and suffixed with \-\-graph.
+<br><br>
+
+### FormatHaplo.py
+
+This program takes the mosaic painting from PaintArp and convert them to tile 
+files for circos representation.
+
+*Required arguments:*
+
+    --indiv: Individual for which the haplotypes should be reformated for Circos drawing ans its ploidy. Format should be as follows: Name,Ploidy.
+    --vcf: Path to the vcf file containing individual studied.
+    --painting: A folder containing chromosome painting for all accessions studied from vcfhunter tools.
+    --color:  A file containing color code for painting.
+
+*Optional arguments:*
+
+    --chr: Chromosome to work with. They should be separated by ":". If omitted, all chromosomes will be used.
+    --outfolder: Folder in which output should be written.
+
+
+*Output:*
+
+ **\*circos.\*.haplo\*.tab:** Several tabulated files (as much as the ploidy of the individuals) containing chromosome painting information for circos drawing.
 <br><br>
