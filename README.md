@@ -1940,5 +1940,28 @@ configuration files required to draw circos representation.
 
 *Output:*
 
- **\*.png:** A png file drawing normalized ratio origins for an acession along chromosome of reference sequence.
+ **\*.conf:** Two configuration files required for circos to work.
+<br><br>
+
+### DrawStackedDensity.py
+
+This program draw several statistics along chromosomes. Statistics are 
+stacked.
+
+*Required arguments:*
+
+    --files: List of density files separated by ",". These files should be formated as follows: ID1:File1,ID2:File2,...
+    --FillUnder: Fill the curve under, (y or n)
+    --chrToRm: List of chromosome to exclude from drawing separated with ","
+    --color: A color file in tabulated format (in RGB). Col1: RefxName, Col2: Red, Col3: Green, Col4: Blue
+    --Ylim: Set Y limit for all plots. Recommended to compare genomes with the same graphic scale --> if omitted each graph may have different Yscale (adjusted from each chromosome)
+    --draw: Drawing output. Possible options: One figure per genome (g), one figure per chromosomes (i), scaled image (s) - only with (g), in this case chromosomes are drawn scaled. Options can be combined
+    --negative: Draw also negative curve: y or n
+    --graph: Graphic output format. possible options: pdf, png, svg
+    --prefix: Prefix for the output file(s)
+
+
+*Output:*
+
+ A figure named according to \-\-prefix and suffixed with \-\-graph.
 <br><br>
