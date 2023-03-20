@@ -67,7 +67,7 @@ program allowed to perform a chromosome painting for all chromosome of one acces
 
 Go to the TestTools folder and run the following command line:
 ```
-../bin/vcf2allPropAndCov.py --conf ../data/config/Vcf.conf --origin ../data/config/Origin.tab --acc Kunnan --ploidy 2 --NoMiss n --all y
+../bin/vcf2allPropAndCov.py --conf ../data/config/Vcf.conf --origin ../data/config/Origin.tab --acc Kunnan --ploidy 2 --NoMiss n --all y --col ../data/config/COLOR.tab
 ```
 
 This command line analyse the "Kunnan" accession (--acc Kunnan) on chromosome 1,2,3,4
@@ -78,6 +78,8 @@ accession can have missing data (--NoMiss n) but all accessions without missing
 data should have the allele (--all y).
 **Remark:**  For any options passed, for a SNP position, if an ancestral group
 as all its accessions with missing data, the SNP position is not used by the program.
+The program can automatically assign a colour to a group. The user can also pass in
+his own colour file (--col ../data/config/COLOR.tab).
 
 
 This programs outpouts 4 files:
