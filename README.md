@@ -1,7 +1,7 @@
 Purpose of VcfHunter
 ====================
 
-VcfExplorer regroups several programs which principal aims are to map
+VcfHunter regroups several programs which principal aims are to map
 DNA and RNAseq data onto reference genome sequence, perform variant calling,
 manipulate vcf files, perform chromosome painting of accessions based
 on the contribution of ancestral groups, select marker for genetic
@@ -25,14 +25,15 @@ If bam-readcound is not loaded in the environment put ***bamreadcount = /toto/ta
 Dependencies
 ------------
 
-1.  STAR, https://github.com/alexdobin/STAR
-2.  PicarTools, https://broadinstitute.github.io/picard/
-3.  GATK, https://software.broadinstitute.org/gatk/
-4.  Samtools, https://github.com/samtools/samtools
-5.  Bamtools, https://github.com/pezmaster31/bamtools
-6.  bam-readcount, https://github.com/genome/bam-readcount
-7.  gnuplot, http://www.gnuplot.info/
-8.  circos-0.67 or greater, http://circos.ca/software/download/circos/
+1.  BWA, https://bio-bwa.sourceforge.net/
+2.  STAR, https://github.com/alexdobin/STAR
+3.  PicarTools, https://broadinstitute.github.io/picard/
+4.  GATK, https://software.broadinstitute.org/gatk/
+5.  Samtools, https://github.com/samtools/samtools
+6.  Bamtools, https://github.com/pezmaster31/bamtools
+7.  bam-readcount, https://github.com/genome/bam-readcount
+8.  gnuplot, http://www.gnuplot.info/
+9.  circos-0.67 or greater, http://circos.ca/software/download/circos/
 
 Python3 (tested with 3.4.10), Java and Biopython are also required.
 <br>
