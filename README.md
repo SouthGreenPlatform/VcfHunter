@@ -43,7 +43,11 @@ How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
 
-**Martin et al., 2023.** Martin G, Cottin A, Baurens F-C, Labadie K, Hervouet C, Salmon F, Paulo-de-la-Reberdiere N, Van den Houwe I, Sardos J, Aury J-M, et al. 2020. **Interspecific introgression patterns reveal the origins of worldwide cultivated bananas in New Guinea.** *Plant J. 113:802–818* https://doi.org/10.1111/tpj.16086
+**Martin et al., 2023b.** Martin G, Baurens F-C, Labadie K, Hervouet C, Salmon F, Marius F, Paulo-de-la-Reberdiere N, Van den Houwe I, Aury J-M, D'Hont A, Yahiaoui N. 2023. **Shared pedigree relationships and transmission of unreduced gametes in cultivated banana.** *Annals of Botany. XX:1–13* https://doi.org/10.1093/aob/mcad065
+
+or
+
+**Martin et al., 2023a.** Martin G, Cottin A, Baurens F-C, Labadie K, Hervouet C, Salmon F, Paulo-de-la-Reberdiere N, Van den Houwe I, Sardos J, Aury J-M, et al. 2023. **Interspecific introgression patterns reveal the origins of worldwide cultivated bananas in New Guinea.** *Plant J. 113:802–818* https://doi.org/10.1111/tpj.16086
 
 or
 
@@ -100,28 +104,28 @@ The package provided comprised 46 programs listed here:
 -   vcf2dis.py (Martin et al., 2020b)
 -   vcfAndConsToRatio.py (Martin et al., 2020b)
 -   vcfFormatForVcftools.py (Martin et al., 2020b)
--   DrawRatio.py (Martin et al., 2023)
--   DrawRatioDetailInterractive.py (Martin et al., 2023)
--   GroupBasedOnDistanceToCentroids.py (Martin et al., 2023)
--   IdentOtherAncestry.py (Martin et al., 2023)
--   IdentPrivateAllele.py (Martin et al., 2023)
--   PaintArp.py (Martin et al., 2023)
--   PhaseInVcf.py (Martin et al., 2023)
--   PhaseInVcfToFasta.2.0.py (Martin et al., 2023)
--   ReformatTree.py (Martin et al., 2023)
--   allele_ratio_group.py (Martin et al., 2023)
--   allele_ratio_per_acc.py (Martin et al., 2023)
--   convertForIdeo.py (Martin et al., 2023)
--   plot_allele_normalized_mean_ratio_per_acc.py (Martin et al., 2023)
--   ACRO.py (no publication associated yet)
--   APAR.py (no publication associated yet)
--   DrawCircos.py (no publication associated yet)
--   DrawStackedDensity.py (no publication associated yet)
--   FormatHaplo.py (no publication associated yet)
--   SPRH.py (no publication associated yet)
--   TotalRecal.1.0.py (no publication associated yet)
--   ValPar.py (no publication associated yet)
--   vcfSelect.py (no publication associated yet)
+-   DrawRatio.py (Martin et al., 2023a)
+-   DrawRatioDetailInterractive.py (Martin et al., 2023a)
+-   GroupBasedOnDistanceToCentroids.py (Martin et al., 2023a)
+-   IdentOtherAncestry.py (Martin et al., 2023a)
+-   IdentPrivateAllele.py (Martin et al., 2023a)
+-   PaintArp.py (Martin et al., 2023a)
+-   PhaseInVcf.py (Martin et al., 2023a)
+-   PhaseInVcfToFasta.2.0.py (Martin et al., 2023a)
+-   ReformatTree.py (Martin et al., 2023a)
+-   allele_ratio_group.py (Martin et al., 2023a)
+-   allele_ratio_per_acc.py (Martin et al., 2023a)
+-   convertForIdeo.py (Martin et al., 2023a)
+-   plot_allele_normalized_mean_ratio_per_acc.py (Martin et al., 2023a)
+-   ACRO.py (Martin et al., 2023b)
+-   APAR.py (Martin et al., 2023b)
+-   DrawCircos.py (Martin et al., 2023b)
+-   DrawStackedDensity.py (Martin et al., 2023b)
+-   FormatHaplo.py (Martin et al., 2023b)
+-   SPRH.py (Martin et al., 2023b)
+-   TotalRecal.1.0.py (Martin et al., 2023b)
+-   ValPar.py (Martin et al., 2023b)
+-   vcfSelect.py (Martin et al., 2023b)
 
 All 46 programs run using the following command: python program-name <--options-name value>
 <br><br><br>
