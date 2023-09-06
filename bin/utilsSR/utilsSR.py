@@ -674,7 +674,7 @@ def run_step_M_RNAseq(GFF3, REF, LOCA_PROGRAMS, PREFIX, DICO_LIB):
 #          Process ReSeq Only
 ##############################################
 
-def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT):
+def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT, REMOVEUMI, UMITOOLS):
 
 	sys.stdout.write('Working on '+ACC_ID+' accession\n')
 	
@@ -773,6 +773,44 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	sys.stdout.write('done\n')
 	
 	#############
+	#2 Removing reads based on UMI if requested
+	if REMOVEUMI == 'yes':
+		sys.stdout.write('Initiating deduplication with umi_tools.\n')
+		UMIsort = []
+		UMIindex = []
+		UMIremove = []
+		for n in LIB_DIC:
+			UMIsortcmd = '%s sort %s %s' % (SAMTOOLS, ACC_ID+'/'+TMP+n+'.bam', ACC_ID+'/'+TMP+n+'sorted')
+			UMIindexcmd = '%s index -b %s' % (SAMTOOLS, ACC_ID+'/'+TMP+n+'sorted.bam')
+			UMIremovecmd = '%s dedup -I %s --output-stats=%s -S %s' % (UMITOOLS, ACC_ID+'/'+TMP+n+'sorted.bam', ACC_ID+'/'+n+'.UMI.stat', ACC_ID+'/'+TMP+n+'UMIrm.bam')
+			UMIsort.append(UMIsortcmd)
+			UMIindex.append(UMIindexcmd)
+			UMIremove.append(UMIremovecmd)
+		if QUEUE == None:
+			for comd in UMIsort:
+				sys.stdout.write(comd+'\n')
+				run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools sort for umi_tool dedup) for accession '+ACC_ID+':\n')
+				if run_job_error:
+					return (ACC_ID, run_job_error)
+			for comd in UMIindex:
+				sys.stdout.write(comd+'\n')
+				run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (samtools index for umi_tool dedup) for accession '+ACC_ID+':\n')
+				if run_job_error:
+					return (ACC_ID, run_job_error)
+			for comd in UMIremove:
+				sys.stdout.write(comd+'\n')
+				run_job_error = run_job(getframeinfo(currentframe()), comd, 'Error in step A (umi_tool dedup) for accession '+ACC_ID+':\n')
+				if run_job_error:
+					return (ACC_ID, run_job_error)
+		else:
+			run_qsub(QUEUE, UMIsort, 1, 'samtoolsUMIsort-'+ACC_ID, "12G", PREFIX)
+			run_qsub(QUEUE, UMIindex, 1, 'samtoolsUMIindex-'+ACC_ID, "12G", PREFIX)
+			run_qsub(QUEUE, UMIremove, 1, 'UMIdedup-'+ACC_ID, "12G", PREFIX)
+		sys.stdout.write('done\n')
+	else:
+		sys.stdout.write('UMI WILL NOT BE REMOVED\n')
+	
+	#############
 	#3 Merging
 	sys.stdout.write('Initiating merging step.\n')
 	if not(os.path.isdir(ACC_ID+'/'+TMP)):
@@ -780,8 +818,12 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	
 	merge = ''
 	to_merge = []
-	for n in LIB_DIC:
-		merge = merge + 'INPUT='+ACC_ID+'/'+TMP+n+'.bam '
+	if REMOVEUMI == 'yes':
+		for n in LIB_DIC:
+			merge = merge + 'INPUT='+ACC_ID+'/'+TMP+n+'UMIrm.bam '
+	else:
+		for n in LIB_DIC:
+			merge = merge + 'INPUT='+ACC_ID+'/'+TMP+n+'.bam '
 	MERGE = '%s -XX:ParallelGCThreads=1 -Xmx8G -jar %s MergeSamFiles %s OUTPUT=%s MERGE_SEQUENCE_DICTIONARIES=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate TMP_DIR=%s' % (JAVA, PICARD, merge, ACC_ID+'/'+ACC_ID+'_merged.bam', ACC_ID+'/'+TMP)
 	to_merge.append(MERGE)
 	
@@ -822,6 +864,12 @@ def run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, Q
 	for n in LIB_DIC:
 		os.remove(ACC_ID+'/'+TMP+n+'.sam')
 		os.remove(ACC_ID+'/'+TMP+n+'.bam')
+	if REMOVEUMI == 'yes':
+		for n in LIB_DIC:
+			os.remove(ACC_ID+'/'+TMP+n+'UMIrm.bam')
+			os.remove(ACC_ID+'/'+TMP+n+'sorted.bam')
+			os.remove(ACC_ID+'/'+TMP+n+'sorted.bam.bai')
+	
 	
 	shutil.rmtree(ACC_ID+'/'+TMP)
 	sys.stdout.write('Merging step completed.\n')

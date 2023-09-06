@@ -56,18 +56,22 @@ def run_analysis(LIB_DIC, ACC_ID, PLOIDY, OPTIONS, LOCA_PROGRAMS, CONFIG, DICO_C
 	JAVA = LOCA_PROGRAMS.get('Programs','java')
 	PICARD = LOCA_PROGRAMS.get('Programs','picard')
 	GATK = LOCA_PROGRAMS.get('Programs','gatk')
+	UMITOOLS = LOCA_PROGRAMS.get('Programs','umitools')
 	UseUnifiedGenotyperForBaseRecal =  'no'
+	RemoveUMI = 'no'
 	PYTHON = LOCA_PROGRAMS.get('Programs','python')
 	PLOTBAMSTAT = LOCA_PROGRAMS.get('Programs','plotbamstats')
 	PREFIX = OPTIONS.prefix
 	if CONFIG.has_section('Variant'):
 		if CONFIG.has_option('Variant', 'UseUnifiedGenotyperForBaseRecal'):
 			UseUnifiedGenotyperForBaseRecal =  CONFIG.get('Variant', 'UseUnifiedGenotyperForBaseRecal')
+	if CONFIG.has_section('RmUMI'):
+		RemoveUMI = 'yes'
 	
 	if 'a' in OPTIONS.steps:
 		#1 Mapping
 		#2 Merging
-		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT)
+		to_return = utils.run_step_A(ACC_ID, LIB_DIC, BWA, REF, TMP, JAVA, PICARD, SAMTOOLS, PREFIX, QUEUE, PARSEUNMAPPED, PLOTBAMSTAT, RemoveUMI, UMITOOLS)
 		if to_return == 0:
 			pass
 		else:

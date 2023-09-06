@@ -34,6 +34,7 @@ Dependencies
 7.  bam-readcount, https://github.com/genome/bam-readcount
 8.  gnuplot, http://www.gnuplot.info/
 9.  circos-0.67 or greater, http://circos.ca/software/download/circos/
+10. umi tools, https://umi-tools.readthedocs.io/en/latest/
 
 Python3 (tested with 3.4.10), Java and Biopython are also required.
 <br>
@@ -272,7 +273,7 @@ specification.**
 
 #### Configuration file description:
 
-The configuration file should contain 4 sections and must be formated as
+The configuration file should contain 2 sections and must be formated as
 followed:
 
     [Libraries]
@@ -281,6 +282,9 @@ followed:
     ...
     [Reference]
     genome = path_to_the_reference_sequence
+
+An additional section named [RmUMI] can be added. If so, aligned reads
+will be processed using umi_tools dedup.
 
 #### Output:
 
