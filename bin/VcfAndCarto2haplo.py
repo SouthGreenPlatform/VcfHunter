@@ -134,7 +134,7 @@ def __main__():
 							# print(codes, DicoSelect[codes], MaxValue/sum(DicoBest[codes][1]))
 						else:
 							OK = False
-							sys.stdout.write('Oups, their is more than 1 maximal value for code'+codes+'. The marker '+MarkerName+' will not be reported.\n')
+							sys.stdout.write('Oups, their is more than 1 maximal value for code '+codes+'. The marker '+MarkerName+' will not be reported.\n')
 							sys.stdout.write(str(DicoBest)+'\n')
 					if OK:
 						FinalOK = True
@@ -171,7 +171,7 @@ def __main__():
 										# print(MarkerName, DicoSelect, AllAlleles, haplo1, haplo2, nnGeno, npGeno, Difference)
 									else:
 										sys.exit('Oups, their is a bug. There is more than 2 alleles identified for marker: '+MarkerName)
-									outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\n')
+									outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\tnn|np\n')
 									outfile.flush()
 							elif 'hk' in DicoSelect:
 								if len(DicoSelect) != 3:
@@ -192,7 +192,7 @@ def __main__():
 										# print(MarkerName, DicoSelect, AllAlleles, haplo1, haplo2, hhGeno, kkGeno)
 									else:
 										sys.exit('Oups, their is a bug. There is more than 2 alleles identified for marker: '+MarkerName)
-									outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\n')
+									outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\thh|kk\n')
 									outfile.flush()
 				elif MarkerName in MarkerNameSet:
 					ref_allele = data[IREF]
@@ -226,7 +226,7 @@ def __main__():
 								haplo1 = AllAlleles[int(ListRetainedGenotypes[0])]
 								haplo2 = AllAlleles[int(ListRetainedGenotypes[0])]
 								# print(MarkerName, DicoCor, TotalSansMissing, ListRetainedGenotypes, AllAlleles, haplo1, haplo2)
-								outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\n')
+								outfile.write(MarkerName+'\t'+haplo1+'|'+haplo2+'\tHo|Ho\n')
 								outfile.flush()
 						elif len(ListRetainedGenotypes) == 2: #Two genotypes founds according to our criteria so one parent is heterozygous. It is likely the other one but because we are not sure, we will not report this line
 							geno1 = set(ListRetainedGenotypes[0].split(":"))
