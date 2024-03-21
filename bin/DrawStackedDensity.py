@@ -32,9 +32,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 #fonction de dessin ref1 en rouge
-def draw_plot_per_chr(ListID, Y, X, OUT, CHR, FILLUNDER, YLIM, COLOR, NEGATIVE): 
+def draw_plot_per_chr(ListID, Y, X, OUT, CHR, FILLUNDER, YLIM, COLOR, NEGATIVE, VERT, VERTREG, FIGURESIZE): 
 	
-	fig = plt.figure(figsize=(30, 10))
+	# obtaining figure size
+	FigureSize = list(map(float, FIGURESIZE.split(',')))
+	
+	fig = plt.figure(figsize=FigureSize)
 	ax = plt.subplot2grid((1,1),(0,0))
 	
 	if NEGATIVE == 'y':
@@ -53,13 +56,22 @@ def draw_plot_per_chr(ListID, Y, X, OUT, CHR, FILLUNDER, YLIM, COLOR, NEGATIVE):
 		if YLIM != None:
 			ax.set_ylim(float(YLIM*-1), float(YLIM))
 		else:
-			ax.set_ylim(max(np.array(Y[ListID[-1]][CHR]))*-1, max(np.array(Y[ListID[-1]][CHR])))
+			YLIM = max(np.array(Y[ListID[-1]][CHR]))
+			ax.set_ylim(YLIM*-1, YLIM)
 	else:
 		if YLIM != None:
 			ax.set_ylim(0, float(YLIM))
 		else:
-			ax.set_ylim(0, max(np.array(Y[ListID[-1]][CHR])))
-		
+			YLIM = max(np.array(Y[ListID[-1]][CHR]))
+			ax.set_ylim(0, YLIM)
+	
+	if CHR in VERT:
+		for pos in VERT[CHR]:
+			ax.axvline(x=pos, ymin=0, ymax = float(YLIM), linewidth=2, color='black')
+	
+	if CHR in VERTREG:
+		for pos in VERTREG[CHR]:
+			ax.fill_betweenx([0,float(YLIM)], int(pos[0]), int(pos[1]), color=(0.3,0.3,0.3), alpha=0.20)
 	
 	ax.set_xlim(0, X[CHR][-1])
 	ax.set_title(CHR, fontweight='bold', position=(0.5, 1))
@@ -68,7 +80,10 @@ def draw_plot_per_chr(ListID, Y, X, OUT, CHR, FILLUNDER, YLIM, COLOR, NEGATIVE):
 	fig.savefig(OUT)
 	plt.close(fig)
 
-def draw_plot(DICOCHR, LISTCHR, ListID, Y, X, OUT, FILLUNDER, YLIM, COLOR, NEGATIVE, SCALE):
+def draw_plot(DICOCHR, LISTCHR, ListID, Y, X, OUT, FILLUNDER, YLIM, COLOR, NEGATIVE, SCALE, VERT, VERTREG, FIGURESIZE):
+	
+	# obtaining figure size
+	FigureSize = list(map(float, FIGURESIZE.split(',')))
 	
 	# Calculating chromosome number
 	NB = len(LISTCHR)
@@ -89,7 +104,7 @@ def draw_plot(DICOCHR, LISTCHR, ListID, Y, X, OUT, FILLUNDER, YLIM, COLOR, NEGAT
 	
 	# Drawing figures
 	POSSPAN = 0
-	fig = plt.figure(figsize=(21, 29.7))
+	fig = plt.figure(figsize=FigureSize)
 	fig.subplots_adjust(left=0.05, right=0.95, top=0.98, bottom=0.05)
 	
 	# Drawing graph
@@ -124,6 +139,15 @@ def draw_plot(DICOCHR, LISTCHR, ListID, Y, X, OUT, FILLUNDER, YLIM, COLOR, NEGAT
 		else:
 			ax.set_xlim(0, X[CHR][-1])
 		ax.axvline(x=DICOCHR[CHR],linewidth=2, color='black')
+		
+		if CHR in VERT:
+			for pos in VERT[CHR]:
+				ax.axvline(x=pos, ymin=0, ymax = float(YLIM), linewidth=2, color='black')
+		
+		if CHR in VERTREG:
+			for pos in VERTREG[CHR]:
+				ax.fill_betweenx([0,float(YLIM)], int(pos[0]), int(pos[1]), color=(0.3,0.3,0.3), alpha=0.20)
+		
 		POSSPAN += 1
 	plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=len(COLOR), fontsize=20)
 	
@@ -147,23 +171,43 @@ from Bio.SeqRecord import SeqRecord
 
 def __main__():
 	#Parse Command Line
-	parser = optparse.OptionParser(
-		description="This program draw several statistics along chromosomes. Statistics are stacked.",
-		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
+	parser = optparse.OptionParser()
 	# Wrapper options. 
-	parser.add_option( '-f', '--files',		dest='files',		default=None,		help='List of density files separated by ",". These files should be formated as follows: ID1:File1,ID2:File2,...')
-	parser.add_option( '-F', '--FillUnder',	dest='FillUnder',	default='y',		help='Fill the curve under, (y or n)')
-	parser.add_option( '-c', '--chrToRm',	dest='chrToRm',		default='',			help='List of chromosome to exclude from drawing separated with ","')
-	parser.add_option( '-C', '--color',		dest='color',		default=None,		help='A color file in tabulated format (in RGB). Col1: RefxName, Col2: Red, Col3: Green, Col4: Blue')
-	parser.add_option( '-y', '--Ylim',		dest='Ylim',		default=None,		help='Set Y limit for all plots. Recommended to compare genomes with the same graphic scale --> if omitted each graph may have different Yscale (adjusted from each chromosome)')
-	parser.add_option( '-d', '--draw',		dest='draw',		default='i',		help='Drawing output. Possible options: One figure per genome (g), one figure per chromosomes (i), scaled image (s) - only with (g), in this case chromosomes are drawn scaled. Options can be combined')
-	parser.add_option( '-n', '--negative',	dest='negative',	default='n',		help='Draw also negative curve: y or n')
-	parser.add_option( '-g', '--graph',		dest='graph',		default='svg',		help='graphic output. possible options: pdf, png, svg')
-	parser.add_option( '-p', '--prefix',	dest='prefix',		default='Stacked',	help='Prefix for the output file(s)')
+	parser.add_option( '-f', '--files',		dest='files',		default=None,			help='List of density files separated by ",". These files should be formated as follows: ID1:File1,ID2:File2,...')
+	parser.add_option( '-F', '--FillUnder',	dest='FillUnder',	default='y',			help='Fill the curve under, (y or n)')
+	parser.add_option( '-c', '--chrToRm',	dest='chrToRm',		default='',				help='List of chromosome to exclude from drawing separated with ","')
+	parser.add_option( '-C', '--color',		dest='color',		default=None,			help='A color file in tabulated format (in RGB). Col1: RefxName, Col2: Red, Col3: Green, Col4: Blue')
+	parser.add_option( '-y', '--Ylim',		dest='Ylim',		default=None,			help='Set Y limit for all plots. Recommended to compare genomes with the same graphic scale --> if omitted each graph may have different Yscale (adjusted from each chromosome)')
+	parser.add_option( '-d', '--draw',		dest='draw',		default='i',			help='Drawing output. Possible options: One figure per genome (g), one figure per chromosomes (i), scaled image (s) - only with (g), in this case chromosomes are drawn scaled. Options can be combined')
+	parser.add_option( '-n', '--negative',	dest='negative',	default='n',			help='Draw also negative curve: y or n')
+	parser.add_option( '-l',  '--loc',		dest='loc',			default='',				help='Regions to locate by vertical line. This should be formated this way: Chromosome_name,position:chromosome_name,position: ... [Default: %default]')
+	parser.add_option( '-g', '--graph',		dest='graph',		default='svg',			help='graphic output. possible options: pdf, png, svg')
+	parser.add_option( '-s',  '--figsize',	dest='figsize',		default='21,29.7',		help='Figure size (in inches). [Default: %default]')
+	parser.add_option( '-p', '--prefix',	dest='prefix',		default='Stacked',		help='Prefix for the output file(s)')
 
 
 	(options, args) = parser.parse_args()
 	
+	# Recording regions to locate
+	VERT = {}
+	VERTREG = {}
+	for n in options.loc.split(':'):
+		info = n.split(',')
+		if len(info) == 1:
+			pass
+		else:
+			chr = info[0]
+			if not(chr in VERT):
+				VERT[chr] = set()
+				VERTREG[chr] = []
+			if len(info) == 2:
+				VERT[chr].add(int(info[1]))
+			elif len(info) == 3:
+				VERTREG[chr].append(info[1:])
+			else:
+				sys.stdout.write('Wrong format passed to --loc argument\n')
+	
+	# Recording chromosomes to exclude
 	ChrToExclude=options.chrToRm.split(',')
 	
 	# Recording chromosome information
@@ -243,10 +287,10 @@ def __main__():
 	# Drawing figures
 	listchr = sorted(listchr)
 	if 'g' in options.draw:
-		draw_plot(chrSize, listchr, ListID, dicoInfo, DicoPos, options.prefix+"."+options.graph, options.FillUnder, options.Ylim, DicoCol, options.negative, options.draw)
+		draw_plot(chrSize, listchr, ListID, dicoInfo, DicoPos, options.prefix+"."+options.graph, options.FillUnder, options.Ylim, DicoCol, options.negative, options.draw, VERT, VERTREG, options.figsize)
 	if 'i' in options.draw:
 		for chr in listchr:
-			draw_plot_per_chr(ListID, dicoInfo, DicoPos, options.prefix+'_'+chr+"."+options.graph, chr, options.FillUnder, options.Ylim, DicoCol, options.negative)
+			draw_plot_per_chr(ListID, dicoInfo, DicoPos, options.prefix+'_'+chr+"."+options.graph, chr, options.FillUnder, options.Ylim, DicoCol, options.negative, VERT, VERTREG, options.figsize)
 
 
 if __name__ == "__main__": __main__()

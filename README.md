@@ -44,6 +44,9 @@ How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
 
+**Martin et al., in prep.** G. Martin, B. Istace, F.C. Baurens, C. Belser, C Hervouet, K. Labadie, C. Cruaud, B. Noel, C. Guiougou, F. Salmon, J. Mahadeo, F. Ahmad, H. A. Volkaert, G. Droc, M. Rouard, J. Sardos, P. Wincker, N Yahiaoui, J.M. Aury, A D’Hont. in prep. **Chromosome evolution in Musa species: Insights from genome assemblies of wild contributors to banana cultivars.**
+
+or
 **Martin et al., 2023b.** Martin G, Baurens F-C, Labadie K, Hervouet C, Salmon F, Marius F, Paulo-de-la-Reberdiere N, Van den Houwe I, Aury J-M, D'Hont A, Yahiaoui N. 2023. **Shared pedigree relationships and transmission of unreduced gametes in cultivated banana.** *Annals of Botany. XX:1–13* https://doi.org/10.1093/aob/mcad065
 
 or
@@ -127,8 +130,13 @@ The package provided comprised 46 programs listed here:
 -   TotalRecal.1.0.py (Martin et al., 2023b)
 -   ValPar.py (Martin et al., 2023b)
 -   vcfSelect.py (Martin et al., 2023b)
+-   calcul_pileup_count.py (Martin et al., In prep)
+-   calcul_pileup_mean.py (Martin et al., In prep)
+-   PaintAssembly.sh (Martin et al., In prep)
+-   ParseReadsOnHaplo.py  (Martin et al., In prep)
 
-All 46 programs run using the following command: python program-name <--options-name value>
+49 programs run using the following command: python program-name <--options-name value>
+1 program (PaintAssembly.sh) run using the following command: bash PaintAssembly.sh <--options-name value>
 <br><br><br>
 
 Programs
@@ -2067,4 +2075,97 @@ This program look for direct parentage between genotyped individuals.
 *Output:*
 
  A gzipped vcf file named according to \-\-out.
+<br><br>
+
+### calcul_pileup_count.py
+
+This program count from a pileup like file the coverage sum in a sliding window.
+
+*Options:*
+
+    --pileup: The pileup file (tabulated)
+    --window: The window to calculate proportion
+    --fasta: The multifasta reference file
+    --FillUnder: Fill the curve under, (y or n)
+    --Ylim: Set Y limit. Can be omitted
+    --chr: Chromosome to work with. They should be separated by ":". If omitted, all chromosomes will be used
+    --title: Add title to figure: y or n
+    --negative: Draw also negative curve: y or n
+    --out: Prefix for the output files
+    --outtype: Output file type: png or svg
+    --draw: Draw a figure. Possible values "y" or "n".
+
+
+*Output:*
+
+ DOTO
+<br><br>
+
+### calcul_pileup_mean.py
+
+This program count from a pileup like file the average coverage of covered positions in a sliding window.
+
+*Options:*
+
+    --pileup: The pileup file (tabulated)
+    --window: The window to calculate proportion
+    --fasta: The multifasta reference file
+    --FillUnder: Fill the curve under, (y or n)
+    --Ylim: Set Y limit. Can be omitted
+    --chr: Chromosome to work with. They should be separated by ":". If omitted, all chromosomes will be used
+    --title: Add title to figure: y or n
+    --negative: Draw also negative curve: y or n
+    --out: Prefix for the output files
+    --outtype: Output file type: png or svg
+    --draw: Draw a figure. Possible values "y" or "n".
+
+
+*Output:*
+
+ TODO
+<br><br>
+
+### PaintAssembly.sh
+
+This program perform ancestry chromosome painting of genome assembly according to tags specific of ancestral origin.
+
+*Options:*
+
+    --reference: Path to the reference fasta file
+    --directory: A directory that will contains outputs
+    --read-folder: A folder containing origin reads. A file per origin named ORIGIN.fastq.gz
+    --window: Windows in which the number of mean number of reads hits will be counted
+    --include-pattern: Pattern(s) to select chromosomes into the figure. Each patterns should be separated by '|'
+    --exclude-pattern: Pattern(s) to exclude some chromosomes. Each patterns should be separated by '|'
+    --color-file: A color file with 4 columns: col 1 = group name and col 2 to 4 = RGB color code
+    --prefix: Prefix for the output figure and intermediate output files
+    --steps: Steps of the analysis to perform:
+        1: Working folder creation, copy of the reference and indexation
+        2: Origin read libraries mapping
+        3: Mapping read filtration
+        4: Calculating the number of hits on non overlapping sliding windows
+        5: Selecting chromosomes on pattern and drawing curve figures
+        6: Attributing origin based on majority rule
+        7: Data formating for GEMO analysis
+
+
+*Output:*
+
+ TODO
+<br><br>
+
+### ParseReadsOnHaplo.py
+
+This program use a bi-allelic haplotype file to sort aligned reads according to haplotype information.
+
+*Options:*
+
+    --haplo: The haplotype file
+    --conf: Configuration file locating bam files to work with
+    --prefix: Prefix for output files
+
+
+*Output:*
+
+ TODO
 <br><br>
