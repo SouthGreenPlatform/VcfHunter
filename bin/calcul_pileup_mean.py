@@ -68,10 +68,10 @@ def draw_plot(X, Y, OUT, TITLE, FILLUNDER, YLIM, NEGATIVE, V):
 def __main__():
 	#Parse Command Line
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
-	"\n\nThis program count from a pileup like file the average coverage of covered"
-	"\npositions in a sliding window.")
+	"\n\nThis program count from a pileup like file (columns 1 (chr), 2 (pos) and 4 (value) of pileup)"
+	"\nthe average of values reported in a sliding window.")
 	# Wrapper options. 
-	parser.add_option( '-p', '--pileup',		dest='pileup',			default=None,		help='The pileup file (tabulated)')
+	parser.add_option( '-p', '--pileup',		dest='pileup',			default=None,		help='The pileup column selected file (tabulated)')
 	parser.add_option( '-w', '--window',		dest='window',			default='100000',	help='The window to calculate proportion')
 	parser.add_option( '-f', '--fasta',			dest='fasta',			default=None,		help='The multifasta reference file')
 	parser.add_option( '-F', '--FillUnder',		dest='FillUnder',		default='n',		help='Fill the curve under, (y or n)')
