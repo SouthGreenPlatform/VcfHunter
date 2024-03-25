@@ -243,7 +243,7 @@ fi
 if [ $(grep 7 <<<$STEPS) ]; then
  echo "Step 7: Data formating for GEMO analysis"
  echo "chr len centromereInf centromereSup label" | sed 's: :\t:g'> ${Dir}/${OUTFIGURE}_${WIN}_GEMO_chrom.tab
- awk '/^>/{if (l!="") print l; print; l=0; next}{l+=length($0)}END{print l}' ${Dir}/${FileN} | paste - - | sed 's/>//' | grep chr | grep -v random | while read ligne; do
+ awk '/^>/{if (l!="") print l; print; l=0; next}{l+=length($0)}END{print l}' ${Dir}/${FileN} | paste - - | sed 's/>//' | grep -E ${CHRPAT} | grep -E -v ${EXCCHRPAT} | while read ligne; do
   CHR=$(echo ${ligne} | cut -f 1 -d " ")
   LEN=$(echo ${ligne} | cut -f 2 -d " ")
   echo $CHR $LEN $(($LEN / 2)) $(($LEN / 2 + 2)) A | sed 's: :\t:g' >> ${Dir}/${OUTFIGURE}_${WIN}_GEMO_chrom.tab
