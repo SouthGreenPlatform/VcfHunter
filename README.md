@@ -2085,7 +2085,7 @@ This program count from a pileup like file the coverage sum in a sliding window.
 *Options:*
 
     --pileup: The pileup file (tabulated)
-    --window: The window to calculate proportion
+    --window: The window to calculate sum
     --fasta: The multifasta reference file
     --FillUnder: Fill the curve under, (y or n)
     --Ylim: Set Y limit. Can be omitted
@@ -2099,12 +2099,13 @@ This program count from a pileup like file the coverage sum in a sliding window.
 
 *Output:*
 
- DOTO
+-   A 4 column file (**\*.tab.gz**) containing the sum of the values found in the third column of the file passed to ***--pileup***. The sum are calculated on non-overlapping sliding window of size passed to ***--window*** argument. Col1: sequence, col2: window start, col3: window end, col4: sum.
+-   A **\*.png** (or **\*.svg**) file per sequences in the multifasta file passed to ***--fasta*** argument representing the sum calculated on sliding windows along the sequence.
 <br><br>
 
 ### calcul_pileup_mean.py
 
-This program count from a pileup like file the average coverage of covered positions in a sliding window.
+This program count from a pileup like file the average of values reported in a sliding window.
 
 *Options:*
 
@@ -2123,7 +2124,8 @@ This program count from a pileup like file the average coverage of covered posit
 
 *Output:*
 
- TODO
+-   A 5 column file (**\*.tab.gz**) containing the mean of the values found in the third column of the file passed to ***--pileup***. The mean are calculated on non-overlapping sliding window of size passed to ***--window*** argument. Col1: sequence, col2: window start, col3: window end, col4: mean value, col5: number of observed values in the window.
+-   A **\*.png** (or **\*.svg**) file per sequences in the multifasta file passed to ***--fasta*** argument representing the statistic calculated on sliding windows along the sequence.
 <br><br>
 
 ### PaintAssembly.sh
