@@ -2128,7 +2128,7 @@ This program count from a pileup like file the average coverage of covered posit
 
 ### PaintAssembly.sh
 
-This program perform ancestry chromosome painting of genome assembly according to tags specific of ancestral origin.
+This program perform ancestry chromosome painting of genome assembly according to tags specific of ancestral origin. A tag file in the form of a fastq file should be provided for each origin. All fastq files should be placed in the folder passed to --read-folder argument.
 
 *Options:*
 
@@ -2152,7 +2152,11 @@ This program perform ancestry chromosome painting of genome assembly according t
 
 *Output:*
 
- TODO
+Outpouts depends on steps performed:
+
+-   step 1: A directory created with name passed to ***--directory*** that contain a copy of the sequence assembly ***--reference*** as well as its bwa indexes (**.amb**, **.ann**, **.bwt**, **.pac**, **.sa**).
+-   step 2: A **\*.bam** file per origin corresponding to aligned tags. Each bam is named according to **ORIGIN** name of the origin fastq file and prefixed vith value passed to ***--prefix*** argument.
+
 <br><br>
 
 ### ParseReadsOnHaplo.py
