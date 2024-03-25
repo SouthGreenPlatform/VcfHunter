@@ -2080,11 +2080,11 @@ This program look for direct parentage between genotyped individuals.
 
 ### calcul_pileup_count.py
 
-This program count from a pileup like file the coverage sum in a sliding window.
+This program count from a pileup like file (columns 1 (chr), 2 (pos) and 4 (value) of pileup), the coverage sum in a sliding window.
 
 *Options:*
 
-    --pileup: The pileup file (tabulated)
+    --pileup: The pileup column selected file (tabulated)
     --window: The window to calculate sum
     --fasta: The multifasta reference file
     --FillUnder: Fill the curve under, (y or n)
@@ -2105,12 +2105,12 @@ This program count from a pileup like file the coverage sum in a sliding window.
 
 ### calcul_pileup_mean.py
 
-This program count from a pileup like file the average of values reported in a sliding window.
+This program count from a pileup like file (columns 1 (chr), 2 (pos) and 4 (value) of pileup), the average of values reported in a sliding window.
 
 *Options:*
 
-    --pileup: The pileup file (tabulated)
-    --window: The window to calculate proportion
+    --pileup: The pileup column selected file (tabulated)
+    --window: The window to calculate mean value
     --fasta: The multifasta reference file
     --FillUnder: Fill the curve under, (y or n)
     --Ylim: Set Y limit. Can be omitted
