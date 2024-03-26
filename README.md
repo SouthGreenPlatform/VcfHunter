@@ -2170,16 +2170,17 @@ Outpouts depends on steps performed:
 
 ### ParseReadsOnHaplo.py
 
-This program use a bi-allelic haplotype file to sort aligned reads according to haplotype information.
+This program use a bi-allelic haplotype file to sort aligned reads according to haplotype information. This program does not work with INDELS.
 
 *Options:*
 
-    --haplo: The haplotype file
-    --conf: Configuration file locating bam files to work with
+    --haplo: The haplotype file. File should be tabulated with two columns with header "Marker" and "FinalPhase". In the "Marker" column, chromosome and position should be formated as follows "Sequence name"+M+"position" (e.g. chr01M20620). In the "FinalPhase" column, haplotypes are separated by "|" (e.g. C|A).
+    --conf: Configuration file locating bam files to work with (one line per path to bam files). 
     --prefix: Prefix for output files
 
 
 *Output:*
 
- TODO
+-   A **\*haplo1.fastq.gz** and **\*haplo2.fastq.gz** fastq formated files containing reads that have alleles from haplotype 1 and haplotype 2 respectively. Each file is prefixed with value passed to ***--prefix*** argument.
+-   A **\*haplo1.gz** and **\*haplo2.gz** fasta files containing reads sequence that have alleles from haplotype 1 and haplotype 2 respectively. Positions with haplotype specific alleles on the reference sequence and in the read is added at the end of read name. Each file is prefixed with value passed to ***--prefix*** argument.
 <br><br>
