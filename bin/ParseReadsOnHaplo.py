@@ -32,10 +32,10 @@ def __main__():
 	#Parse Command Line
 	parser = optparse.OptionParser(usage="python %prog [options]\n\nProgram designed by Guillaume MARTIN (guillaume.martin@cirad.fr)"
 	"\n\nThis program use a bi-allelic haplotype file to sort aligned reads according"
-	"\nto haplotype information.")
+	"\nto haplotype information. This program does not work with INDELS.")
 	# Wrapper options.
-	parser.add_option( '-H', '--haplo',		dest='haplo',		default=None,		help='The haplotype file')
-	parser.add_option( '-c', '--conf',		dest='conf',		default=None,		help='Configuration file locating bam files to work with')
+	parser.add_option( '-H', '--haplo',		dest='haplo',		default=None,		help='The haplotype file. File should be tabulated with two columns with header "Marker" and "FinalPhase". In the "Marker" column, chromosome and position should be formated as follows "Sequence name"+M+"position" (e.g. chr01M20620). In the "FinalPhase" column, haplotypes are separated by "|" (e.g. C|A).')
+	parser.add_option( '-c', '--conf',		dest='conf',		default=None,		help='Configuration file locating bam files to work with (one line per path to bam files).')
 	parser.add_option( '-p', '--prefix',	dest='prefix',		default=None,		help='Prefix for output files')
 	(options, args) = parser.parse_args()
 	
