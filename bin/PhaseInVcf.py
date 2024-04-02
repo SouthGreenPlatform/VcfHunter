@@ -126,7 +126,7 @@ def Phase(VCF, PCT, PREFIX):
 								dicoImpossible[accession][2] += 1
 							
 							# Looking for impossible case
-							if len(F1GT) == 1: # The F1 is homozygous
+							elif len(F1GT) == 1: # The F1 is homozygous
 								CommonAllSet = P1GT & P2GT
 								if not(F1GTLi[0] in CommonAllSet):# impossible case
 									# print('imp1', data[1], accession, F1GT, P1GT, P2GT)
