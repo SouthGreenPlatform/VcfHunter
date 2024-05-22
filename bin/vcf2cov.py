@@ -37,8 +37,16 @@ from scipy.interpolate import spline
 from textwrap import wrap
 
 
-def draw_chr(DICO_INFO, CHR_INFO, OUT, MEAN_COV, PLOIDY, halfWindow, PSIZE, LSIZE, VERT, VERTREG):
-
+def draw_chr(DICO_INFO, CHR_INFO, OUT, TOTAL, PLOIDY, halfWindow, PSIZE, LSIZE, VERT, VERTREG, STAT):
+	
+	# Calculating central value
+	if STAT == "mean":
+		MEAN_COV = np.mean(TOTAL)
+	elif STAT == "median":
+		MEAN_COV = np.median(TOTAL)
+	else:
+		sys.exit("Unmanaged argument in --stat, possible values are 'mean' or 'median'\n")
+	
 	# Obtaining chromosomes list
 	chr_list = sorted(list(DICO_INFO.keys()))
 
@@ -105,8 +113,13 @@ def draw_chr(DICO_INFO, CHR_INFO, OUT, MEAN_COV, PLOIDY, halfWindow, PSIZE, LSIZ
 		Window = 1+2*halfWindow
 		for n in range(len(value)-Window):
 			IntermVal = value[n:n+Window]
-			ValueNorm.append(sum(IntermVal)/len(IntermVal))
 			PosNorm.append(final_pos[n+halfWindow])
+			if STAT == "mean":
+				ValueNorm.append(np.mean(IntermVal))
+			elif STAT == "median":
+				ValueNorm.append(np.median(IntermVal))
+			else:
+				sys.exit("Unmanaged argument in --stat, possible values are 'mean' or 'median'\n")
 
 		ax.fill_between([0]+final_pos+[CHR_INFO[chr]], fill_plus1, fill_moins1, color=(1,0,0), alpha=0.20) ## For band
 		ax.axhline(y=MEAN_COV, linewidth=0.5, color = (0,0,0))
@@ -169,6 +182,7 @@ def __main__():
 		parser.add_option( '',  '--lsize',	dest='lsize',	default='1',	help='Size of the line of the mean value curve. [Default: %default]')
 		parser.add_option( '',  '--win',	dest='halfwin',	default='10',	help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 		parser.add_option( '',  '--loc',	dest='loc',		default='',		help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
+		parser.add_option( '',  '--stat',	dest='stat',	default='mean',	help='Statistics to use: "mean" for mean value used, "median" for median value used. [Default: %default]')
 		parser.add_option( '',  '--out',	dest='out',		default=None,	help='Prefix for file name output. [Default: %default]')
 		(options, args) = parser.parse_args()
 
@@ -240,9 +254,9 @@ def __main__():
 							chr_info = get_chr_size(data)
 							dico_chr[chr_info[0]] = chr_info[1]
 				file.close()
-				sys.stdout.write('Average coverage : '+str(sum(total)/len(total))+'\n')
-				sys.stdout.write('Median coverage : '+str(np.median(total))+'\n')
+				sys.stdout.write(ACCESS+', average coverage : '+str(sum(total)/len(total))+'\n')
+				sys.stdout.write(ACCESS+', median coverage : '+str(np.median(total))+'\n')
 				# It's time to draw
-				draw_chr(dico_draw, dico_chr, options.out+'_'+ACCESS+'.png', sum(total)/len(total), PLOIDY, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG)
+				draw_chr(dico_draw, dico_chr, options.out+'_'+ACCESS+'.png', total, PLOIDY, int(options.halfwin), float(options.psize), float(options.lsize), VERT, VERTREG, options.stat)
 
 if __name__ == "__main__": __main__()
