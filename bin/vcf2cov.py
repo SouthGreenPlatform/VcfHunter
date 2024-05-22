@@ -183,6 +183,7 @@ def __main__():
 		parser.add_option( '',  '--win',	dest='halfwin',	default='10',	help='Size of half sliding window that allow to draw mean value curve [Default: %default]')
 		parser.add_option( '',  '--loc',	dest='loc',		default='',		help='Regions to locate by vertical line. This should be formated this way: Chromosome_name:position,chromosome_name:position, ... [Default: %default]')
 		parser.add_option( '',  '--stat',	dest='stat',	default='mean',	help='Statistics to use: "mean" for mean value used, "median" for median value used. [Default: %default]')
+		parser.add_option( '',  '--clust',	dest='clust',	default='0',	help='Interval (in bases) in which redondant information will be removed. [Default: %default]')
 		parser.add_option( '',  '--out',	dest='out',		default=None,	help='Prefix for file name output. [Default: %default]')
 		(options, args) = parser.parse_args()
 
@@ -195,6 +196,7 @@ def __main__():
 
 		MINCOV = int(options.minCov)
 		MAXCOV = int(options.maxCov)
+		CLUST = int(options.clust)
 		
 		VERT = {}
 		VERTREG = {}
@@ -227,6 +229,8 @@ def __main__():
 				dico_draw = {}
 				dico_chr = {}
 				total = []
+				lpos = []
+				lval = []
 				if options.vcf[-3:] == '.gz':
 					file = gzip.open(options.vcf,'rt')
 				else:
@@ -245,11 +249,21 @@ def __main__():
 							VARIANT = REF + ALT
 							ACCESSION = data[header.index(ACCESS)].split(':')
 							COVERAGE = int(ACCESSION[FORMAT.index("DP")])
+									
+							if not(CHR in dico_draw):
+								dico_draw[CHR] = {}
+								lpos = []
+								lval = []
+							
 							if COVERAGE >= MINCOV and COVERAGE <= MAXCOV:
-								if not(CHR in dico_draw):
-									dico_draw[CHR] = {}
-								dico_draw[CHR][POS] = COVERAGE
-								total.append(COVERAGE)
+								lpos.append(POS)                                         # block to manage redundancy in data (cluster of same information)
+								lval.append(COVERAGE)                                    # block to manage redundancy in data (cluster of same information)
+								while len(lpos) > 1 and (lpos[-1]-lpos[0]) > CLUST:      # block to manage redundancy in data (cluster of same information)
+									del(lpos[0])                                         # block to manage redundancy in data (cluster of same information)
+									del(lval[0])                                         # block to manage redundancy in data (cluster of same information)
+								if not COVERAGE in lval[0:-1]:                           # block to manage redundancy in data (cluster of same information)
+									dico_draw[CHR][POS] = COVERAGE
+									total.append(COVERAGE)
 						elif data[0][0:9] == '##contig=':
 							chr_info = get_chr_size(data)
 							dico_chr[chr_info[0]] = chr_info[1]
