@@ -259,7 +259,7 @@ def __main__():
 	parser.add_option( '',  '--figsize',		dest='figsize',		default='10.5,14.85',	help='Figure size (in inches). [Default: %default]')
 	parser.add_option( '',  '--MinMax',			dest='MinMax',		default='1,1',			help='Additional variations added to values equal to 1 to have a better idea of dot density. Do not exceed 1.1 in maximal value. Example: 0.9,1.1 [Default: %default]')
 	parser.add_option( '',	'--reg',			dest='reg',			default=None,			help='Region to draw. This could be a chromosome or a chromosome region. To specify a chromosome, just put the name. If it is a region, it should be formated as follows: name,start,end. [Default: %default]')
-	# parser.add_option( '',	'--prefix',			dest='prefix',		default='',				help='Prefix for output files. Not required [Default: %default]')
+	parser.add_option( '',	'--strict',			dest='strict',		default='y',			help='Strict control of the origin file. Possible values "y" and "n". If "y" program will exit with error if an allele has two possible origin. [Default: %default]')
 	(options, args) = parser.parse_args()	
 	
 	if options.chr == None:
@@ -326,9 +326,20 @@ def __main__():
 				if not(pos in dico_origin[chr]):
 					dico_origin[chr][pos] = {}
 				if allele in dico_origin[chr][pos]:
-					sys.exit('Oups, there is a problem, the allele '+allele+' at position '+str(pos)+' on chromosome '+chr+' has more than one origin... this is not allowed\n')
-				dico_origin[chr][pos][allele] = Origin
-				dico_group.add(Origin)
+					if dico_origin[chr][pos][allele] == Origin:
+						sys.stdout.write('Oups, there is redundancy in the file: the line at position '+str(pos)+' on chromosome '+chr+' for allele '+allele+' seems duplicated\n')
+					elif options.strict == 'y':
+						sys.exit('Oups, there is a problem, the allele '+allele+' at position '+str(pos)+' on chromosome '+chr+' has more than one origin "'+dico_origin[chr][pos][allele]+'" and "'+Origin+'" this is not allowed\n')
+					else:
+						sys.stdout.write('Oups, there is a problem, the allele '+allele+' at position '+str(pos)+' on chromosome '+chr+' has more than one origin "'+dico_origin[chr][pos][allele]+'" and "'+Origin+'" this is not allowed. Both informations were discarded from the analysis. If a third line for this allele at this position is found, this information will be kept\n')
+						del dico_origin[chr][pos][allele]
+						if len(dico_origin[chr][pos]) == 0:
+							del dico_origin[chr][pos]
+							if len(dico_origin[chr]) == 0:
+								del dico_origin[chr]
+				else:
+					dico_origin[chr][pos][allele] = Origin
+					dico_group.add(Origin)
 	file.close()
 	
 	# Preparing color file
