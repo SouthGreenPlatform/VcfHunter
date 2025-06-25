@@ -412,6 +412,10 @@ def __main__():
 	optional.add_argument( '-W',	'--WINDOW',		dest='WINDOW',		required=False,	default='100000',	help='The window to calculate site proportion in accordance with tested parentage (unit base pair). [Default: 100000]')
 	options = parser.parse_args()
 	
+	
+	sys.stdout.write('\nWARNING WARNING it seems that --window and --WINDOW are not used argument. IF TRUE THIS SHOULD PROBABLY BE CORRECTED\n')
+	sys.stdout.flush()
+	
 	# Parsing options
 	P1n, P1p, P1g = options.parent1.split(',')
 	P2n, P2p, P2g = options.parent2.split(',')
