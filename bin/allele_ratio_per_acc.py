@@ -26,6 +26,9 @@ parser.add_argument("-a","--accession",
 parser.add_argument("-d","--depth",
                     help="Minimal depth to consider a site. value comprised between 1 to infinite. If only considering sites with genotype, omit this argument.",
                     type=str,default="n")
+parser.add_argument("-I","--info",
+                    help="Add number of reads with the allele as well as total coverage of the SNP. Possible values : 'y' or 'n'.",
+                    type=str,default="n")
 args = parser.parse_args()
 
 #-------
@@ -45,6 +48,7 @@ in_dir = args.input_dir
 wk_dir = args.output_dir
 individual = args.accession
 depthValue = args.depth
+information = args.info
 
 #-------
 # Output
@@ -120,7 +124,10 @@ FORMAT = 8
 
 #Write output file header
 with gzip.open(out_file,"wt") as outf:
-    header = "\t".join(["chr","pos","allele","obs_ratio","exp_ratio","grp"])
+    if information == "y":
+        header = "\t".join(["chr","pos","allele","obs_ratio","exp_ratio","grp","nreads","totreads"])
+    else:
+        header = "\t".join(["chr","pos","allele","obs_ratio","exp_ratio","grp"])
     header += "\n"
     outf.write(header)
 
@@ -189,9 +196,16 @@ for vcf_file in vcf_list:
                                 exp_ratio = grp_ratio_d[key][group]
                                 #print
                                 ratio = str(float(AD_val)/float(DP_val))
-                                str_out = "\t".join([f_chr,f_pos,
-                                                    allele,ratio,
-                                                    exp_ratio,group])
+                                if information == "y":
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group,
+                                                        str(float(AD_val)),
+                                                        str(float(DP_val))])
+                                else:
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group])
                                 outf.write(str_out + "\n")
 
 
@@ -230,9 +244,16 @@ for vcf_file in vcf_list:
                                 exp_ratio = grp_ratio_d[key][group]
                                 #print
                                 ratio = str(float(AD_val)/float(DP_val))
-                                str_out = "\t".join([f_chr,f_pos,
-                                                    allele,ratio,
-                                                    exp_ratio,group])
+                                if information == "y":
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group,
+                                                        str(float(AD_val)),
+                                                        str(float(DP_val))])
+                                else:
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group])
                                 outf.write(str_out + "\n")
     else:
         MinDPValue = int(depthValue)
@@ -271,9 +292,16 @@ for vcf_file in vcf_list:
                                 exp_ratio = grp_ratio_d[key][group]
                                 #print
                                 ratio = str(float(AD_val)/float(DP_val))
-                                str_out = "\t".join([f_chr,f_pos,
-                                                    allele,ratio,
-                                                    exp_ratio,group])
+                                if information == "y":
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group,
+                                                        str(float(AD_val)),
+                                                        str(float(DP_val))])
+                                else:
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group])
                                 outf.write(str_out + "\n")
 
 
@@ -312,7 +340,14 @@ for vcf_file in vcf_list:
                                 exp_ratio = grp_ratio_d[key][group]
                                 #print
                                 ratio = str(float(AD_val)/float(DP_val))
-                                str_out = "\t".join([f_chr,f_pos,
-                                                    allele,ratio,
-                                                    exp_ratio,group])
+                                if information == "y":
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group,
+                                                        str(float(AD_val)),
+                                                        str(float(DP_val))])
+                                else:
+                                    str_out = "\t".join([f_chr,f_pos,
+                                                        allele,ratio,
+                                                        exp_ratio,group])
                                 outf.write(str_out + "\n")
