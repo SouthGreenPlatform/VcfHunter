@@ -28,58 +28,77 @@ import gzip
 
 
 def __main__():
-	#Parse Command Line
-	parser = optparse.OptionParser(
-		description="This program select sites in a vcf according to a list of positions.",
-		epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
-	# Wrapper options.
-	parser.add_option( '-v',  '--vcf',		dest='vcf',		default=None,	help='Vcf file. [Default: %default]')
-	parser.add_option( '-s',  '--sites',	dest='sites',	default=None,	help='Sites to keep in a 2 column file (c1 = chromosome, c2 = position). [Default: %default]')
-	parser.add_option( '-o',  '--out',		dest='out',		default=None,	help='Output file name. Output will be gzipped. [Default: %default]')
-	(options, args) = parser.parse_args()
+    #Parse Command Line
+    parser = optparse.OptionParser(
+        description="This program select sites in a vcf according to a list of positions.",
+        epilog="Program designed by Guillaume MARTIN (guillaume.martin@cirad.fr)")
+    # Wrapper options.
+    parser.add_option( '-v', '--vcf',     dest='vcf',     default=None, help='Vcf file. [Default: %default]')
+    parser.add_option( '-s', '--sites',   dest='sites',   default=None, help='Sites to keep in a 2 column file (c1 = chromosome, c2 = position). [Default: %default]')
+    parser.add_option( '-e', '--exclude', dest='exclude', default='n',  help='Exclude site instead if keeping them. Possible values: "y", "n". [Default: %default]')
+    parser.add_option( '-o', '--out',     dest='out',     default=None, help='Output file name. Output will be gzipped. [Default: %default]')
+    (options, args) = parser.parse_args()
 
-	if options.vcf == None:
-		sys.exit('Please provide a vcf file to --vcf argument')
-	if options.sites == None:
-		sys.exit('Please provide a file to --sites argument')
-	if options.out == None:
-		sys.exit('Please provide a output name to --out argument')
-	
-	# Recording sites to keep
-	dico = {}
-	file = open(options.sites)
-	for line in file:
-		data = line.split()
-		if data:
-			if not data[0] in dico:
-				dico[data[0]] = set()
-			dico[data[0]].add(data[1])
-	file.close()
-	
-	# Parsing the vcf file
-	VCF = options.vcf
-	
-	outfile = gzip.open(options.out,'wt')
-	
-	if VCF[-3:] == '.gz':
-		file = gzip.open(VCF,'rt')
-	else:
-		file = open(VCF)
-	
-	for line in file:
-		data = line.split()
-		if data:
-			if data[0][0] == "#":
-				if data[0] == "#CHROM":
-					CHROMPOS = data.index("#CHROM")
-					POPPOS = data.index("POS")
-				outfile.write(line)
-			else:
-				chr = data[CHROMPOS]
-				pos = data[POPPOS]
-				if chr in dico:
-					if pos in dico[chr]:
-						outfile.write(line)
-	
+    if options.vcf == None:
+        sys.exit('Please provide a vcf file to --vcf argument')
+    if options.sites == None:
+        sys.exit('Please provide a file to --sites argument')
+    if options.out == None:
+        sys.exit('Please provide a output name to --out argument')
+    
+    # Recording sites to keep
+    dico = {}
+    file = open(options.sites)
+    for line in file:
+        data = line.split()
+        if data:
+            if not data[0] in dico:
+                dico[data[0]] = set()
+            dico[data[0]].add(data[1])
+    file.close()
+    
+    # Parsing the vcf file
+    VCF = options.vcf
+    
+    outfile = gzip.open(options.out,'wt')
+    
+    if VCF[-3:] == '.gz':
+        file = gzip.open(VCF,'rt')
+    else:
+        file = open(VCF)
+    if options.exclude == 'n':
+        for line in file:
+            data = line.split()
+            if data:
+                if data[0][0] == "#":
+                    if data[0] == "#CHROM":
+                        CHROMPOS = data.index("#CHROM")
+                        POPPOS = data.index("POS")
+                    outfile.write(line)
+                else:
+                    chr = data[CHROMPOS]
+                    pos = data[POPPOS]
+                    if chr in dico:
+                        if pos in dico[chr]:
+                            outfile.write(line)
+    else:
+        for line in file:
+            data = line.split()
+            if data:
+                if data[0][0] == "#":
+                    if data[0] == "#CHROM":
+                        CHROMPOS = data.index("#CHROM")
+                        POPPOS = data.index("POS")
+                    outfile.write(line)
+                else:
+                    chr = data[CHROMPOS]
+                    pos = data[POPPOS]
+                    if chr in dico:
+                        if pos in dico[chr]:
+                            pass
+                        else:
+                            outfile.write(line)
+                    else:
+                        outfile.write(line)
 
 if __name__ == "__main__": __main__()
