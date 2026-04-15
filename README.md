@@ -44,7 +44,7 @@ How to cite
 -----------
 Depending on the tool you use (see ***Description*** section) please cite either:
 
-**Martin et al., in prep.** G. Martin, B. Istace, F.C. Baurens, C. Belser, C Hervouet, K. Labadie, C. Cruaud, B. Noel, C. Guiougou, F. Salmon, J. Mahadeo, F. Ahmad, H. A. Volkaert, G. Droc, M. Rouard, J. Sardos, P. Wincker, N Yahiaoui, J.M. Aury, A D’Hont. in prep. **Chromosome evolution in Musa species: Insights from genome assemblies of wild contributors to banana cultivars.**
+**Martin et al., 2025.** G. Martin, B. Istace, F.C. Baurens, C. Belser, C Hervouet, K. Labadie, C. Cruaud, B. Noel, C. Guiougou, F. Salmon, J. Mahadeo, F. Ahmad, H. A. Volkaert, G. Droc, M. Rouard, J. Sardos, P. Wincker, N Yahiaoui, J.M. Aury, A D’Hont. 2025. **Unravelling genomic drivers of speciation in Musa through genome assemblies of wild banana ancestors.** *Nat Commun. 16, 961* https://doi.org/10.1038/s41467-025-56329-4
 
 or
 
