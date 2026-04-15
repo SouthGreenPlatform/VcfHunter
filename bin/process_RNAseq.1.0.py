@@ -284,7 +284,8 @@ def __main__():
 		
 		if NoBugg:
 			if os.path.isdir(PREFIX+'_ref_star_2'):
-				shutil.rmtree(PREFIX+'_ref_star_2')
+				sys.stdout.write('All seems OK.\n')
+				# shutil.rmtree(PREFIX+'_ref_star_2')
 		
 	# Creating pseudo VCF
 	if 'k' in options.steps:
